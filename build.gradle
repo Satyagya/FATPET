@@ -67,7 +67,7 @@ dependencies {
 
 	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: "${spring_boot_kafka_version}"
 
-
+	implementation("com.engati:data-analytics-sdk:${data_analytics_sdk}")
 
 	implementation("org.springframework.boot:spring-boot-starter-web:${spring_boot_version}")
 	implementation("org.springframework.boot:spring-boot-starter-actuator:${actuator_version}")
