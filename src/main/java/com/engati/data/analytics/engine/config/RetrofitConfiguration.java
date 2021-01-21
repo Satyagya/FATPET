@@ -30,7 +30,7 @@ public class RetrofitConfiguration {
     return builder.build();
   }
 
-  @Bean(name = "retrofitEncoderApiService")
+  @Bean(name = "retrofitDruidApiService")
   public DruidServiceRetrofit retrofitDruidApiService(
       @Qualifier(value = "retrofitDruidApi") Retrofit retrofitDruidApi) {
     return retrofitDruidApi.create(DruidServiceRetrofit.class);
