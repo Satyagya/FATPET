@@ -5,12 +5,13 @@ import com.engati.data.analytics.engine.druid.response.DruidResponseParser;
 import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.util.Utility;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
-import com.engati.data.analytics.sdk.druid.query.TimeSeriesQueryMetaInfo;
+import com.engati.data.analytics.sdk.druid.query.TopNQueryMetaInfo;
 import com.google.gson.JsonArray;
 import in.zapr.druid.druidry.aggregator.DruidAggregator;
+import in.zapr.druid.druidry.dimension.SimpleDimension;
 import in.zapr.druid.druidry.filter.DruidFilter;
 import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
-import in.zapr.druid.druidry.query.aggregation.DruidTimeSeriesQuery;
+import in.zapr.druid.druidry.query.aggregation.DruidTopNQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,9 +21,9 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class TimeSeriesQuery extends QueryHandler {
+public class TopNQuery extends QueryHandler {
 
-  private static final String QUERY_TYPE_TIME_SERIES = "timeseries";
+  private static final String QUERY_TYPE_TOPN = "topN";
 
   @Autowired
   private DruidQueryGenerator druidQueryGenerator;
@@ -35,33 +36,37 @@ public class TimeSeriesQuery extends QueryHandler {
 
   @Override
   public String getQueryType() {
-    return QUERY_TYPE_TIME_SERIES;
+    return QUERY_TYPE_TOPN;
   }
 
   @Override
-  public List<List<Map<String, String>>> generateAndExecuteQuery(Integer botRef, Integer
-      customerId, DruidQueryMetaInfo druidQueryMetaInfo) {
-    TimeSeriesQueryMetaInfo timeSeriesQueryMetaInfo = ((TimeSeriesQueryMetaInfo)
-        druidQueryMetaInfo);
+  public List<List<Map<String, String>>> generateAndExecuteQuery(Integer botRef, Integer customerId,
+      DruidQueryMetaInfo druidQueryMetaInfo) {
+
+    TopNQueryMetaInfo topNQueryMetaInfo = ((TopNQueryMetaInfo) druidQueryMetaInfo);
 
     List<DruidAggregator> druidAggregators = druidQueryGenerator
-        .generateAggregators(timeSeriesQueryMetaInfo.getDruidAggregateMetaInfo());
+        .generateAggregators(topNQueryMetaInfo.getDruidAggregateMetaInfo());
     List<DruidPostAggregator> postAggregators = druidQueryGenerator
-        .generatePostAggregator(timeSeriesQueryMetaInfo.getDruidPostAggregateMetaInfo());
+        .generatePostAggregator(topNQueryMetaInfo.getDruidPostAggregateMetaInfo());
     DruidFilter druidFilter = druidQueryGenerator
-        .generateFilters(timeSeriesQueryMetaInfo.getDruidFilterMetaInfo());
+        .generateFilters(topNQueryMetaInfo.getDruidFilterMetaInfo());
 
-    DruidTimeSeriesQuery timeSeriesQuery = DruidTimeSeriesQuery.builder()
+    DruidTopNQuery topNQuery = DruidTopNQuery.builder()
         .dataSource(Utility.convertDataSource(botRef, customerId,
-            timeSeriesQueryMetaInfo.getDataSource()))
-        .intervals(Utility.extractInterval(timeSeriesQueryMetaInfo.getIntervals()))
+            topNQueryMetaInfo.getDataSource()))
+        .intervals(Utility.extractInterval(topNQueryMetaInfo.getIntervals()))
+        .granularity(Utility.getGranularity(topNQueryMetaInfo.getGrain()))
+        .dimension(new SimpleDimension(topNQueryMetaInfo.getDimension()))
+        .threshold(topNQueryMetaInfo.getThreshold())
+        .topNMetric(Utility.getMetric(topNQueryMetaInfo.getMetricType(),
+            topNQueryMetaInfo.getMetricValue()))
         .aggregators(druidAggregators)
         .postAggregators(postAggregators)
         .filter(druidFilter)
-        .granularity(Utility.getGranularity(timeSeriesQueryMetaInfo.getGrain()))
         .build();
 
-    String query = Utility.convertDruidQueryToJsonString(timeSeriesQuery);
+    String query = Utility.convertDruidQueryToJsonString(topNQuery);
     JsonArray response = druidQueryExecutor.getResponseFromDruid(query);
     return druidResponseParser.convertJsonToMap(response);
   }
