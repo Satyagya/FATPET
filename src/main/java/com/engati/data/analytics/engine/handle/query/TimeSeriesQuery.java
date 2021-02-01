@@ -22,7 +22,7 @@ import java.util.Map;
 @Component
 public class TimeSeriesQuery extends QueryHandler {
 
-  private static final String QUERY_TYPE_TIME_SERIES = "timeseries";
+  private static final String QUERY_TYPE_TIME_SERIES = "TIME_SERIES";
 
   @Autowired
   private DruidQueryGenerator druidQueryGenerator;

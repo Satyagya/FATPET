@@ -25,7 +25,7 @@ public class QueryHandlerFactory {
     }
   }
 
-  public BaseQueryHandler createMetricHandler(String type) {
+  public BaseQueryHandler getQueryHandler(String type) {
     if (QUERY_HANDLER_MAP.containsKey(type)) {
       return QUERY_HANDLER_MAP.get(type);
     }

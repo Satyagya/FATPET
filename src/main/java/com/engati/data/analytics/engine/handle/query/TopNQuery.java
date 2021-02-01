@@ -23,7 +23,7 @@ import java.util.Map;
 @Component
 public class TopNQuery extends QueryHandler {
 
-  private static final String QUERY_TYPE_TOPN = "topN";
+  private static final String QUERY_TYPE_TOPN = "TOPN";
 
   @Autowired
   private DruidQueryGenerator druidQueryGenerator;
