@@ -38,7 +38,7 @@ public class DruidGenericController {
 
   @RequestMapping(value = "/customer/{customerId}/bot/{botRef}/response",
       method = RequestMethod.POST)
-  public ResponseEntity<JsonArray> ingestData(@PathVariable(value = "customerId") Long customerId,
+  public ResponseEntity<JsonArray> getResponse(@PathVariable(value = "customerId") Long customerId,
       @PathVariable(value = "botRef") Long botRef, @RequestBody String query) {
     return druidSqlResponseService.getDruidSqlResponse(customerId, botRef, query);
   }

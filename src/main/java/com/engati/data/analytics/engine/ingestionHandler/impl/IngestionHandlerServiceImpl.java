@@ -10,6 +10,7 @@ import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
@@ -22,6 +23,7 @@ import java.util.Objects;
 import static com.engati.data.analytics.engine.constants.DruidConstants.BOTREF_PLACE_HOLDER;
 import static com.engati.data.analytics.engine.constants.DruidConstants.CUSTOMER_ID_PLACE_HOLDER;
 import static com.engati.data.analytics.engine.constants.DruidConstants.DIR_PATH_PLACE_HOLDER;
+import static com.engati.data.analytics.engine.constants.DruidConstants.FILE_NAME_PLACE_HOLDER;
 import static com.engati.data.analytics.engine.constants.DruidConstants.TASK_ID;
 
 @Slf4j
@@ -30,6 +32,12 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
 
   @Autowired
   private DruidServiceRetrofit druidServiceRetrofit;
+
+  @Value("${s3.shopify.net.bucket.path}")
+  String netChangePath;
+
+  @Value("${s3.shopify.ingestion.bucket.path}")
+  String ingestionSpecsPath;
 
 
   /**
@@ -55,8 +63,9 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
     Map<String, String> replaceMap = new HashMap<>();
     replaceMap.put(CUSTOMER_ID_PLACE_HOLDER, customerId.toString());
     replaceMap.put(BOTREF_PLACE_HOLDER, botRef.toString());
-    replaceMap.put(DIR_PATH_PLACE_HOLDER, "dir_path");
-    String requestBody = replacePlaceHolders("ingestion_spec_path", replaceMap);
+    replaceMap.put(DIR_PATH_PLACE_HOLDER, String.format(netChangePath, customerId, botRef));
+    replaceMap.put(FILE_NAME_PLACE_HOLDER, timestamp + dataSourceName);
+    String requestBody = replacePlaceHolders(ingestionSpecsPath, replaceMap);
     JsonObject druidResponse = ingestionRequestToDruid(requestBody);
     if (Objects.nonNull(druidResponse)) {
       userIngestionProcess.setTaskId(druidResponse.get(TASK_ID).getAsString());
