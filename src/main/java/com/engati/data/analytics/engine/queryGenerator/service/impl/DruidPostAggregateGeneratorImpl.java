@@ -60,7 +60,7 @@ public class DruidPostAggregateGeneratorImpl implements DruidPostAggregateGenera
     }
     //todo function to get druid arithmetic function
     ArithmeticPostAggregator arithmeticPostAggregator = ArithmeticPostAggregator.builder()
-        .name(postAggregateMetaInfoDto.getName()).fields(fieldsList)
+        .name(postAggregateMetaInfoDto.getPostAggregatorName()).fields(fieldsList)
 //        .function(postAggregateMetaInfoDto.getFunction())
         .build();
     return arithmeticPostAggregator;
@@ -68,19 +68,19 @@ public class DruidPostAggregateGeneratorImpl implements DruidPostAggregateGenera
 
   private FieldAccessPostAggregator getFieldAccessPostAggregator(DruidPostAggregatorMetaInfo
       druidPostAggregateMetaInfoDto) {
-    return new FieldAccessPostAggregator(druidPostAggregateMetaInfoDto.getName(),
+    return new FieldAccessPostAggregator(druidPostAggregateMetaInfoDto.getPostAggregatorName(),
         druidPostAggregateMetaInfoDto.getFieldName());
   }
 
   private ConstantPostAggregator getConstantPostAggregator(DruidPostAggregatorMetaInfo
       druidPostAggregateMetaInfoDto) {
-    return new ConstantPostAggregator(druidPostAggregateMetaInfoDto.getName(),
+    return new ConstantPostAggregator(druidPostAggregateMetaInfoDto.getPostAggregatorName(),
         druidPostAggregateMetaInfoDto.getValue());
   }
 
   private FinalizingFieldAccessPostAggregator getFinalizingFieldAccessPostAggregator(
       DruidPostAggregatorMetaInfo druidPostAggregateMetaInfoDto) {
-    return new FinalizingFieldAccessPostAggregator(druidPostAggregateMetaInfoDto.getName(),
-        druidPostAggregateMetaInfoDto.getFieldName());
+    return new FinalizingFieldAccessPostAggregator(druidPostAggregateMetaInfoDto
+        .getPostAggregatorName(), druidPostAggregateMetaInfoDto.getFieldName());
   }
 }
