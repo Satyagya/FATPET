@@ -1,0 +1,95 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "s3",
+        "uris": [
+          "s3://engati-druid-dev/data/{{customer_id}}/{{bot_ref}}/{{load_path}}/PRODUCT.csv"
+        ],
+        "properties": {
+          "accessKeyId": {
+            "type": "default",
+            "password": "{{access_key}}"
+          },
+          "secretAccessKey": {
+            "type": "default",
+            "password": "{{secret_key}}"
+          }
+        }
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic",
+        "maxRowsPerSegment": 5000000
+      },
+      "forceGuaranteedRollup": false,
+      "logParseExceptions": true
+    },
+    "dataSchema": {
+      "granularitySpec": {
+        "type": "uniform",
+        "queryGranularity": "DAY",
+        "rollup": false,
+        "segmentGranularity": "WEEK"
+      },
+      "timestampSpec": {
+        "column": "created_at",
+        "format": "iso"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type": "string",
+            "name": "title"
+          },
+          {
+            "type": "string",
+            "name": "tags"
+          },
+          {
+            "type": "string",
+            "name": "type"
+          },
+          {
+            "type": "string",
+            "name": "variant_sku"
+          },
+          {
+            "type": "long",
+            "name": "variant_price"
+          },
+          {
+            "type": "string",
+            "name": "variant_taxable"
+          },
+          {
+            "type": "string",
+            "name": "vendor"
+          },
+          {
+            "type": "string",
+            "name": "is_gift_card"
+          },
+          {
+            "type": "string",
+            "name": "published"
+          },
+          {
+            "type": "string",
+            "name": "status"
+          }
+        ]
+      },
+      "dataSource": "product_{{customer_id}}_{{bot_ref}}"
+    }
+  }
+}
