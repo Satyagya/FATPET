@@ -1,0 +1,177 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "s3",
+        "uris": [
+          "s3://engati-druid-dev/data/{{customer_id}}/{{bot_ref}}/{{load_path}}/ORDER.csv"
+        ],
+        "properties": {
+          "accessKeyId": {
+            "type": "default",
+            "password": "{{access_key}}"
+          },
+          "secretAccessKey": {
+            "type": "default",
+            "password": "{{secret_key}}"
+          }
+        }
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      },
+      "logParseExceptions": true
+    },
+    "dataSchema": {
+      "dataSource": "order_{{customer_id}}_{{bot_ref}}",
+      "granularitySpec": {
+        "type": "uniform",
+        "queryGranularity": "DAY",
+        "rollup": false,
+        "segmentGranularity": "WEEK"
+      },
+      "timestampSpec": {
+        "column": "created_at",
+        "format": "auto"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type":"string",
+            "name":"name"
+          },
+          {
+            "type":"string",
+            "name":"line_item_name"
+          },
+          {
+            "type":"string",
+            "name":"product_title"
+          },
+          {
+            "type":"string",
+            "name":"line_item_sku"
+          },
+          {
+            "type":"string",
+            "name":"lineItem_fulfillment_status"
+          },
+          {
+            "type": "long",
+            "name": "lineItem_quantity"
+          },
+          {
+            "type": "long",
+            "name": "lineItem_price"
+          },
+          {
+            "type":"string",
+            "name":"financial_status"
+          },
+          {
+            "type":"string",
+            "name":"fulfilllment_status"
+          },
+          {
+            "type":"string",
+            "name":"notes"
+          },
+          {
+            "type":"string",
+            "name":"payment_method"
+          },
+          {
+            "type":"string",
+            "name":"source"
+          },
+          {
+            "type": "double",
+            "name": "sub_total"
+          },
+          {
+            "type":"string",
+            "name":"discount_code"
+          },
+          {
+            "type": "double",
+            "name": "discount_amount"
+          },
+          {
+            "type": "double",
+            "name": "taxes"
+          },
+          {
+            "type": "double",
+            "name": "total"
+          },
+          {
+            "type":"string",
+            "name":"vendor"
+          },
+          {
+            "type":"string",
+            "name":"product_type"
+          },
+          {
+            "type":"string",
+            "name":"email"
+          },
+          {
+            "type":"string",
+            "name":"tags"
+          },
+          {
+            "type":"string",
+            "name":"currency_code"
+          },
+          {
+            "type":"string",
+            "name":"cancelled_at"
+          },
+          {
+            "type": "long",
+            "name": "billing_zip_code"
+          },
+          {
+            "type":"string",
+            "name":"billing_address_1"
+          },
+          {
+            "type":"string",
+            "name":"billing_address_2"
+          },
+          {
+            "type":"string",
+            "name":"billing_city"
+          },
+          {
+            "type":"string",
+            "name":"billing_country"
+          },
+          {
+            "type":"string",
+            "name":"billing_name"
+          },
+          {
+            "type":"string",
+            "name":"billing_phone"
+          },
+          {
+            "type":"string",
+            "name":"billing_province"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "s3",
+        "uris": [
+          "s3://engati-druid-dev/data/{{customer_id}}/{{bot_ref}}/{{load_path}}/COLLECTION.csv"
+        ],
+        "properties": {
+          "accessKeyId": {
+            "type": "default",
+            "password": "{{access_key}}"
+          },
+          "secretAccessKey": {
+            "type": "default",
+            "password": "{{secret_key}}"
+          }
+        }
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      },
+      "logParseExceptions": true
+    },
+    "dataSchema": {
+      "dataSource": "collection_{{customer_id}}_{{bot_ref}}",
+      "granularitySpec": {
+        "type": "uniform",
+        "queryGranularity": "DAY",
+        "rollup": false,
+        "segmentGranularity": "WEEK"
+      },
+      "timestampSpec": {
+        "column": "created_at",
+        "format": "auto"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type":"string",
+            "name":"collection_id"
+          },
+          {
+            "type":"string",
+            "name":"title"
+          },
+          {
+            "type":"string",
+            "name":"updated_at"
+          },
+          {
+            "type":"long",
+            "name":"products_count"
+          },
+          {
+            "type":"string",
+            "name":"product_id"
+          },
+          {
+            "type":"string",
+            "name":"line_item_sku"
+          },
+          {
+            "type": "string",
+            "name": "product_title"
+          }
+        ]
+      }
+    }
+  }
+}
