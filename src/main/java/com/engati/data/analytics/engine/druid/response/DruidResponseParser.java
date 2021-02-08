@@ -8,4 +8,6 @@ import java.util.Map;
 public interface DruidResponseParser {
 
   List<List<Map<String, String>>> convertJsonToMap(JsonArray response);
+
+  List<Map<String, Object>> convertGroupByJsonToMap(JsonArray response);
 }

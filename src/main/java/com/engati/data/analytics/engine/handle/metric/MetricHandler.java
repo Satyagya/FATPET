@@ -1,15 +1,13 @@
-package com.engati.data.analytics.engine.handle.query;
+package com.engati.data.analytics.engine.handle.metric;
 
-import com.engati.data.analytics.engine.handle.query.factory.BaseQueryHandler;
+import com.engati.data.analytics.engine.handle.metric.factory.BaseMetricHandler;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
 import com.engati.data.analytics.sdk.response.QueryResponse;
 
-import java.util.List;
-import java.util.Map;
+abstract class MetricHandler implements BaseMetricHandler {
 
-abstract class QueryHandler implements BaseQueryHandler {
   @Override
-  public String getQueryType() {
+  public String getMetricName() {
     return null;
   }
 

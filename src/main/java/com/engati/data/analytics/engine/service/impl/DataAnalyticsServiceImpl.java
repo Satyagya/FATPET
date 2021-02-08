@@ -1,8 +1,12 @@
 package com.engati.data.analytics.engine.service.impl;
 
+import com.engati.data.analytics.engine.handle.metric.factory.MetricHandlerFactory;
 import com.engati.data.analytics.engine.handle.query.factory.QueryHandlerFactory;
 import com.engati.data.analytics.engine.service.DataAnalyticsService;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
+import com.engati.data.analytics.sdk.druid.query.DruidQueryType;
+import com.engati.data.analytics.sdk.druid.query.GroupByQueryMetaInfo;
+import com.engati.data.analytics.sdk.druid.query.MultiQueryMetaInfo;
 import com.engati.data.analytics.sdk.request.QueryGenerationRequest;
 import com.engati.data.analytics.sdk.response.QueryResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -21,17 +25,24 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
   @Autowired
   private QueryHandlerFactory queryHandlerFactory;
 
+  @Autowired
+  private MetricHandlerFactory metricHandlerFactory;
+
   @Override
   public QueryResponse executeQueryRequest(Integer botRef, Integer customerId,
       QueryGenerationRequest request) {
-    List<List<Map<String, String>>> prevResponse = new ArrayList<>();
+    QueryResponse response = new QueryResponse();
     for (DruidQueryMetaInfo druidQueryMetaInfo: request.getQueriesMetaInfo()) {
-      List<List<Map<String, String>>> response = queryHandlerFactory
-          .getQueryHandler(druidQueryMetaInfo.getQueryType().name())
-          .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo);
-      prevResponse = mergePreviousResponse(response, prevResponse);
+      if (DruidQueryType.MULTI_DATA_SOURCE.equals(druidQueryMetaInfo.getQueryType())) {
+        String metricHandlerKey = getMetricHandlerKey(druidQueryMetaInfo);
+        response = metricHandlerFactory.getMetricHandler(metricHandlerKey)
+            .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
+      } else {
+        response = queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name())
+                .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
+      }
     }
-    return QueryResponse.builder().queryResponse(prevResponse).build();
+    return response;
   }
 
   private List<List<Map<String, String>>> mergePreviousResponse(List<List<Map<String, String>>>
@@ -46,5 +57,14 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
       }
     }
     return prevResponse;
+  }
+
+  private String getMetricHandlerKey(DruidQueryMetaInfo druidQueryMetaInfo) {
+    String metricHandlerKey = null;
+    if (druidQueryMetaInfo instanceof MultiQueryMetaInfo) {
+      MultiQueryMetaInfo multiQueryMetaInfo = (MultiQueryMetaInfo) druidQueryMetaInfo;
+      metricHandlerKey = multiQueryMetaInfo.getMetricName();
+    }
+    return metricHandlerKey;
   }
 }

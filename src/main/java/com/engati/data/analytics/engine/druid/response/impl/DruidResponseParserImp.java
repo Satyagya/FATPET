@@ -38,4 +38,20 @@ public class DruidResponseParserImp implements DruidResponseParser {
     }
     return responseMapList;
   }
+
+  public List<Map<String, Object>> convertGroupByJsonToMap(JsonArray response) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    List<Map<String, Object>> responseMapList = new ArrayList<>();
+    try {
+      for (int i = 0; i < response.size(); i++) {
+        JsonElement jsonElement = response.get(i).getAsJsonObject().get("event");
+        Map<String, Object> data = objectMapper.readValue(jsonElement.toString(), Map.class);
+        responseMapList.add(data);
+      }
+    } catch (Exception e) {
+      log.error("Error while generating response from the jsonArray", e);
+    }
+    return responseMapList;
+  }
+
 }

@@ -1,13 +1,10 @@
-package com.engati.data.analytics.engine.handle.query.factory;
+package com.engati.data.analytics.engine.handle.metric.factory;
 
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
 import com.engati.data.analytics.sdk.response.QueryResponse;
 
-import java.util.List;
-import java.util.Map;
-
-public interface BaseQueryHandler {
-  String getQueryType();
+public interface BaseMetricHandler {
+  String getMetricName();
   QueryResponse generateAndExecuteQuery(Integer botRef, Integer customerId,
       DruidQueryMetaInfo druidQueryMetaInfo, QueryResponse prevResponse);
 }

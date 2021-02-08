@@ -6,6 +6,9 @@ import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.util.Utility;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.TimeSeriesQueryMetaInfo;
+import com.engati.data.analytics.sdk.response.QueryResponse;
+import com.engati.data.analytics.sdk.response.ResponseType;
+import com.engati.data.analytics.sdk.response.SimpleResponse;
 import com.google.gson.JsonArray;
 import in.zapr.druid.druidry.aggregator.DruidAggregator;
 import in.zapr.druid.druidry.filter.DruidFilter;
@@ -22,7 +25,7 @@ import java.util.Map;
 @Component
 public class TimeSeriesQuery extends QueryHandler {
 
-  private static final String QUERY_TYPE_TIME_SERIES = "TIME_SERIES";
+  private static final String QUERY_TYPE = "TIME_SERIES";
 
   @Autowired
   private DruidQueryGenerator druidQueryGenerator;
@@ -35,12 +38,12 @@ public class TimeSeriesQuery extends QueryHandler {
 
   @Override
   public String getQueryType() {
-    return QUERY_TYPE_TIME_SERIES;
+    return QUERY_TYPE;
   }
 
   @Override
-  public List<List<Map<String, String>>> generateAndExecuteQuery(Integer botRef, Integer
-      customerId, DruidQueryMetaInfo druidQueryMetaInfo) {
+  public QueryResponse generateAndExecuteQuery(Integer botRef, Integer
+      customerId, DruidQueryMetaInfo druidQueryMetaInfo, QueryResponse prevResponse) {
     TimeSeriesQueryMetaInfo timeSeriesQueryMetaInfo = ((TimeSeriesQueryMetaInfo)
         druidQueryMetaInfo);
 
@@ -63,6 +66,9 @@ public class TimeSeriesQuery extends QueryHandler {
 
     String query = Utility.convertDruidQueryToJsonString(timeSeriesQuery);
     JsonArray response = druidQueryExecutor.getResponseFromDruid(query);
-    return druidResponseParser.convertJsonToMap(response);
+    SimpleResponse simpleResponse = SimpleResponse.builder()
+        .queryResponse(druidResponseParser.convertJsonToMap(response)).build();
+    simpleResponse.setType(ResponseType.SIMPLE);
+    return simpleResponse;
   }
 }
