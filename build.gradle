@@ -1,50 +1,37 @@
 buildscript {
-	repositories {
-		mavenCentral()
-		mavenLocal()
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:${spring_boot_version}")
-	}
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${spring_boot_version}")
+    }
 }
+
 
 plugins {
-	id "org.sonarqube" version "2.7"
-	id 'org.ajoberstar.grgit' version '3.1.1'
-	id "com.gorylenko.gradle-git-properties" version "2.2.0"
-
+    id "org.sonarqube" version "2.7"
+    id 'org.ajoberstar.grgit' version '3.1.1'
+    id "com.gorylenko.gradle-git-properties" version "2.2.0"
 }
-
-repositories {
-	mavenCentral()
-	mavenLocal()
-}
-repositories {
-	maven {
-		name 'nexus'
-		url "http://nexus.engati.ops:8081/repository/coviam-artifactory/"
-		credentials {
-			username project.repoUser
-			password project.repoPassword
-		}
-	}
-	maven { url 'https://jitpack.io' }
-}
-
 
 group = 'com.engati'
 if (project.hasProperty('appVersion')) {
-	version = "${appVersion}"
+    version = "${appVersion}"
 } else {
-	version = "${version}-BRANCH-${grgit.branch.current().name}-SNAPSHOT"
+    version = "${version}-BRANCH-${grgit.branch.current().name}-SNAPSHOT"
+}
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'jacoco'
-
-
 apply plugin: 'org.springframework.boot'
 
 sourceCompatibility = 1.8
@@ -52,11 +39,12 @@ targetCompatibility = 1.8
 
 
 dependencies {
-
-	implementation "org.springframework.boot:spring-boot-starter-data-rest:${spring_boot_version}"
+    implementation "org.springframework.boot:spring-boot-starter-data-solr:${spring_boot_version}"
+    implementation "org.springframework.boot:spring-boot-starter-data-rest:${spring_boot_version}"
+    compile("org.springframework.boot:spring-boot-starter-actuator:${spring_boot_version}")
+    compile("net.logstash.logback:logstash-logback-encoder:${logback_version}")
 
 	compile group: 'in.zapr.druid', name: 'druidry', version: '2.0'
-	compile 'com.squareup.retrofit2:converter-gson:2.3.0'
 
     implementation("com.google.code.gson:gson:${gson_version}")
 
@@ -65,35 +53,24 @@ dependencies {
 	implementation("io.springfox:springfox-swagger2:${swagger_version}")
 	implementation("io.springfox:springfox-swagger-ui:${swagger_version}")
 
-	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: "${spring_boot_kafka_version}"
-
-	implementation("com.engati:data-analytics-sdk:${data_analytics_sdk}")
-
 	implementation("org.springframework.boot:spring-boot-starter-web:${spring_boot_version}")
-	implementation("org.springframework.boot:spring-boot-starter-actuator:${actuator_version}")
 	implementation("org.projectlombok:lombok:${lombok_version}")
 
 	implementation group: 'org.springframework', name: 'spring-test', version: '3.1.1.RELEASE'
 
-	implementation("net.logstash.logback:logstash-logback-encoder:${logback_version}")
 	implementation("net.rakugakibox.spring.boot:logback-access-spring-boot-starter:${logback_access_version}")
 
 	implementation("com.squareup.retrofit2:retrofit:${retrofit2_version}")
 	implementation("com.squareup.retrofit2:converter-jackson:${retrofit2_version}")
 	implementation("com.squareup.retrofit2:adapter-rxjava2:${retrofit2_version}")
+    implementation("com.squareup.retrofit2:converter-gson:${retrofit2_version}")
 
 	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "${jackson_dataformat_version}"
 	implementation(group: 'org.asynchttpclient', name: 'async-http-client', version: "${asynchttpclient_version}")
-	implementation 'com.github.Cloudmersive:Cloudmersive.APIClient.Java:v3.54'
-
 
 	testImplementation group: 'junit', name: 'junit', version: '4.12'
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${spring_boot_version}"
 	testImplementation("com.squareup.retrofit2:retrofit-mock:2.4.0")
 	testImplementation group: 'org.springframework', name: 'spring-mock', version: '2.0.8'
 
-}
-
-configurations.all {
-	exclude(group: 'xerces')
 }
