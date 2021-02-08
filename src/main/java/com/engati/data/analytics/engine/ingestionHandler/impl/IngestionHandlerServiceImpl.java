@@ -33,6 +33,9 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
   @Autowired
   private DruidServiceRetrofit druidServiceRetrofit;
 
+  @Value("${s3.shopify.initial.bucket.path}")
+  String initialLoadPath;
+
   @Value("${s3.shopify.net.bucket.path}")
   String netChangePath;
 
@@ -63,9 +66,15 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
     Map<String, String> replaceMap = new HashMap<>();
     replaceMap.put(CUSTOMER_ID_PLACE_HOLDER, customerId.toString());
     replaceMap.put(BOTREF_PLACE_HOLDER, botRef.toString());
-    replaceMap.put(DIR_PATH_PLACE_HOLDER, String.format(netChangePath, customerId, botRef));
-    replaceMap.put(FILE_NAME_PLACE_HOLDER, timestamp + dataSourceName);
-    String requestBody = replacePlaceHolders(ingestionSpecsPath, replaceMap);
+    if(isInitialLoad){
+      replaceMap.put(DIR_PATH_PLACE_HOLDER, String.format(initialLoadPath, customerId, botRef,dataSourceName));
+      replaceMap.put(FILE_NAME_PLACE_HOLDER, dataSourceName);
+    }
+    else{
+      replaceMap.put(DIR_PATH_PLACE_HOLDER, String.format(netChangePath, customerId, botRef,timestamp+dataSourceName));
+      replaceMap.put(FILE_NAME_PLACE_HOLDER, timestamp + dataSourceName);
+    }
+    String requestBody = replacePlaceHolders(String.format(ingestionSpecsPath,dataSourceName), replaceMap);
     JsonObject druidResponse = ingestionRequestToDruid(requestBody);
     if (Objects.nonNull(druidResponse)) {
       userIngestionProcess.setTaskId(druidResponse.get(TASK_ID).getAsString());

@@ -4,7 +4,6 @@ import com.engati.data.analytics.engine.ingestionHandler.DruidSqlResponseService
 import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
 import com.engati.data.analytics.engine.response.ingestion.IngestionResponse;
 import com.engati.data.analytics.engine.response.ingestion.UserIngestionProcess;
-import com.google.gson.JsonArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,12 +23,12 @@ public class DruidGenericController {
   @Autowired
   DruidSqlResponseService druidSqlResponseService;
 
-  @RequestMapping(value = "/customer/{customerId}/bot/{botRef}/ingest", method = RequestMethod.POST)
+  @RequestMapping(value = "/customer/{customerId}/bot/{botRef}/ingest", method = RequestMethod.GET)
   public ResponseEntity<IngestionResponse<UserIngestionProcess>> ingestData(
       @PathVariable(value = "customerId") Long customerId,
       @PathVariable(value = "botRef") Long botRef,
       @RequestParam(value = "isInitialLoad", required = true) Boolean isInitialLoad,
-      @RequestParam(value = "timestamp", required = true) String timestamp,
+      @RequestParam(value = "timestamp", required = false) String timestamp,
       @RequestParam(value = "dataSourceName", required = true) String dataSourceName) {
     IngestionResponse<UserIngestionProcess> responseObj = ingestionHandlerService
         .ingestToDruid(customerId, botRef, timestamp, dataSourceName, isInitialLoad);
@@ -38,7 +37,7 @@ public class DruidGenericController {
 
   @RequestMapping(value = "/customer/{customerId}/bot/{botRef}/response",
       method = RequestMethod.POST)
-  public ResponseEntity<JsonArray> getResponse(@PathVariable(value = "customerId") Long customerId,
+  public String getResponse(@PathVariable(value = "customerId") Long customerId,
       @PathVariable(value = "botRef") Long botRef, @RequestBody String query) {
     return druidSqlResponseService.getDruidSqlResponse(customerId, botRef, query);
   }
