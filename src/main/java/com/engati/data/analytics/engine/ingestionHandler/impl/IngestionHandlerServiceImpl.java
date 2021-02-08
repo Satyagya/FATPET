@@ -1,9 +1,9 @@
 package com.engati.data.analytics.engine.ingestionHandler.impl;
 
+import com.engati.data.analytics.engine.common.DataAnalyticsEngineResponse;
+import com.engati.data.analytics.engine.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
-import com.engati.data.analytics.engine.response.ingestion.IngestionResponse;
-import com.engati.data.analytics.engine.response.ingestion.IngestionStatusCode;
-import com.engati.data.analytics.engine.response.ingestion.UserIngestionProcess;
+import com.engati.data.analytics.engine.response.ingestion.DruidIngestionResponse;
 import com.engati.data.analytics.engine.retrofit.DruidServiceRetrofit;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -33,13 +33,13 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
   @Autowired
   private DruidServiceRetrofit druidServiceRetrofit;
 
-  @Value("${s3.shopify.initial.bucket.path}")
+  @Value("${s3.initial.load.bucket}")
   String initialLoadPath;
 
-  @Value("${s3.shopify.net.bucket.path}")
+  @Value("${s3.net.load.bucket}")
   String netChangePath;
 
-  @Value("${s3.shopify.ingestion.bucket.path}")
+  @Value("${druid.ingestion.specs.path}")
   String ingestionSpecsPath;
 
 
@@ -55,37 +55,39 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
    * @return
    */
   @Override
-  public IngestionResponse<UserIngestionProcess> ingestToDruid(Long customerId, Long botRef,
-      String timestamp, String dataSourceName, Boolean isInitialLoad) {
-    UserIngestionProcess userIngestionProcess =
-        new UserIngestionProcess().builder().botRef(botRef).customerId(customerId).taskId(null)
+  public DataAnalyticsEngineResponse<DruidIngestionResponse> ingestToDruid(Long customerId,
+      Long botRef, String timestamp, String dataSourceName, Boolean isInitialLoad) {
+    DruidIngestionResponse druidIngestionResponse =
+        new DruidIngestionResponse().builder().botRef(botRef).customerId(customerId).taskId(null)
             .build();
-    IngestionResponse<UserIngestionProcess> ingestionResponse =
-        new IngestionResponse<>(IngestionStatusCode.FAIL);
-    ingestionResponse.setResponseObject(userIngestionProcess);
+    DataAnalyticsEngineResponse<DruidIngestionResponse> dataAnalyticsEngineResponse =
+        new DataAnalyticsEngineResponse<>(DataAnalyticsEngineStatusCode.INGESTION_FAILURE);
+    dataAnalyticsEngineResponse.setResponseObject(druidIngestionResponse);
     Map<String, String> replaceMap = new HashMap<>();
     replaceMap.put(CUSTOMER_ID_PLACE_HOLDER, customerId.toString());
     replaceMap.put(BOTREF_PLACE_HOLDER, botRef.toString());
-    if(isInitialLoad){
-      replaceMap.put(DIR_PATH_PLACE_HOLDER, String.format(initialLoadPath, customerId, botRef,dataSourceName));
+    if (isInitialLoad) {
+      replaceMap.put(DIR_PATH_PLACE_HOLDER,
+          String.format(initialLoadPath, customerId, botRef, dataSourceName));
+      replaceMap.put(FILE_NAME_PLACE_HOLDER, dataSourceName);
+    } else {
+      replaceMap.put(DIR_PATH_PLACE_HOLDER,
+          String.format(netChangePath, customerId, botRef, timestamp, dataSourceName));
       replaceMap.put(FILE_NAME_PLACE_HOLDER, dataSourceName);
     }
-    else{
-      replaceMap.put(DIR_PATH_PLACE_HOLDER, String.format(netChangePath, customerId, botRef,timestamp+dataSourceName));
-      replaceMap.put(FILE_NAME_PLACE_HOLDER, timestamp + dataSourceName);
-    }
-    String requestBody = replacePlaceHolders(String.format(ingestionSpecsPath,dataSourceName), replaceMap);
+    String requestBody =
+        replacePlaceHolders(String.format(ingestionSpecsPath, dataSourceName), replaceMap);
     JsonObject druidResponse = ingestionRequestToDruid(requestBody);
     if (Objects.nonNull(druidResponse)) {
-      userIngestionProcess.setTaskId(druidResponse.get(TASK_ID).getAsString());
-      ingestionResponse.setStatus(IngestionStatusCode.SUCCESS);
+      druidIngestionResponse.setTaskId(druidResponse.get(TASK_ID).getAsString());
+      dataAnalyticsEngineResponse.setStatus(DataAnalyticsEngineStatusCode.INGESTION_SUCCESS);
       log.info("Ingestion to druid successful for customerId:{}, botRef:{}, timestamp:{} and "
           + "dataSourceName:{}", customerId, botRef, timestamp, dataSourceName);
     } else {
       log.info("Ingestion to druid failed for customerId:{}, botRef:{}, timestamp:{} and "
           + "dataSourceName:{}", customerId, botRef, timestamp, dataSourceName);
     }
-    return ingestionResponse;
+    return dataAnalyticsEngineResponse;
   }
 
 

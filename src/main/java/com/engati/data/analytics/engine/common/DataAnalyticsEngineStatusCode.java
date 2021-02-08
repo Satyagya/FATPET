@@ -21,6 +21,8 @@ import java.io.IOException;
 public enum DataAnalyticsEngineStatusCode implements AppCode<DataAnalyticsEngineStatusCode> {
 
   SUCCESS(1000, "SUCCESS"),
+  INGESTION_SUCCESS(1001, "INGESTION_SUCCESS"),
+  INGESTION_FAILURE(1002, "INGESTION_FAILURE"),
   PROCESSING_ERROR(999, "PROCESSING_ERROR");
 
   private final int code;

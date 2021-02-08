@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class UserIngestionProcess {
+public class DruidIngestionResponse {
 
   private Long customerId;
 
