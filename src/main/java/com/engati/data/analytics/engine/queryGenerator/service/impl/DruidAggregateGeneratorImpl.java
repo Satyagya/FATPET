@@ -3,9 +3,7 @@ package com.engati.data.analytics.engine.queryGenerator.service.impl;
 import com.engati.data.analytics.engine.queryGenerator.druidry.aggregator.DistinctCountAggregator;
 import com.engati.data.analytics.engine.queryGenerator.druidry.aggregator.NewCardinalityAggregator;
 import com.engati.data.analytics.engine.queryGenerator.service.DruidAggregateGenerator;
-//import com.engati.data.analytics.sdk.druid.aggregator.CardinalityAggregatorMetaInfo;
 import com.engati.data.analytics.sdk.druid.aggregator.DruidAggregatorMetaInfo;
-//import com.engati.data.analytics.sdk.druid.aggregator.JavaScriptAggregatorMetaInfo;
 import in.zapr.druid.druidry.aggregator.CountAggregator;
 import in.zapr.druid.druidry.aggregator.DoubleSumAggregator;
 import in.zapr.druid.druidry.aggregator.DruidAggregator;
@@ -30,37 +28,33 @@ public class DruidAggregateGeneratorImpl implements DruidAggregateGenerator {
     for(DruidAggregatorMetaInfo druidAggregateMetaInfo: aggregateMetaInfos) {
       switch (druidAggregateMetaInfo.getType()) {
         case COUNT:
-          druidAggregators.add(new CountAggregator(druidAggregateMetaInfo.getNames()));
+          druidAggregators.add(new CountAggregator(druidAggregateMetaInfo.getAggregatorName()));
           break;
         case LONGSUM:
-          druidAggregators.add(new LongSumAggregator(druidAggregateMetaInfo.getNames(),
-              druidAggregateMetaInfo.getFieldNames()));
+          druidAggregators.add(new LongSumAggregator(druidAggregateMetaInfo.getAggregatorName(),
+              druidAggregateMetaInfo.getFieldName()));
           break;
         case DOUBLESUM:
-          druidAggregators.add(new DoubleSumAggregator(druidAggregateMetaInfo.getNames(),
-              druidAggregateMetaInfo.getFieldNames()));
+          druidAggregators.add(new DoubleSumAggregator(druidAggregateMetaInfo.getAggregatorName(),
+              druidAggregateMetaInfo.getFieldName()));
           break;
         case DISTINCT_COUNT:
-          druidAggregators.add(new DistinctCountAggregator(druidAggregateMetaInfo.getNames(),
-              druidAggregateMetaInfo.getFieldNames()));
+          druidAggregators.add(new DistinctCountAggregator(druidAggregateMetaInfo
+              .getAggregatorName(), druidAggregateMetaInfo.getFieldName()));
           break;
-//        case CARDINALITY:
-//          CardinalityAggregatorMetaInfo cardinalityAggregatorMetaInfo =
-//              ((CardinalityAggregatorMetaInfo) druidAggregateMetaInfo);
-//          druidAggregators.add(new NewCardinalityAggregator(cardinalityAggregatorMetaInfo.getNames(),
-//              cardinalityAggregatorMetaInfo.getFields(), cardinalityAggregatorMetaInfo.getByRow(),
-//              cardinalityAggregatorMetaInfo.getRound()));
-//          break;
-//        case JAVASCRIPT:
-//          JavaScriptAggregatorMetaInfo javaScriptAggregatorMetaInfo =
-//              ((JavaScriptAggregatorMetaInfo) druidAggregateMetaInfo);
-//          druidAggregators.add(JavaScriptAggregator.builder()
-//              .name(javaScriptAggregatorMetaInfo.getNames())
-//              .fieldNames(javaScriptAggregatorMetaInfo.getFields())
-//              .functionAggregate(javaScriptAggregatorMetaInfo.getFnAggregate())
-//              .functionCombine(javaScriptAggregatorMetaInfo.getFnCombine())
-//              .functionReset(javaScriptAggregatorMetaInfo.getFnReset()).build());
-//          break;
+        case CARDINALITY:
+          druidAggregators.add(new NewCardinalityAggregator(druidAggregateMetaInfo.getAggregatorName(),
+              druidAggregateMetaInfo.getFields(), druidAggregateMetaInfo.getByRow(),
+              druidAggregateMetaInfo.getRound()));
+          break;
+        case JAVASCRIPT:
+          druidAggregators.add(JavaScriptAggregator.builder()
+              .name(druidAggregateMetaInfo.getAggregatorName())
+              .fieldNames(druidAggregateMetaInfo.getFields())
+              .functionAggregate(druidAggregateMetaInfo.getFnAggregate())
+              .functionCombine(druidAggregateMetaInfo.getFnCombine())
+              .functionReset(druidAggregateMetaInfo.getFnReset()).build());
+          break;
         default:
           log.error("The given aggregator: {} does not have implementation",
               druidAggregateMetaInfo.getType());
