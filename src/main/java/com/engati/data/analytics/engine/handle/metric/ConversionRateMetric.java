@@ -1,14 +1,17 @@
 package com.engati.data.analytics.engine.handle.metric;
 
 import com.engati.data.analytics.engine.handle.query.factory.QueryHandlerFactory;
+import com.engati.data.analytics.engine.util.Constants;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.GroupByQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.MultiQueryMetaInfo;
 import com.engati.data.analytics.sdk.response.QueryResponse;
+import com.engati.data.analytics.sdk.response.ResponseType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,43 +51,40 @@ public class ConversionRateMetric extends MetricHandler {
       responses.add(queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name())
           .generateAndExecuteQuery(botRef, customerId, druidQuery, response));
     }
+    return getConversionRate(responses, multiQueryMetaInfo.getMetricName(),
+        multiQueryMetaInfo.getModifier(), multiQueryMetaInfo.getLimit());
+  }
 
+  private QueryResponse getConversionRate(List<QueryResponse> responses, String metric,
+      String modifier, Integer limit) {
+    if (CollectionUtils.isNotEmpty(responses)) {
+      if (ResponseType.GROUP_BY.equals(responses.get(0).getType())) {
+
+      } else {
+
+      }
+    }
     return null;
   }
 
-  private List<List<Map<String, String>>> mergeTimeSeriesQuery(List<List<Map<String, Object>>>
-      orderResponse, List<List<Map<String, Object>>> sessionResponse) {
-    List<List<Map<String, String>>> timeStampConversionRate = new ArrayList<>();
-    List<Map<String, String>> conversionRate = new ArrayList<>();
+  private List<List<Map<String, Object>>> mergeTimeSeriesQuery(List<List<Map<String, Object>>>
+      orderResponse, List<List<Map<String, Object>>> sessionResponse, String metric) {
+    List<List<Map<String, Object>>> timeStampConversionRate = new ArrayList<>();
+    List<Map<String, Object>> conversionRate = new ArrayList<>();
     for (int timeStampIndex = 0; timeStampIndex<orderResponse.size(); timeStampIndex++) {
-      Map<String, String> value = new HashMap<>();
+      Map<String, Object> value = new HashMap<>();
       for (int resultIndex = 0; resultIndex<orderResponse.get(timeStampIndex).size(); resultIndex++) {
         Integer orderCount = (Integer) orderResponse.get(timeStampIndex).get(resultIndex)
-            .get("order_count");
+            .get(Constants.ORDER_COUNT);
         Integer sessionCount = (Integer) sessionResponse.get(timeStampIndex).get(resultIndex)
-            .get("session_count");
+            .get(Constants.SESSION_COUNT);
         Double cvr = calculateConversionRate(orderCount, sessionCount);
-        value.put("conversion_rate", new DecimalFormat("#.##").format(cvr));
+        value.put(metric, Constants.DECIMAL_FORMAT.format(cvr));
         conversionRate.add(value);
       }
       timeStampConversionRate.add(conversionRate);
     }
     return timeStampConversionRate;
-  }
-
-  private List<Map<String, Object>> convertGroupByJsonToMap(JsonArray response) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    List<Map<String, Object>> responseMapList = new ArrayList<>();
-    try {
-      for (int i = 0; i < response.size(); i++) {
-        JsonElement jsonElement = response.get(i).getAsJsonObject().get("event");
-        Map<String, Object> data = objectMapper.readValue(jsonElement.toString(), Map.class);
-        responseMapList.add(data);
-      }
-    } catch (Exception e) {
-      log.error("Error while generating response from the jsonArray", e);
-    }
-    return responseMapList;
   }
 
   private List<List<Map<String, String>>> mergeGroupByQuery(List<Map<String, Object>>

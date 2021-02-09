@@ -1,9 +1,9 @@
 package com.engati.data.analytics.engine.controller;
 
-import com.engati.data.analytics.engine.common.DataAnalyticsEngineResponse;
-import com.engati.data.analytics.engine.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.engine.service.DataAnalyticsService;
 import com.engati.data.analytics.engine.util.Constants;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.request.QueryGenerationRequest;
 import com.engati.data.analytics.sdk.response.QueryResponse;
 import lombok.extern.slf4j.Slf4j;
