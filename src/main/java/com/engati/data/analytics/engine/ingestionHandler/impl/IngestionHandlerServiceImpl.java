@@ -4,7 +4,7 @@ import com.engati.data.analytics.engine.common.DataAnalyticsEngineResponse;
 import com.engati.data.analytics.engine.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
 import com.engati.data.analytics.engine.response.ingestion.DruidIngestionResponse;
-import com.engati.data.analytics.engine.retrofit.DruidServiceRetrofit;
+import com.engati.data.analytics.engine.retrofit.DruidIngestionServiceRetrofit;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ import static com.engati.data.analytics.engine.constants.DruidConstants.TASK_ID;
 public class IngestionHandlerServiceImpl implements IngestionHandlerService {
 
   @Autowired
-  private DruidServiceRetrofit druidServiceRetrofit;
+  private DruidIngestionServiceRetrofit druidIngestionServiceRetrofit;
 
   @Value("${s3.initial.load.bucket}")
   String initialLoadPath;
@@ -104,7 +104,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
       RequestBody body = RequestBody
           .create(okhttp3.MediaType.parse("application/json; charset=utf-8"), requestBody);
       Response<JsonObject> response;
-      response = druidServiceRetrofit.ingestDataToDruid(body).execute();
+      response = druidIngestionServiceRetrofit.ingestDataToDruid(body).execute();
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
           .isSuccessful()) {
         log.info("response: {}", response);

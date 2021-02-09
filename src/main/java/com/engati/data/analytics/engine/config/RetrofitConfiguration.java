@@ -1,5 +1,6 @@
 package com.engati.data.analytics.engine.config;
 
+import com.engati.data.analytics.engine.retrofit.DruidIngestionServiceRetrofit;
 import com.engati.data.analytics.engine.retrofit.DruidServiceRetrofit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -34,5 +35,22 @@ public class RetrofitConfiguration {
   public DruidServiceRetrofit retrofitDruidApiService(
       @Qualifier(value = "retrofitDruidApi") Retrofit retrofitDruidApi) {
     return retrofitDruidApi.create(DruidServiceRetrofit.class);
+  }
+
+  @Bean(name = "retrofitDruidIngestionApi")
+  public Retrofit retrofitDruidIngestionApi(DruidConfiguration druidConfiguration) {
+    Retrofit.Builder builder = new Retrofit.Builder().baseUrl(druidConfiguration.getUrl()).client(
+        new OkHttpClient().newBuilder()
+            .connectTimeout(druidConfiguration.getConnectTimeout(), TimeUnit.MILLISECONDS)
+            .readTimeout(druidConfiguration.getReadTimeout(), TimeUnit.MILLISECONDS).build())
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+    return builder.build();
+  }
+
+  @Bean(name = "retrofitDruidIngestionApiService")
+  public DruidIngestionServiceRetrofit retrofitDruidIngestionApiService(
+      @Qualifier(value = "retrofitDruidIngestionApi") Retrofit retrofitDruidIngestionApi) {
+    return retrofitDruidIngestionApi.create(DruidIngestionServiceRetrofit.class);
   }
 }
