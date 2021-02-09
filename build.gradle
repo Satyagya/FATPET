@@ -53,7 +53,9 @@ dependencies {
 	implementation("io.springfox:springfox-swagger2:${swagger_version}")
 	implementation("io.springfox:springfox-swagger-ui:${swagger_version}")
 
-	implementation("org.springframework.boot:spring-boot-starter-web:${spring_boot_version}")
+    implementation("com.engati:data-analytics-sdk:${data_analytics_sdk}")
+
+    implementation("org.springframework.boot:spring-boot-starter-web:${spring_boot_version}")
 	implementation("org.projectlombok:lombok:${lombok_version}")
 
 	implementation group: 'org.springframework', name: 'spring-test', version: '3.1.1.RELEASE'
