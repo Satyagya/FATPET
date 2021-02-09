@@ -1,7 +1,8 @@
 package com.engati.data.analytics.engine.ingestionHandler;
 
-import com.engati.data.analytics.engine.common.DataAnalyticsEngineResponse;
-import com.engati.data.analytics.engine.response.ingestion.DruidIngestionResponse;
+
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
+import com.engati.data.analytics.sdk.response.DruidIngestionResponse;
 
 public interface IngestionHandlerService {
 

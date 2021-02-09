@@ -1,6 +1,6 @@
 package com.engati.data.analytics.engine.execute;
 
-import com.engati.data.analytics.engine.common.DataAnalyticsEngineResponse;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
 import com.google.gson.JsonArray;
 
 public interface DruidQueryExecutor {
