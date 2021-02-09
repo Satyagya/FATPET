@@ -39,6 +39,7 @@ public class DruidQueryExecutorImpl implements DruidQueryExecutor {
       }
     } catch (IOException ex) {
       log.error("DruidQueryExecutorImpl: Failed to parse response from druid", ex);
+      throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
     return output;
   }
