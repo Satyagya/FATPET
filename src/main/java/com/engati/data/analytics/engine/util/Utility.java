@@ -32,7 +32,7 @@ public class Utility {
   }
 
   public static String convertDataSource(Integer botRef, Integer customerId, String dataSource) {
-    return String.format("%s_%s_%s", dataSource, botRef, customerId);
+    return String.format("%s_%s_%s", dataSource, customerId, botRef);
   }
 
   public static Granularity getGranularity(String grain) {
