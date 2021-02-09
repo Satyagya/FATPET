@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -49,11 +48,14 @@ public class TopNQuery extends QueryHandler {
     TopNQueryMetaInfo topNQueryMetaInfo = ((TopNQueryMetaInfo) druidQueryMetaInfo);
 
     List<DruidAggregator> druidAggregators = druidQueryGenerator
-        .generateAggregators(topNQueryMetaInfo.getDruidAggregateMetaInfo());
+        .generateAggregators(topNQueryMetaInfo.getDruidAggregateMetaInfo(),
+            botRef, customerId);
     List<DruidPostAggregator> postAggregators = druidQueryGenerator
-        .generatePostAggregator(topNQueryMetaInfo.getDruidPostAggregateMetaInfo());
+        .generatePostAggregator(topNQueryMetaInfo.getDruidPostAggregateMetaInfo(),
+            botRef, customerId);
     DruidFilter druidFilter = druidQueryGenerator
-        .generateFilters(topNQueryMetaInfo.getDruidFilterMetaInfo());
+        .generateFilters(topNQueryMetaInfo.getDruidFilterMetaInfo(),
+            botRef, customerId);
 
     DruidTopNQuery topNQuery = DruidTopNQuery.builder()
         .dataSource(Utility.convertDataSource(botRef, customerId,
@@ -70,9 +72,10 @@ public class TopNQuery extends QueryHandler {
         .build();
 
     String query = Utility.convertDruidQueryToJsonString(topNQuery);
-    JsonArray response = druidQueryExecutor.getResponseFromDruid(query);
+    JsonArray response = druidQueryExecutor.getResponseFromDruid(query, botRef, customerId);
     SimpleResponse simpleResponse = SimpleResponse.builder()
-        .queryResponse(druidResponseParser.convertJsonToMap(response)).build();
+        .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
+        .build();
     simpleResponse.setType(ResponseType.SIMPLE);
     return simpleResponse;
   }

@@ -1,6 +1,9 @@
 package com.engati.data.analytics.engine.druid.response.impl;
 
 import com.engati.data.analytics.engine.druid.response.DruidResponseParser;
+import com.engati.data.analytics.engine.util.Constants;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineException;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
@@ -17,12 +20,13 @@ import java.util.Map;
 @Slf4j
 public class DruidResponseParserImp implements DruidResponseParser {
 
-  public List<List<Map<String, Object>>> convertJsonToMap(JsonArray response) {
+  public List<List<Map<String, Object>>> convertJsonToMap(JsonArray response, Integer botRef,
+      Integer customerId) {
     ObjectMapper objectMapper = new ObjectMapper();
     List<List<Map<String, Object>>> responseMapList = new ArrayList<>();
     try {
       for (int i = 0; i < response.size(); i++) {
-        JsonElement jsonElement = response.get(i).getAsJsonObject().get("result");
+        JsonElement jsonElement = response.get(i).getAsJsonObject().get(Constants.RESULT);
         if (jsonElement instanceof JsonArray) {
           List<Map<String, Object>> data = objectMapper
               .readValue(jsonElement.toString(), new TypeReference<List<Map<String, Object>>>() {
@@ -33,23 +37,28 @@ public class DruidResponseParserImp implements DruidResponseParser {
           responseMapList.add(Collections.singletonList(data));
         }
       }
-    } catch (Exception e) {
-      log.error("Error while generating response from the jsonArray", e);
+    } catch (Exception ex) {
+      log.error("DruidResponseParserImp: Error while parsing the druid response "
+          + "from the jsonArray for botRef: {}, customerId: {}", botRef, customerId, ex);
+      throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
     return responseMapList;
   }
 
-  public List<Map<String, Object>> convertGroupByJsonToMap(JsonArray response) {
+  public List<Map<String, Object>> convertGroupByJsonToMap(JsonArray response, Integer botRef,
+      Integer customerId) {
     ObjectMapper objectMapper = new ObjectMapper();
     List<Map<String, Object>> responseMapList = new ArrayList<>();
     try {
       for (int i = 0; i < response.size(); i++) {
-        JsonElement jsonElement = response.get(i).getAsJsonObject().get("event");
+        JsonElement jsonElement = response.get(i).getAsJsonObject().get(Constants.EVENT);
         Map<String, Object> data = objectMapper.readValue(jsonElement.toString(), Map.class);
         responseMapList.add(data);
       }
-    } catch (Exception e) {
-      log.error("Error while generating response from the jsonArray", e);
+    } catch (Exception ex) {
+      log.error("DruidResponseParserImp: Error while parsing the druid response "
+          + "from the jsonArray for botRef: {}, customerId: {}", botRef, customerId, ex);
+      throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
     return responseMapList;
   }

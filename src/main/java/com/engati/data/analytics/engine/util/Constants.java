@@ -11,4 +11,6 @@ public class Constants {
   public static final String ORDER_COUNT = "order_count";
   public static final String SESSION_COUNT = "session_count";
   public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
+  public static final String RESULT = "result";
+  public static final String EVENT = "event";
 }

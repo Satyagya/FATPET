@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -48,11 +48,13 @@ public class TimeSeriesQuery extends QueryHandler {
         druidQueryMetaInfo);
 
     List<DruidAggregator> druidAggregators = druidQueryGenerator
-        .generateAggregators(timeSeriesQueryMetaInfo.getDruidAggregateMetaInfo());
+        .generateAggregators(timeSeriesQueryMetaInfo.getDruidAggregateMetaInfo(),
+            botRef, customerId);
     List<DruidPostAggregator> postAggregators = druidQueryGenerator
-        .generatePostAggregator(timeSeriesQueryMetaInfo.getDruidPostAggregateMetaInfo());
+        .generatePostAggregator(timeSeriesQueryMetaInfo.getDruidPostAggregateMetaInfo(),
+            botRef, customerId);
     DruidFilter druidFilter = druidQueryGenerator
-        .generateFilters(timeSeriesQueryMetaInfo.getDruidFilterMetaInfo());
+        .generateFilters(timeSeriesQueryMetaInfo.getDruidFilterMetaInfo(), botRef, customerId);
 
     DruidTimeSeriesQuery timeSeriesQuery = DruidTimeSeriesQuery.builder()
         .dataSource(Utility.convertDataSource(botRef, customerId,
@@ -65,10 +67,29 @@ public class TimeSeriesQuery extends QueryHandler {
         .build();
 
     String query = Utility.convertDruidQueryToJsonString(timeSeriesQuery);
-    JsonArray response = druidQueryExecutor.getResponseFromDruid(query);
+    JsonArray response = druidQueryExecutor.getResponseFromDruid(query, botRef, customerId);
     SimpleResponse simpleResponse = SimpleResponse.builder()
-        .queryResponse(druidResponseParser.convertJsonToMap(response)).build();
+        .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
+        .build();
     simpleResponse.setType(ResponseType.SIMPLE);
-    return simpleResponse;
+
+    prevResponse = mergePreviousResponse(simpleResponse, (SimpleResponse) prevResponse);
+    return prevResponse;
+  }
+
+  private SimpleResponse mergePreviousResponse(SimpleResponse response,
+      SimpleResponse prevResponse) {
+    if (Objects.isNull(prevResponse) || Objects.isNull(prevResponse.getQueryResponse())
+        || prevResponse.getQueryResponse().isEmpty()) {
+      return response;
+    } else {
+      for (int resultIndex = 0; resultIndex < response.getQueryResponse().size(); resultIndex++) {
+        for (int index = 0; index < response.getQueryResponse().get(resultIndex).size(); index++) {
+          prevResponse.getQueryResponse().get(resultIndex).get(index)
+              .putAll(response.getQueryResponse().get(resultIndex).get(index));
+        }
+      }
+    }
+    return prevResponse;
   }
 }

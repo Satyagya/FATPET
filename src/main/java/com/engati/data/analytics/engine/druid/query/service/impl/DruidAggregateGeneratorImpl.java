@@ -20,9 +20,9 @@ import java.util.List;
 public class DruidAggregateGeneratorImpl implements DruidAggregateGenerator {
 
   @Override
-  public List<DruidAggregator> getQueryAggregators(List<DruidAggregatorMetaInfo> aggregateMetaInfos) {
+  public List<DruidAggregator> getQueryAggregators(List<DruidAggregatorMetaInfo>
+      aggregateMetaInfos, Integer botRef, Integer customerId) {
 
-    log.info("DruidAggregators: create list of aggregators");
     List<DruidAggregator> druidAggregators = new ArrayList<>();
     for(DruidAggregatorMetaInfo druidAggregateMetaInfo: aggregateMetaInfos) {
       switch (druidAggregateMetaInfo.getType()) {
@@ -55,8 +55,9 @@ public class DruidAggregateGeneratorImpl implements DruidAggregateGenerator {
               .functionReset(druidAggregateMetaInfo.getFnReset()).build());
           break;
         default:
-          log.error("The given aggregator: {} does not have implementation",
-              druidAggregateMetaInfo.getType());
+          log.error("DruidAggregateGeneratorImpl: Provided aggregator: {} does not have "
+                  + "implementation for botRef: {}, customerId: {}",
+              druidAggregateMetaInfo.getType(), botRef, customerId);
       }
     }
     return druidAggregators;

@@ -31,18 +31,21 @@ public class DruidQueryGeneratorImpl implements DruidQueryGenerator {
 
   @Override
   public List<DruidAggregator> generateAggregators(List<DruidAggregatorMetaInfo>
-      druidAggregateMetaInfoList) {
-    return druidAggregateGenerator.getQueryAggregators(druidAggregateMetaInfoList);
+      druidAggregateMetaInfoList, Integer botRef, Integer customerId) {
+    return druidAggregateGenerator.getQueryAggregators(druidAggregateMetaInfoList,
+        botRef, customerId);
   }
 
   @Override
-  public List<DruidPostAggregator> generatePostAggregator(
-      List<DruidPostAggregatorMetaInfo> druidPostAggregateMetaInfoList) {
-    return druidPostAggregateGenerator.getQueryPostAggregators(druidPostAggregateMetaInfoList);
+  public List<DruidPostAggregator> generatePostAggregator(List<DruidPostAggregatorMetaInfo>
+      druidPostAggregateMetaInfoList, Integer botRef, Integer customerId) {
+    return druidPostAggregateGenerator.getQueryPostAggregators(druidPostAggregateMetaInfoList,
+        botRef, customerId);
   }
 
   @Override
-  public DruidFilter generateFilters(DruidFilterMetaInfo druidFilterMetaInfoDto) {
-    return druidFilterGenerator.getFiltersByType(druidFilterMetaInfoDto);
+  public DruidFilter generateFilters(DruidFilterMetaInfo druidFilterMetaInfoDto,
+      Integer botRef, Integer customerId) {
+    return druidFilterGenerator.getFiltersByType(druidFilterMetaInfoDto, botRef, customerId);
   }
 }

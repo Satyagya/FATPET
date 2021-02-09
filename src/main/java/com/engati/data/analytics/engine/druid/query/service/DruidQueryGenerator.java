@@ -11,10 +11,12 @@ import java.util.List;
 
 public interface DruidQueryGenerator {
 
-  List<DruidAggregator> generateAggregators(List<DruidAggregatorMetaInfo> druidAggregateMetaInfoList);
+  List<DruidAggregator> generateAggregators(List<DruidAggregatorMetaInfo>
+      druidAggregateMetaInfoList, Integer botRef, Integer customerId);
 
   List<DruidPostAggregator> generatePostAggregator(List<DruidPostAggregatorMetaInfo>
-      druidPostAggregateMetaInfoList);
+      druidPostAggregateMetaInfoList, Integer botRef, Integer customerId);
 
-  DruidFilter generateFilters(DruidFilterMetaInfo druidFilterMetaInfoDto);
+  DruidFilter generateFilters(DruidFilterMetaInfo druidFilterMetaInfoDto, Integer botRef,
+      Integer customerId);
 }

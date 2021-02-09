@@ -4,5 +4,5 @@ import com.google.gson.JsonArray;
 
 public interface DruidQueryExecutor {
 
-  JsonArray getResponseFromDruid(String druidJsonQuery);
+  JsonArray getResponseFromDruid(String druidJsonQuery, Integer botRef, Integer customerId);
 }

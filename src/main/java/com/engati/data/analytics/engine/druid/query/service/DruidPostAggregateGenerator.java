@@ -8,5 +8,5 @@ import java.util.List;
 public interface DruidPostAggregateGenerator {
 
   List<DruidPostAggregator> getQueryPostAggregators(List<DruidPostAggregatorMetaInfo>
-      postAggregateMetaInfoDtos);
+      postAggregateMetaInfoDtos, Integer botRef, Integer customerId);
 }

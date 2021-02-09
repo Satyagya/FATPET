@@ -17,42 +17,49 @@ import java.util.Objects;
 public class DruidFilterGeneratorImpl implements DruidFilterGenerator {
 
   @Override
-  public DruidFilter getFiltersByType(DruidFilterMetaInfo druidFilterMetaInfoDto) {
+  public DruidFilter getFiltersByType(DruidFilterMetaInfo druidFilterMetaInfoDto,
+      Integer botRef, Integer customerId) {
     DruidFilter druidFilter = null;
     if (Objects.nonNull(druidFilterMetaInfoDto) &&
         Objects.nonNull(druidFilterMetaInfoDto.getType())) {
       switch (druidFilterMetaInfoDto.getType()) {
         case SELECTOR:
           druidFilter = getSelectorFilter((String) druidFilterMetaInfoDto.getDimension(),
-              (String) druidFilterMetaInfoDto.getValue());
+              (String) druidFilterMetaInfoDto.getValue(), botRef, customerId);
           break;
         case IN:
-          druidFilter = getInFilter(druidFilterMetaInfoDto);
+          druidFilter = getInFilter(druidFilterMetaInfoDto, botRef, customerId);
           break;
         default:
-          log.error("The given filter is not supported currently - {}", druidFilterMetaInfoDto);
+          log.error("DruidFilterGeneratorImpl: Provided filter type: {} does not "
+              + "have implementation for botRef: {}, customerId: {}",
+              druidFilterMetaInfoDto.getType(), botRef, customerId);
       }
     }
     return druidFilter;
   }
 
-  private List<DruidFilter> getQueryFilters(List<DruidFilterMetaInfo> druidFilterMetaInfoDtos) {
+  private List<DruidFilter> getQueryFilters(List<DruidFilterMetaInfo> druidFilterMetaInfoDtos,
+      Integer botRef, Integer customerId) {
     List<DruidFilter> druidFilters = new ArrayList<>();
     for (DruidFilterMetaInfo druidFilterMetaInfoDto: druidFilterMetaInfoDtos) {
-      druidFilters.add(getFiltersByType(druidFilterMetaInfoDto));
+      druidFilters.add(getFiltersByType(druidFilterMetaInfoDto, botRef, customerId));
     }
     return druidFilters;
   }
 
-  private SelectorFilter getSelectorFilter(String dimension, String value) {
+  private SelectorFilter getSelectorFilter(String dimension, String value, Integer botRef,
+      Integer customerId) {
     return new SelectorFilter(dimension, value);
   }
 
-  private SelectorFilter getSelectorFilter(String dimension, Integer value) {
+  private SelectorFilter getSelectorFilter(String dimension, Integer value,
+      Integer botRef, Integer customerId) {
     return new SelectorFilter(dimension, value);
   }
 
-  private InFilter getInFilter(DruidFilterMetaInfo druidFilterMetaInfoDto) {
+  private InFilter getInFilter(DruidFilterMetaInfo druidFilterMetaInfoDto,
+      Integer botRef, Integer customerId) {
     return new InFilter((String) druidFilterMetaInfoDto.getDimension(),
         (List) druidFilterMetaInfoDto.getValue());
   }
