@@ -64,15 +64,15 @@
           },
           {
             "type":"string",
-            "name":"lineItem_fulfillment_status"
+            "name":"line_item_fulfillment_status"
           },
           {
             "type": "long",
-            "name": "lineItem_quantity"
+            "name": "line_item_quantity"
           },
           {
             "type": "long",
-            "name": "lineItem_price"
+            "name": "line_item_price"
           },
           {
             "type":"string",
