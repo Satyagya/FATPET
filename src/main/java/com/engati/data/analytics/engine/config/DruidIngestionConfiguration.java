@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "engati.data.analytics.engine.druid.ingestion")
 @Data
-public class DruidRetrofitConfiguration {
+public class DruidIngestionConfiguration {
   private String url;
   private Integer connectTimeout;
   private Integer readTimeout;

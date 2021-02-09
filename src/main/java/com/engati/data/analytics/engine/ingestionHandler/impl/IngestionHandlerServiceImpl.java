@@ -1,10 +1,11 @@
 package com.engati.data.analytics.engine.ingestionHandler.impl;
 
-import com.engati.data.analytics.engine.common.DataAnalyticsEngineResponse;
-import com.engati.data.analytics.engine.common.DataAnalyticsEngineStatusCode;
+
 import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
-import com.engati.data.analytics.engine.response.ingestion.DruidIngestionResponse;
 import com.engati.data.analytics.engine.retrofit.DruidIngestionServiceRetrofit;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
+import com.engati.data.analytics.sdk.response.DruidIngestionResponse;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;

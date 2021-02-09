@@ -1,12 +1,11 @@
 package com.engati.data.analytics.engine.execute.impl;
 
-import com.engati.data.analytics.engine.common.DataAnalyticsEngineResponse;
-import com.engati.data.analytics.engine.common.DataAnalyticsEngineStatusCode;
+
 import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.retrofit.DruidServiceRetrofit;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.google.gson.JsonArray;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
