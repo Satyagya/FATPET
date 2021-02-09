@@ -20,11 +20,11 @@ public class RetrofitConfiguration {
   private static final Gson gson = new Gson();
 
   @Bean(name = "retrofitDruidApi")
-  public Retrofit retrofitDruidApi(DruidConfiguration druidConfiguration) {
-    Retrofit.Builder builder = new Retrofit.Builder().baseUrl(druidConfiguration.getUrl()).client(
+  public Retrofit retrofitDruidApi(DruidQueryConfiguration druidQueryConfiguration) {
+    Retrofit.Builder builder = new Retrofit.Builder().baseUrl(druidQueryConfiguration.getUrl()).client(
         new OkHttpClient().newBuilder()
-            .connectTimeout(druidConfiguration.getConnectTimeout(), TimeUnit.MILLISECONDS)
-            .readTimeout(druidConfiguration.getReadTimeout(), TimeUnit.MILLISECONDS).build())
+            .connectTimeout(druidQueryConfiguration.getConnectTimeout(), TimeUnit.MILLISECONDS)
+            .readTimeout(druidQueryConfiguration.getReadTimeout(), TimeUnit.MILLISECONDS).build())
         .addConverterFactory(GsonConverterFactory.create(gson))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
     return builder.build();
