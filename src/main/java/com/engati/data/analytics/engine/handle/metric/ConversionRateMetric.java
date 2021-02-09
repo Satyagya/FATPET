@@ -1,11 +1,15 @@
 package com.engati.data.analytics.engine.handle.metric;
 
+import com.engati.data.analytics.engine.handle.query.factory.QueryHandlerFactory;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
+import com.engati.data.analytics.sdk.druid.query.GroupByQueryMetaInfo;
+import com.engati.data.analytics.sdk.druid.query.MultiQueryMetaInfo;
 import com.engati.data.analytics.sdk.response.QueryResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.DecimalFormat;
@@ -26,6 +30,9 @@ public class ConversionRateMetric extends MetricHandler {
 
   private static final String METRIC_HANDLER_NAME = "conversion_rate";
 
+  @Autowired
+  private QueryHandlerFactory queryHandlerFactory;
+
   @Override
   public String getMetricName() {
     return METRIC_HANDLER_NAME;
@@ -34,23 +41,15 @@ public class ConversionRateMetric extends MetricHandler {
   @Override
   public QueryResponse generateAndExecuteQuery(Integer botRef, Integer customerId,
       DruidQueryMetaInfo druidQueryMetaInfo, QueryResponse prevResponse) {
+    List<QueryResponse> responses = new ArrayList<>();
+    MultiQueryMetaInfo multiQueryMetaInfo = ((MultiQueryMetaInfo) druidQueryMetaInfo);
+    for (DruidQueryMetaInfo druidQuery: multiQueryMetaInfo.getMultiMetricQuery()) {
+      QueryResponse response = new QueryResponse();
+      responses.add(queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name())
+          .generateAndExecuteQuery(botRef, customerId, druidQuery, response));
+    }
 
     return null;
-  }
-
-  private List<List<Map<String, Object>>> convertTimeSeriesJsonToMap(JsonArray response) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    List<List<Map<String, Object>>> responseMapList = new ArrayList<>();
-    try {
-      for (int i = 0; i < response.size(); i++) {
-        JsonElement jsonElement = response.get(i).getAsJsonObject().get("result");
-        Map<String, Object> data = objectMapper.readValue(jsonElement.toString(), Map.class);
-        responseMapList.add(Collections.singletonList(data));
-      }
-    } catch (Exception e) {
-      log.error("Error while generating response from the jsonArray", e);
-    }
-    return responseMapList;
   }
 
   private List<List<Map<String, String>>> mergeTimeSeriesQuery(List<List<Map<String, Object>>>

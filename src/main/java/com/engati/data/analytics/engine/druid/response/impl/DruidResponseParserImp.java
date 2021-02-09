@@ -17,19 +17,19 @@ import java.util.Map;
 @Slf4j
 public class DruidResponseParserImp implements DruidResponseParser {
 
-  public List<List<Map<String, String>>> convertJsonToMap(JsonArray response) {
+  public List<List<Map<String, Object>>> convertJsonToMap(JsonArray response) {
     ObjectMapper objectMapper = new ObjectMapper();
-    List<List<Map<String, String>>> responseMapList = new ArrayList<>();
+    List<List<Map<String, Object>>> responseMapList = new ArrayList<>();
     try {
       for (int i = 0; i < response.size(); i++) {
         JsonElement jsonElement = response.get(i).getAsJsonObject().get("result");
         if (jsonElement instanceof JsonArray) {
-          List<Map<String, String>> data = objectMapper
-              .readValue(jsonElement.toString(), new TypeReference<List<Map<String, String>>>() {
+          List<Map<String, Object>> data = objectMapper
+              .readValue(jsonElement.toString(), new TypeReference<List<Map<String, Object>>>() {
               });
           responseMapList.add(data);
         } else {
-          Map<String, String> data = objectMapper.readValue(jsonElement.toString(), Map.class);
+          Map<String, Object> data = objectMapper.readValue(jsonElement.toString(), Map.class);
           responseMapList.add(Collections.singletonList(data));
         }
       }
