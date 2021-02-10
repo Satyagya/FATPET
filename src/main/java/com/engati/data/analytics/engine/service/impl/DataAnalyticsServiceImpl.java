@@ -29,11 +29,12 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
     for (DruidQueryMetaInfo druidQueryMetaInfo: request.getQueriesMetaInfo()) {
       if (DruidQueryType.MULTI_DATA_SOURCE.equals(druidQueryMetaInfo.getQueryType())) {
         String metricHandlerKey = getMetricHandlerKey(druidQueryMetaInfo);
-        response = metricHandlerFactory.getMetricHandler(metricHandlerKey)
+        response = metricHandlerFactory.getMetricHandler(metricHandlerKey, botRef, customerId)
             .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
       } else {
-        response = queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name())
-                .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
+        response = queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name(),
+            botRef, customerId).generateAndExecuteQuery(botRef, customerId,
+            druidQueryMetaInfo, response);
       }
     }
     return response;
