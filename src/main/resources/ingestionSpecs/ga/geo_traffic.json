@@ -68,7 +68,7 @@
           },
           {
             "type":"string",
-            "name":"media"
+            "name":"medium"
           },
           {
             "type": "long",
