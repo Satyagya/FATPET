@@ -33,7 +33,7 @@
       "logParseExceptions": true
     },
     "dataSchema": {
-      "dataSource": "transactions_{{customer_id}}_{{bot_ref}}",
+      "dataSource": "transaction_{{customer_id}}_{{bot_ref}}",
       "granularitySpec": {
         "type": "uniform",
         "queryGranularity": "DAY",
