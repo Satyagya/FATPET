@@ -60,7 +60,7 @@ public class DruidQueryExecutorImpl implements DruidQueryExecutor {
     dataAnalyticsEngineResponse.setResponseObject(output);
     try {
       RequestBody body = okhttp3.RequestBody
-          .create(okhttp3.MediaType.parse("application/json;"), druidSqlQuery);
+          .create(okhttp3.MediaType.parse("application/json;charset=utf-8"), druidSqlQuery);
       Response<JsonArray> response;
       response = druidServiceRetrofit.getResponseForDruidSqlFromDruid(body).execute();
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
