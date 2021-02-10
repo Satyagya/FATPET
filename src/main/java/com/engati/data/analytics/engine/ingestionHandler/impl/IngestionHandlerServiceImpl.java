@@ -77,7 +77,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
       replaceMap.put(FILE_NAME_PLACE_HOLDER, dataSourceName);
     }
     String requestBody =
-        replacePlaceHolders(String.format(ingestionSpecsPath, dataSourceName), replaceMap);
+        replacePlaceHolders(String.format(ingestionSpecsPath, dataSourceName.toLowerCase()), replaceMap);
     JsonObject druidResponse = ingestionRequestToDruid(requestBody);
     if (Objects.nonNull(druidResponse)) {
       druidIngestionResponse.setTaskId(druidResponse.get(TASK_ID).getAsString());
