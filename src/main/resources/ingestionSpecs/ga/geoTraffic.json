@@ -6,7 +6,7 @@
       "inputSource": {
         "type": "s3",
         "uris": [
-          "s3://engati-druid-dev/data/{{customer_id}}/{{bot_ref}}/{{load_path}}/GEO_TRAFFIC_METRICS.csv"
+          "s3://engati-druid-dev/data/{{customer_id}}/{{bot_ref}}/{{load_path}}/GEO_TRAFFIC.csv"
         ],
         "properties": {
           "accessKeyId": {
