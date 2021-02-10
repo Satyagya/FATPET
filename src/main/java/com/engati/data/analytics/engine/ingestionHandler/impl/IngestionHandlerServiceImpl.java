@@ -5,6 +5,7 @@ import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService
 import com.engati.data.analytics.engine.retrofit.DruidIngestionServiceRetrofit;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
+import com.engati.data.analytics.sdk.enums.DataSourceMetaInfo;
 import com.engati.data.analytics.sdk.response.DruidIngestionResponse;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -77,7 +78,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
       replaceMap.put(FILE_NAME_PLACE_HOLDER, dataSourceName);
     }
     String requestBody =
-        replacePlaceHolders(String.format(ingestionSpecsPath, dataSourceName.toLowerCase()), replaceMap);
+        replacePlaceHolders(String.format(ingestionSpecsPath, DataSourceMetaInfo.getIngestionPathForDataSource(dataSourceName)), replaceMap);
     JsonObject druidResponse = ingestionRequestToDruid(requestBody);
     if (Objects.nonNull(druidResponse)) {
       druidIngestionResponse.setTaskId(druidResponse.get(TASK_ID).getAsString());
