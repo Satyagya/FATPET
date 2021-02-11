@@ -43,7 +43,7 @@
       },
       "timestampSpec": {
         "column": "created_at",
-        "format": "iso"
+        "format": "auto"
       },
       "dimensionsSpec": {
         "dimensions": [
