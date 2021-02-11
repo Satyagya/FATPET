@@ -39,7 +39,6 @@ targetCompatibility = 1.8
 
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-data-solr:${spring_boot_version}"
     implementation "org.springframework.boot:spring-boot-starter-data-rest:${spring_boot_version}"
     compile("org.springframework.boot:spring-boot-starter-actuator:${spring_boot_version}")
     compile("net.logstash.logback:logstash-logback-encoder:${logback_version}")
