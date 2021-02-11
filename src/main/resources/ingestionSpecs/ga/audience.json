@@ -4,20 +4,9 @@
     "ioConfig": {
       "type": "index_parallel",
       "inputSource": {
-        "type": "s3",
-        "uris": [
-          "s3://engati-druid-dev/data/{{customer_id}}/{{bot_ref}}/{{load_path}}/AUDIENCE.csv"
-        ],
-        "properties": {
-          "accessKeyId": {
-            "type": "default",
-            "password": "{{access_key}}"
-          },
-          "secretAccessKey": {
-            "type": "default",
-            "password": "{{secret_key}}"
-          }
-        }
+        "type": "local",
+        "filter": "AUDIENCE.csv",
+        "baseDir": "/var/domain-intelligence/data/{{customer_id}}/{{bot_ref}}/{{load_path}}"
       },
       "inputFormat": {
         "type": "csv",
