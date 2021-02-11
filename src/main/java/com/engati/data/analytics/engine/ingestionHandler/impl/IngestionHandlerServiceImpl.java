@@ -25,7 +25,6 @@ import java.util.Objects;
 import static com.engati.data.analytics.engine.constants.DruidConstants.BOTREF_PLACE_HOLDER;
 import static com.engati.data.analytics.engine.constants.DruidConstants.CUSTOMER_ID_PLACE_HOLDER;
 import static com.engati.data.analytics.engine.constants.DruidConstants.DIR_PATH_PLACE_HOLDER;
-import static com.engati.data.analytics.engine.constants.DruidConstants.FILE_NAME_PLACE_HOLDER;
 import static com.engati.data.analytics.engine.constants.DruidConstants.TASK_ID;
 
 @Slf4j
@@ -69,16 +68,12 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
     replaceMap.put(CUSTOMER_ID_PLACE_HOLDER, customerId.toString());
     replaceMap.put(BOTREF_PLACE_HOLDER, botRef.toString());
     if (isInitialLoad) {
-      replaceMap.put(DIR_PATH_PLACE_HOLDER,
-          String.format(initialLoadPath, customerId, botRef, dataSourceName));
-      replaceMap.put(FILE_NAME_PLACE_HOLDER, dataSourceName);
+      replaceMap.put(DIR_PATH_PLACE_HOLDER, initialLoadPath);
     } else {
-      replaceMap.put(DIR_PATH_PLACE_HOLDER,
-          String.format(netChangePath, customerId, botRef, timestamp, dataSourceName));
-      replaceMap.put(FILE_NAME_PLACE_HOLDER, dataSourceName);
+      replaceMap.put(DIR_PATH_PLACE_HOLDER, String.format(netChangePath, timestamp));
     }
-    String requestBody =
-        replacePlaceHolders(String.format(ingestionSpecsPath, DataSourceMetaInfo.getIngestionPathForDataSource(dataSourceName)), replaceMap);
+    String requestBody = replacePlaceHolders(String.format(ingestionSpecsPath,
+        DataSourceMetaInfo.getIngestionPathForDataSource(dataSourceName)), replaceMap);
     JsonObject druidResponse = ingestionRequestToDruid(requestBody);
     if (Objects.nonNull(druidResponse)) {
       druidIngestionResponse.setTaskId(druidResponse.get(TASK_ID).getAsString());
