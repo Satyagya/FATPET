@@ -72,8 +72,10 @@ public class ConversionRateMetric extends MetricHandler {
             .map(SimpleResponse.class::cast).collect(Collectors.toList());
         conversionRateResponse.setQueryResponse(getConversionRateFromTimeSeries(
             simpleResponses, metric, botRef, customerId));
-        conversionRateResponse = mergePreviousResponse(conversionRateResponse,
-            (SimpleResponse) prevResponse);
+        if (prevResponse instanceof SimpleResponse) {
+          conversionRateResponse = mergePreviousResponse(conversionRateResponse,
+              (SimpleResponse) prevResponse);
+        }
       }
     }
     conversionRateResponse.setType(ResponseType.SIMPLE.name());
