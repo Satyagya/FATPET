@@ -45,7 +45,7 @@ public class Utility {
     List<Interval> intervals = new ArrayList<>();
     for (DruidTimeIntervalMetaInfo timeIntervalMetaInfo: timeIntervalMetaInfoList) {
       intervals.add(new Interval(DateTime.parse(timeIntervalMetaInfo.getStartTime()),
-          DateTime.parse(timeIntervalMetaInfo.getStartTime())));
+          DateTime.parse(timeIntervalMetaInfo.getEndTime())));
     }
     return intervals;
   }
