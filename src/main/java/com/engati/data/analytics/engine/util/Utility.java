@@ -12,6 +12,7 @@ import in.zapr.druid.druidry.query.DruidQuery;
 import in.zapr.druid.druidry.topNMetric.SimpleMetric;
 import in.zapr.druid.druidry.topNMetric.TopNMetric;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +44,8 @@ public class Utility {
       timeIntervalMetaInfoList) {
     List<Interval> intervals = new ArrayList<>();
     for (DruidTimeIntervalMetaInfo timeIntervalMetaInfo: timeIntervalMetaInfoList) {
-      intervals.add(new Interval(timeIntervalMetaInfo.getStartTime(),
-          timeIntervalMetaInfo.getEndTime()));
+      intervals.add(new Interval(DateTime.parse(timeIntervalMetaInfo.getStartTime()),
+          DateTime.parse(timeIntervalMetaInfo.getStartTime())));
     }
     return intervals;
   }
