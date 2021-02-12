@@ -76,7 +76,7 @@ public class ConversionRateMetric extends MetricHandler {
             (SimpleResponse) prevResponse);
       }
     }
-    conversionRateResponse.setType(ResponseType.SIMPLE);
+    conversionRateResponse.setType(ResponseType.SIMPLE.name());
     return conversionRateResponse;
   }
 

@@ -71,9 +71,13 @@ public class TimeSeriesQuery extends QueryHandler {
     SimpleResponse simpleResponse = SimpleResponse.builder()
         .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
         .build();
-    simpleResponse.setType(ResponseType.SIMPLE);
+    simpleResponse.setType(ResponseType.SIMPLE.name());
 
-    prevResponse = mergePreviousResponse(simpleResponse, (SimpleResponse) prevResponse);
+    if (prevResponse instanceof SimpleResponse) {
+      prevResponse = mergePreviousResponse(simpleResponse, (SimpleResponse) prevResponse);
+    } else {
+      prevResponse = simpleResponse;
+    }
     return prevResponse;
   }
 

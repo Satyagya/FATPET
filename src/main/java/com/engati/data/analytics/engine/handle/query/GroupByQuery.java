@@ -68,7 +68,7 @@ public class GroupByQuery extends QueryHandler {
     GroupByResponse groupByResponse = GroupByResponse.builder()
         .groupByResponse(druidResponseParser.convertGroupByJsonToMap(response,
             botRef, customerId)).build();
-    groupByResponse.setType(ResponseType.GROUP_BY);
+    groupByResponse.setType(ResponseType.GROUP_BY.name());
     return groupByResponse;
   }
 

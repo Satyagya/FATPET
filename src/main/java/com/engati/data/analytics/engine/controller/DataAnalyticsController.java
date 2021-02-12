@@ -38,5 +38,4 @@ public class DataAnalyticsController {
             HttpStatus.OK);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
-
 }
