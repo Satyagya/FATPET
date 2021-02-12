@@ -48,7 +48,7 @@ public class ConversionRateMetric extends MetricHandler {
     MultiQueryMetaInfo multiQueryMetaInfo = ((MultiQueryMetaInfo) druidQueryMetaInfo);
     for (DruidQueryMetaInfo druidQuery: multiQueryMetaInfo.getMultiMetricQuery()) {
       QueryResponse response = new QueryResponse();
-      responses.add(queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getType(),
+      responses.add(queryHandlerFactory.getQueryHandler(druidQuery.getType(),
           botRef, customerId).generateAndExecuteQuery(botRef, customerId,
           druidQuery, response));
     }
