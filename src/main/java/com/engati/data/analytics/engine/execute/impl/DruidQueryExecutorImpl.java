@@ -32,7 +32,7 @@ public class DruidQueryExecutorImpl implements DruidQueryExecutor {
       if (Objects.nonNull(response) && Objects.nonNull(response.body())
           && response.isSuccessful()) {
         output = response.body();
-        log.debug("DruidQueryExecutorImpl: Successfully got response: {} from the druid query: {} "
+        log.info("DruidQueryExecutorImpl: Successfully got response: {} from the druid query: {} "
             + "for botRef: {} and customerId: {}", output, druidJsonQuery, botRef, customerId);
       } else {
         log.error("DruidQueryExecutorImpl: Failed to get response from druid "
