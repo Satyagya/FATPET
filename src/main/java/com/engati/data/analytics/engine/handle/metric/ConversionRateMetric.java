@@ -62,7 +62,7 @@ public class ConversionRateMetric extends MetricHandler {
       Integer botRef, Integer customerId) {
     SimpleResponse conversionRateResponse = new SimpleResponse();
     if (CollectionUtils.isNotEmpty(responses)) {
-      if (ResponseType.GROUP_BY.equals(responses.get(0).getType())) {
+      if (ResponseType.GROUP_BY.name().equals(responses.get(0).getType())) {
         List<GroupByResponse> groupByResponses = responses.stream()
             .map(GroupByResponse.class::cast).collect(Collectors.toList());
         conversionRateResponse.setQueryResponse(getConversionRateForGroupBy(
