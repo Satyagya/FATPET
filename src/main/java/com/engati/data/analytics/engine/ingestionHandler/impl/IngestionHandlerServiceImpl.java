@@ -59,8 +59,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
   public DataAnalyticsEngineResponse<DruidIngestionResponse> ingestToDruid(Long customerId,
       Long botRef, String timestamp, String dataSourceName, Boolean isInitialLoad) {
     DruidIngestionResponse druidIngestionResponse =
-        new DruidIngestionResponse().builder().botRef(botRef).customerId(customerId).taskId(null)
-            .build();
+        new DruidIngestionResponse().builder().botRef(botRef).customerId(customerId).build();
     DataAnalyticsEngineResponse<DruidIngestionResponse> dataAnalyticsEngineResponse =
         new DataAnalyticsEngineResponse<>(DataAnalyticsEngineStatusCode.INGESTION_FAILURE);
     dataAnalyticsEngineResponse.setResponseObject(druidIngestionResponse);
@@ -72,16 +71,16 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
     } else {
       replaceMap.put(DIR_PATH_PLACE_HOLDER, String.format(netChangePath, timestamp));
     }
-    String requestBody = replacePlaceHolders(String.format(ingestionSpecsPath,
+    String requestBody = replacePlaceHolders(customerId, botRef, String.format(ingestionSpecsPath,
         DataSourceMetaInfo.getIngestionPathForDataSource(dataSourceName)), replaceMap);
-    JsonObject druidResponse = ingestionRequestToDruid(requestBody);
+    JsonObject druidResponse = ingestionRequestToDruid(requestBody, customerId, botRef);
     if (Objects.nonNull(druidResponse)) {
       druidIngestionResponse.setTaskId(druidResponse.get(TASK_ID).getAsString());
       dataAnalyticsEngineResponse.setStatus(DataAnalyticsEngineStatusCode.INGESTION_SUCCESS);
       log.info("Ingestion to druid successful for customerId:{}, botRef:{}, timestamp:{} and "
           + "dataSourceName:{}", customerId, botRef, timestamp, dataSourceName);
     } else {
-      log.info("Ingestion to druid failed for customerId:{}, botRef:{}, timestamp:{} and "
+      log.error("Ingestion to druid failed for customerId:{}, botRef:{}, timestamp:{} and "
           + "dataSourceName:{}", customerId, botRef, timestamp, dataSourceName);
     }
     return dataAnalyticsEngineResponse;
@@ -95,7 +94,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
    *
    * @return
    */
-  private JsonObject ingestionRequestToDruid(String requestBody) {
+  private JsonObject ingestionRequestToDruid(String requestBody, Long customerId, Long botRef) {
     JsonObject output = null;
     try {
       RequestBody body = RequestBody
@@ -104,13 +103,14 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
       response = druidIngestionServiceRetrofit.ingestDataToDruid(body).execute();
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
           .isSuccessful()) {
-        log.info("response: {}", response);
+        log.info("response for customerId:{}, botRef:{} is {}", customerId, botRef, response);
         output = response.body();
       } else {
-        log.error("Failed to get response errorBody:{}", response.errorBody().string());
+        log.error("Failed to get response for customerId:{}, botRef:{}, errorBody:{}", customerId,
+            botRef, response.errorBody().string());
       }
     } catch (IOException e) {
-      log.error("Failed to get response", e);
+      log.error("Failed to get response for customerId:{}, botRef:{}", customerId, botRef, e);
     }
     return output;
   }
@@ -124,7 +124,8 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
    *
    * @return
    */
-  private String replacePlaceHolders(String ingestionFileName, Map<String, String> replaceMap) {
+  private String replacePlaceHolders(Long customerId, Long botRef, String ingestionFileName,
+      Map<String, String> replaceMap) {
     String requestBody = null;
     try {
       requestBody =
@@ -133,8 +134,10 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
         requestBody = requestBody.replace(field.getKey(), field.getValue());
       }
     } catch (Exception e) {
-      log.error("Error while replacing place holder from the filename:{} with replaceMap:{}",
-          ingestionFileName, replaceMap.toString(), e);
+      log.error(
+          "Error while replacing place holder from the filename:{} with replaceMap:{} for "
+              + "customerId:{} and botRef:{}",
+          ingestionFileName, replaceMap.toString(), customerId, botRef, e);
     }
     return requestBody;
   }
