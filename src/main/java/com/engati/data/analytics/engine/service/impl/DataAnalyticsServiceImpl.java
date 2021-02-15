@@ -67,20 +67,6 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
         .ingestToDruid(customerId, botRef, timestamp, dataSourceName, isInitialLoad);
   }
 
-  private List<List<Map<String, String>>> mergePreviousResponse(
-      List<List<Map<String, String>>> response, List<List<Map<String, String>>> prevResponse) {
-    if (Objects.isNull(prevResponse) || prevResponse.isEmpty()) {
-      return response;
-    } else {
-      for (int resultIndex = 0; resultIndex < response.size(); resultIndex++) {
-        for (int index = 0; index < response.get(resultIndex).size(); index++) {
-          prevResponse.get(resultIndex).get(index).putAll(response.get(resultIndex).get(index));
-        }
-      }
-    }
-    return prevResponse;
-  }
-
   private String getMetricHandlerKey(DruidQueryMetaInfo druidQueryMetaInfo) {
     String metricHandlerKey = null;
     if (druidQueryMetaInfo instanceof MultiQueryMetaInfo) {
