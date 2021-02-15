@@ -8,7 +8,6 @@ import in.zapr.druid.druidry.filter.SelectorFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,22 +38,8 @@ public class DruidFilterGeneratorImpl implements DruidFilterGenerator {
     return druidFilter;
   }
 
-  private List<DruidFilter> getQueryFilters(List<DruidFilterMetaInfo> druidFilterMetaInfoDtos,
-      Integer botRef, Integer customerId) {
-    List<DruidFilter> druidFilters = new ArrayList<>();
-    for (DruidFilterMetaInfo druidFilterMetaInfoDto: druidFilterMetaInfoDtos) {
-      druidFilters.add(getFiltersByType(druidFilterMetaInfoDto, botRef, customerId));
-    }
-    return druidFilters;
-  }
-
   private SelectorFilter getSelectorFilter(String dimension, String value, Integer botRef,
       Integer customerId) {
-    return new SelectorFilter(dimension, value);
-  }
-
-  private SelectorFilter getSelectorFilter(String dimension, Integer value,
-      Integer botRef, Integer customerId) {
     return new SelectorFilter(dimension, value);
   }
 
