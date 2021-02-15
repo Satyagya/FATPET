@@ -9,10 +9,12 @@ import in.zapr.druid.druidry.postAggregator.ConstantPostAggregator;
 import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
 import in.zapr.druid.druidry.postAggregator.FieldAccessPostAggregator;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -23,9 +25,14 @@ public class DruidPostAggregateGeneratorImpl implements DruidPostAggregateGenera
       postAggregateMetaInfoDtos, Integer botRef, Integer customerId) {
 
     List<DruidPostAggregator> druidPostAggregatorList = new ArrayList<>();
-    for (DruidPostAggregatorMetaInfo postAggregateMetaInfoDto: postAggregateMetaInfoDtos) {
-      druidPostAggregatorList.add(getPostAggregatorRespectToType(postAggregateMetaInfoDto,
-          botRef, customerId));
+    if (CollectionUtils.isNotEmpty(postAggregateMetaInfoDtos)) {
+      for (DruidPostAggregatorMetaInfo postAggregateMetaInfoDto : postAggregateMetaInfoDtos) {
+        DruidPostAggregator postAggregator =
+            getPostAggregatorRespectToType(postAggregateMetaInfoDto, botRef, customerId);
+        if (Objects.nonNull(postAggregator)) {
+          druidPostAggregatorList.add(postAggregator);
+        }
+      }
     }
     return druidPostAggregatorList;
   }
