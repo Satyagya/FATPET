@@ -5,5 +5,6 @@ import in.zapr.druid.druidry.filter.DruidFilter;
 
 public interface DruidFilterGenerator {
 
-  DruidFilter getFiltersByType(DruidFilterMetaInfo druidFilterMetaInfoDto);
+  DruidFilter getFiltersByType(DruidFilterMetaInfo druidFilterMetaInfoDto,
+      Integer botRef, Integer customerId);
 }

@@ -3,6 +3,7 @@ package com.engati.data.analytics.engine.druid.query.service.impl;
 import com.engati.data.analytics.engine.druid.query.druidry.postAggregator.FinalizingFieldAccessPostAggregator;
 import com.engati.data.analytics.engine.druid.query.service.DruidPostAggregateGenerator;
 import com.engati.data.analytics.sdk.druid.postaggregator.DruidPostAggregatorMetaInfo;
+import in.zapr.druid.druidry.postAggregator.ArithmeticFunction;
 import in.zapr.druid.druidry.postAggregator.ArithmeticPostAggregator;
 import in.zapr.druid.druidry.postAggregator.ConstantPostAggregator;
 import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
@@ -18,68 +19,74 @@ import java.util.List;
 public class DruidPostAggregateGeneratorImpl implements DruidPostAggregateGenerator {
 
   @Override
-  public List<DruidPostAggregator> getQueryPostAggregators(
-      List<DruidPostAggregatorMetaInfo> postAggregateMetaInfoDtos) {
+  public List<DruidPostAggregator> getQueryPostAggregators(List<DruidPostAggregatorMetaInfo>
+      postAggregateMetaInfoDtos, Integer botRef, Integer customerId) {
 
     List<DruidPostAggregator> druidPostAggregatorList = new ArrayList<>();
     for (DruidPostAggregatorMetaInfo postAggregateMetaInfoDto: postAggregateMetaInfoDtos) {
-      druidPostAggregatorList.add(getPostAggregatorRespectToType(postAggregateMetaInfoDto));
+      druidPostAggregatorList.add(getPostAggregatorRespectToType(postAggregateMetaInfoDto,
+          botRef, customerId));
     }
     return druidPostAggregatorList;
   }
 
   private DruidPostAggregator getPostAggregatorRespectToType(DruidPostAggregatorMetaInfo
-      postAggregateMetaInfoDto) {
+      postAggregateMetaInfoDto, Integer botRef, Integer customerId) {
     DruidPostAggregator druidPostAggregator = null;
     switch(postAggregateMetaInfoDto.getType()) {
       case ARITHMETIC:
-        druidPostAggregator = getArithmeticPostAggregator(postAggregateMetaInfoDto);
+        druidPostAggregator = getArithmeticPostAggregator(postAggregateMetaInfoDto,
+            botRef, customerId);
         break;
       case FIELD_ACCESSOR:
-        druidPostAggregator = getFieldAccessPostAggregator(postAggregateMetaInfoDto);
+        druidPostAggregator = getFieldAccessPostAggregator(postAggregateMetaInfoDto,
+            botRef, customerId);
         break;
       case CONSTANT:
-        druidPostAggregator = getConstantPostAggregator(postAggregateMetaInfoDto);
+        druidPostAggregator = getConstantPostAggregator(postAggregateMetaInfoDto,
+            botRef, customerId);
         break;
       case FINALIZING_FIELD_ACCESS:
-        druidPostAggregator = getFinalizingFieldAccessPostAggregator(postAggregateMetaInfoDto);
+        druidPostAggregator = getFinalizingFieldAccessPostAggregator(postAggregateMetaInfoDto,
+            botRef, customerId);
         break;
       default:
-        log.error("The given type in postAggregator is not supported: {}",
-            postAggregateMetaInfoDto);
+        log.error("DruidPostAggregateGeneratorImpl: Provided postAggregator type: {} does not "
+                + "have implementation for botRef: {}, customerId: {}",
+            postAggregateMetaInfoDto, botRef, customerId);
     }
     return druidPostAggregator;
   }
 
   private ArithmeticPostAggregator getArithmeticPostAggregator(DruidPostAggregatorMetaInfo
-      postAggregateMetaInfoDto) {
+      postAggregateMetaInfoDto, Integer botRef, Integer customerId) {
 
     List<DruidPostAggregator> fieldsList = new ArrayList<>();
     for (DruidPostAggregatorMetaInfo postAggregateMetaInfo: postAggregateMetaInfoDto.getFields()) {
-      fieldsList.add(getPostAggregatorRespectToType(postAggregateMetaInfo));
+      fieldsList.add(getPostAggregatorRespectToType(postAggregateMetaInfo, botRef, customerId));
     }
-    //todo function to get druid arithmetic function
     ArithmeticPostAggregator arithmeticPostAggregator = ArithmeticPostAggregator.builder()
         .name(postAggregateMetaInfoDto.getPostAggregatorName()).fields(fieldsList)
-//        .function(postAggregateMetaInfoDto.getFunction())
+        .function(ArithmeticFunction.valueOf(postAggregateMetaInfoDto.getFunction()))
         .build();
     return arithmeticPostAggregator;
   }
 
   private FieldAccessPostAggregator getFieldAccessPostAggregator(DruidPostAggregatorMetaInfo
-      druidPostAggregateMetaInfoDto) {
+      druidPostAggregateMetaInfoDto, Integer botRef, Integer customerId) {
     return new FieldAccessPostAggregator(druidPostAggregateMetaInfoDto.getPostAggregatorName(),
         druidPostAggregateMetaInfoDto.getFieldName());
   }
 
   private ConstantPostAggregator getConstantPostAggregator(DruidPostAggregatorMetaInfo
-      druidPostAggregateMetaInfoDto) {
+      druidPostAggregateMetaInfoDto, Integer botRef, Integer customerId) {
     return new ConstantPostAggregator(druidPostAggregateMetaInfoDto.getPostAggregatorName(),
         druidPostAggregateMetaInfoDto.getValue());
   }
 
   private FinalizingFieldAccessPostAggregator getFinalizingFieldAccessPostAggregator(
-      DruidPostAggregatorMetaInfo druidPostAggregateMetaInfoDto) {
+      DruidPostAggregatorMetaInfo druidPostAggregateMetaInfoDto, Integer botRef,
+      Integer customerId) {
     return new FinalizingFieldAccessPostAggregator(druidPostAggregateMetaInfoDto
         .getPostAggregatorName(), druidPostAggregateMetaInfoDto.getFieldName());
   }

@@ -1,24 +1,27 @@
 package com.engati.data.analytics.engine.handle.metric;
 
 import com.engati.data.analytics.engine.handle.query.factory.QueryHandlerFactory;
+import com.engati.data.analytics.engine.util.Constants;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineException;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
-import com.engati.data.analytics.sdk.druid.query.GroupByQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.MultiQueryMetaInfo;
+import com.engati.data.analytics.sdk.response.GroupByResponse;
 import com.engati.data.analytics.sdk.response.QueryResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import com.engati.data.analytics.sdk.response.ResponseType;
+import com.engati.data.analytics.sdk.response.SimpleResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,73 +48,106 @@ public class ConversionRateMetric extends MetricHandler {
     MultiQueryMetaInfo multiQueryMetaInfo = ((MultiQueryMetaInfo) druidQueryMetaInfo);
     for (DruidQueryMetaInfo druidQuery: multiQueryMetaInfo.getMultiMetricQuery()) {
       QueryResponse response = new QueryResponse();
-      responses.add(queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name())
-          .generateAndExecuteQuery(botRef, customerId, druidQuery, response));
+      responses.add(queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name(),
+          botRef, customerId).generateAndExecuteQuery(botRef, customerId,
+          druidQuery, response));
     }
-
-    return null;
+    return getConversionRate(responses, prevResponse, multiQueryMetaInfo.getMetricName(),
+        multiQueryMetaInfo.getModifier(), multiQueryMetaInfo.getLimit(),
+        multiQueryMetaInfo.getDimension(), botRef, customerId);
   }
 
-  private List<List<Map<String, String>>> mergeTimeSeriesQuery(List<List<Map<String, Object>>>
-      orderResponse, List<List<Map<String, Object>>> sessionResponse) {
-    List<List<Map<String, String>>> timeStampConversionRate = new ArrayList<>();
-    List<Map<String, String>> conversionRate = new ArrayList<>();
-    for (int timeStampIndex = 0; timeStampIndex<orderResponse.size(); timeStampIndex++) {
-      Map<String, String> value = new HashMap<>();
-      for (int resultIndex = 0; resultIndex<orderResponse.get(timeStampIndex).size(); resultIndex++) {
-        Integer orderCount = (Integer) orderResponse.get(timeStampIndex).get(resultIndex)
-            .get("order_count");
-        Integer sessionCount = (Integer) sessionResponse.get(timeStampIndex).get(resultIndex)
-            .get("session_count");
-        Double cvr = calculateConversionRate(orderCount, sessionCount);
-        value.put("conversion_rate", new DecimalFormat("#.##").format(cvr));
-        conversionRate.add(value);
+  private QueryResponse getConversionRate(List<QueryResponse> responses, QueryResponse
+      prevResponse, String metric, String modifier, Integer limit, String dimension,
+      Integer botRef, Integer customerId) {
+    SimpleResponse conversionRateResponse = new SimpleResponse();
+    if (CollectionUtils.isNotEmpty(responses)) {
+      if (ResponseType.GROUP_BY.equals(responses.get(0).getType())) {
+        List<GroupByResponse> groupByResponses = responses.stream()
+            .map(GroupByResponse.class::cast).collect(Collectors.toList());
+        conversionRateResponse.setQueryResponse(getConversionRateForGroupBy(
+            groupByResponses, metric, dimension, modifier, limit, botRef, customerId));
+      } else {
+        List<SimpleResponse> simpleResponses = responses.stream()
+            .map(SimpleResponse.class::cast).collect(Collectors.toList());
+        conversionRateResponse.setQueryResponse(getConversionRateFromTimeSeries(
+            simpleResponses, metric, botRef, customerId));
+        conversionRateResponse = mergePreviousResponse(conversionRateResponse,
+            (SimpleResponse) prevResponse);
       }
-      timeStampConversionRate.add(conversionRate);
+    }
+    conversionRateResponse.setType(ResponseType.SIMPLE);
+    return conversionRateResponse;
+  }
+
+  private List<List<Map<String, Object>>> getConversionRateFromTimeSeries(List<SimpleResponse>
+      responses, String metric, Integer botRef, Integer customerId) {
+    List<List<Map<String, Object>>> timeStampConversionRate = new ArrayList<>();
+    try {
+      SimpleResponse orderResponse = responses.stream().filter(response -> response
+          .getQueryResponse().get(0).get(0).containsKey(Constants.ORDER_COUNT))
+          .findFirst().get();
+      SimpleResponse sessionResponse = responses.stream().filter(response -> response
+          .getQueryResponse().get(0).get(0).containsKey(Constants.SESSION_COUNT))
+          .findFirst().get();
+      List<Map<String, Object>> conversionRate = new ArrayList<>();
+      for (int timeStampIndex = 0; timeStampIndex < orderResponse.getQueryResponse().size();
+          timeStampIndex++) {
+        Map<String, Object> value = new HashMap<>();
+        for (int resultIndex = 0; resultIndex < orderResponse.getQueryResponse()
+            .get(timeStampIndex).size(); resultIndex++) {
+          Integer orderCount = (Integer) orderResponse.getQueryResponse()
+              .get(timeStampIndex).get(resultIndex).get(Constants.ORDER_COUNT);
+          Integer sessionCount = (Integer) sessionResponse.getQueryResponse()
+              .get(timeStampIndex).get(resultIndex).get(Constants.SESSION_COUNT);
+          Double cvr = calculateConversionRate(orderCount, sessionCount);
+          value.put(metric, Constants.DECIMAL_FORMAT.format(cvr));
+          conversionRate.add(value);
+        }
+        timeStampConversionRate.add(conversionRate);
+      }
+    } catch (Exception ex) {
+      log.error("ConversionRateMetric: Exception while calculating CVR from time-series query "
+          + "for botRef: {}, customerId: {}", botRef, customerId, ex);
+      throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
     return timeStampConversionRate;
   }
 
-  private List<Map<String, Object>> convertGroupByJsonToMap(JsonArray response) {
-    ObjectMapper objectMapper = new ObjectMapper();
-    List<Map<String, Object>> responseMapList = new ArrayList<>();
+  private List<List<Map<String, Object>>> getConversionRateForGroupBy(List<GroupByResponse>
+      responses, String metric, String dimensionKey, String modifier, Integer limit,
+      Integer botRef, Integer customerId) {
+    List<Map<String, Object>> geoCVRList = new ArrayList<>();
     try {
-      for (int i = 0; i < response.size(); i++) {
-        JsonElement jsonElement = response.get(i).getAsJsonObject().get("event");
-        Map<String, Object> data = objectMapper.readValue(jsonElement.toString(), Map.class);
-        responseMapList.add(data);
-      }
-    } catch (Exception e) {
-      log.error("Error while generating response from the jsonArray", e);
-    }
-    return responseMapList;
-  }
+      GroupByResponse orderResponse = responses.stream().filter(
+          response -> response.getGroupByResponse().get(0).containsKey(Constants.ORDER_COUNT)).findFirst().get();
+      GroupByResponse sessionResponse = responses.stream().filter(
+          response -> response.getGroupByResponse().get(0).containsKey(Constants.SESSION_COUNT)).findFirst().get();
 
-  private List<List<Map<String, String>>> mergeGroupByQuery(List<Map<String, Object>>
-      orderResponse, List<Map<String, Object>> sessionResponse, String dimensionKey,
-      String modifier, Integer limit) {
-    List<Map<String, String>> geoCVRList = new ArrayList<>();
-    Map<String, Integer> geoOrderCount = getGeoAndMetricMap(orderResponse,
-        "order_count", dimensionKey);
-    Map<String, Integer> geoSessionCount = getGeoAndMetricMap(sessionResponse,
-        "sessions", dimensionKey);
-    Set<String> geoSet = geoOrderCount.keySet();
-    geoSet.retainAll(geoSessionCount.keySet());
-    Map<String, Double> geoByValue = new HashMap<>();
-    for (String geoValue: geoSet) {
-      Double cvr = calculateConversionRate(geoOrderCount.get(geoValue),
-          geoSessionCount.get(geoValue));
-      geoByValue.put(geoValue, cvr);
-    }
-    geoByValue = applySortAndLimit(geoByValue, modifier, limit);
-    for (String geoValue: geoByValue.keySet()) {
-      Map<String, String> value = new HashMap<>();
-      value.put(dimensionKey, geoValue);
-      Double cvr = calculateConversionRate(geoOrderCount.get(geoValue),
-          geoSessionCount.get(geoValue));
-      value.put("conversion_rate",
-          new DecimalFormat("#.##").format(cvr));
-      geoCVRList.add(value);
+      Map<String, Integer> geoOrderCount =
+          getGeoAndMetricMap(orderResponse.getGroupByResponse(), Constants.ORDER_COUNT, dimensionKey);
+      Map<String, Integer> geoSessionCount =
+          getGeoAndMetricMap(sessionResponse.getGroupByResponse(), Constants.SESSION_COUNT,
+              dimensionKey);
+      Set<String> geoSet = geoOrderCount.keySet();
+      geoSet.retainAll(geoSessionCount.keySet());
+      Map<String, Double> geoByValue = new HashMap<>();
+      for (String geoValue : geoSet) {
+        Double cvr = calculateConversionRate(geoOrderCount.get(geoValue), geoSessionCount.get(geoValue));
+        geoByValue.put(geoValue, cvr);
+      }
+      geoByValue = applySortAndLimit(geoByValue, modifier, limit);
+      for (String geoValue : geoByValue.keySet()) {
+        Map<String, Object> value = new HashMap<>();
+        value.put(dimensionKey, geoValue);
+        Double cvr = calculateConversionRate(geoOrderCount.get(geoValue), geoSessionCount.get(geoValue));
+        value.put(metric, Constants.DECIMAL_FORMAT.format(cvr));
+        geoCVRList.add(value);
+      }
+    } catch (Exception ex) {
+      log.error("ConversionRateMetric: Exception while calculating CVR from groupBy-series query "
+          + "for botRef: {}, customerId: {}", botRef, customerId, ex);
+      throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
     return Collections.singletonList(geoCVRList);
   }
@@ -124,7 +160,7 @@ public class ConversionRateMetric extends MetricHandler {
 
   private Map<String, Double> applySortAndLimit(Map<String, Double> geoByValue, String modifier,
       Integer limit) {
-    if ("top".equals(modifier)) {
+    if (Constants.TOP.equals(modifier)) {
       return geoByValue.entrySet().stream().sorted(Collections.reverseOrder(comparingByValue()))
           .limit(limit).collect(Collectors
               .toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
@@ -140,5 +176,21 @@ public class ConversionRateMetric extends MetricHandler {
       return ((double) orders / (double) sessions) * 100;
     }
     return 0D;
+  }
+
+  private SimpleResponse mergePreviousResponse(SimpleResponse response,
+      SimpleResponse prevResponse) {
+    if (Objects.isNull(prevResponse) || Objects.isNull(prevResponse.getQueryResponse())
+        || prevResponse.getQueryResponse().isEmpty()) {
+      return response;
+    } else {
+      for (int resultIndex = 0; resultIndex < response.getQueryResponse().size(); resultIndex++) {
+        for (int index = 0; index < response.getQueryResponse().get(resultIndex).size(); index++) {
+          prevResponse.getQueryResponse().get(resultIndex).get(index)
+              .putAll(response.getQueryResponse().get(resultIndex).get(index));
+        }
+      }
+    }
+    return prevResponse;
   }
 }

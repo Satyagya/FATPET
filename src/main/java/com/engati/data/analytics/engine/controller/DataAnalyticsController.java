@@ -36,8 +36,8 @@ public class DataAnalyticsController {
       @PathVariable(Constants.REQ_PARAM_CUSTOMER_ID) Integer customerId,
       @PathVariable(Constants.REQ_PARAM_BOT_REF) Integer botRef,
       @RequestBody QueryGenerationRequest queryGenerationRequest) {
-    QueryResponse responseFromDruid =
-        dataAnalyticsService.executeQueryRequest(botRef, customerId, queryGenerationRequest);
+    QueryResponse responseFromDruid = dataAnalyticsService.executeQueryRequest(botRef, customerId,
+        queryGenerationRequest);
     DataAnalyticsEngineResponse<QueryResponse> response =
         new DataAnalyticsEngineResponse<>(responseFromDruid, DataAnalyticsEngineStatusCode.SUCCESS,
             HttpStatus.OK);

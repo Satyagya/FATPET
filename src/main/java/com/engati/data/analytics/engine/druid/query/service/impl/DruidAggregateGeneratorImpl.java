@@ -1,8 +1,14 @@
 package com.engati.data.analytics.engine.druid.query.service.impl;
 
+import com.engati.data.analytics.engine.druid.query.druidry.aggregator.DistinctCountAggregator;
+import com.engati.data.analytics.engine.druid.query.druidry.aggregator.NewCardinalityAggregator;
 import com.engati.data.analytics.engine.druid.query.service.DruidAggregateGenerator;
 import com.engati.data.analytics.sdk.druid.aggregator.DruidAggregatorMetaInfo;
+import in.zapr.druid.druidry.aggregator.CountAggregator;
+import in.zapr.druid.druidry.aggregator.DoubleSumAggregator;
 import in.zapr.druid.druidry.aggregator.DruidAggregator;
+import in.zapr.druid.druidry.aggregator.JavaScriptAggregator;
+import in.zapr.druid.druidry.aggregator.LongSumAggregator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -14,52 +20,44 @@ import java.util.List;
 public class DruidAggregateGeneratorImpl implements DruidAggregateGenerator {
 
   @Override
-  public List<DruidAggregator> getQueryAggregators(
-      List<DruidAggregatorMetaInfo> aggregateMetaInfos) {
+  public List<DruidAggregator> getQueryAggregators(List<DruidAggregatorMetaInfo>
+      aggregateMetaInfos, Integer botRef, Integer customerId) {
 
-    log.info("DruidAggregators: create list of aggregators");
     List<DruidAggregator> druidAggregators = new ArrayList<>();
-    for (DruidAggregatorMetaInfo druidAggregateMetaInfo : aggregateMetaInfos) {
+    for(DruidAggregatorMetaInfo druidAggregateMetaInfo: aggregateMetaInfos) {
       switch (druidAggregateMetaInfo.getType()) {
         case COUNT:
-          //          druidAggregators.add(new CountAggregator(druidAggregateMetaInfo.getNames()));
+          druidAggregators.add(new CountAggregator(druidAggregateMetaInfo.getAggregatorName()));
           break;
         case LONGSUM:
-          //          druidAggregators.add(new LongSumAggregator(druidAggregateMetaInfo.getNames(),
-          //              druidAggregateMetaInfo.getFieldNames()));
+          druidAggregators.add(new LongSumAggregator(druidAggregateMetaInfo.getAggregatorName(),
+              druidAggregateMetaInfo.getFieldName()));
           break;
         case DOUBLESUM:
-          //          druidAggregators.add(new DoubleSumAggregator(druidAggregateMetaInfo
-          //          .getNames(),
-          //              druidAggregateMetaInfo.getFieldNames()));
+          druidAggregators.add(new DoubleSumAggregator(druidAggregateMetaInfo.getAggregatorName(),
+              druidAggregateMetaInfo.getFieldName()));
           break;
         case DISTINCT_COUNT:
-          //          druidAggregators.add(new DistinctCountAggregator(druidAggregateMetaInfo
-          //          .getNames(),
-          //              druidAggregateMetaInfo.getFieldNames()));
+          druidAggregators.add(new DistinctCountAggregator(druidAggregateMetaInfo
+              .getAggregatorName(), druidAggregateMetaInfo.getFieldName()));
           break;
         case CARDINALITY:
-          //          CardinalityAggregatorMetaInfo cardinalityAggregatorMetaInfo =
-          //              ((CardinalityAggregatorMetaInfo) druidAggregateMetaInfo);
-          //          druidAggregators.add(new NewCardinalityAggregator
-          //          (cardinalityAggregatorMetaInfo.getNames(),
-          //              cardinalityAggregatorMetaInfo.getFields(),
-          //              cardinalityAggregatorMetaInfo.getByRow(),
-          //              cardinalityAggregatorMetaInfo.getRound()));
+          druidAggregators.add(new NewCardinalityAggregator(druidAggregateMetaInfo
+              .getAggregatorName(), druidAggregateMetaInfo.getFields(),
+              druidAggregateMetaInfo.getByRow(), druidAggregateMetaInfo.getRound()));
           break;
         case JAVASCRIPT:
-          //          JavaScriptAggregatorMetaInfo javaScriptAggregatorMetaInfo =
-          //              ((JavaScriptAggregatorMetaInfo) druidAggregateMetaInfo);
-          //          druidAggregators.add(JavaScriptAggregator.builder()
-          //              .name(javaScriptAggregatorMetaInfo.getNames())
-          //              .fieldNames(javaScriptAggregatorMetaInfo.getFields())
-          //              .functionAggregate(javaScriptAggregatorMetaInfo.getFnAggregate())
-          //              .functionCombine(javaScriptAggregatorMetaInfo.getFnCombine())
-          //              .functionReset(javaScriptAggregatorMetaInfo.getFnReset()).build());
-          //          break;
+          druidAggregators.add(JavaScriptAggregator.builder()
+              .name(druidAggregateMetaInfo.getAggregatorName())
+              .fieldNames(druidAggregateMetaInfo.getFields())
+              .functionAggregate(druidAggregateMetaInfo.getFnAggregate())
+              .functionCombine(druidAggregateMetaInfo.getFnCombine())
+              .functionReset(druidAggregateMetaInfo.getFnReset()).build());
+          break;
         default:
-          log.error("The given aggregator: {} does not have implementation",
-              druidAggregateMetaInfo.getType());
+          log.error("DruidAggregateGeneratorImpl: Provided aggregator: {} does not have "
+                  + "implementation for botRef: {}, customerId: {}",
+              druidAggregateMetaInfo.getType(), botRef, customerId);
       }
     }
     return druidAggregators;

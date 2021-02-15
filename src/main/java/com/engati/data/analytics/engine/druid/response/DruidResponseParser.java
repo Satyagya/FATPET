@@ -7,7 +7,9 @@ import java.util.Map;
 
 public interface DruidResponseParser {
 
-  List<List<Map<String, Object>>> convertJsonToMap(JsonArray response);
+  List<List<Map<String, Object>>> convertJsonToMap(JsonArray response,
+      Integer botRef, Integer customerId);
 
-  List<Map<String, Object>> convertGroupByJsonToMap(JsonArray response);
+  List<Map<String, Object>> convertGroupByJsonToMap(JsonArray response,
+      Integer botRef, Integer customerId);
 }
