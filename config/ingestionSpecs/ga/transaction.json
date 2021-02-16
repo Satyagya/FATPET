@@ -1,0 +1,74 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "local",
+        "filter": "TRANSACTION.csv",
+        "baseDir": "/var/domain-intelligence/data/{{customer_id}}/{{bot_ref}}/{{load_path}}"
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      },
+      "logParseExceptions": true
+    },
+    "dataSchema": {
+      "dataSource": "transaction_{{customer_id}}_{{bot_ref}}",
+      "granularitySpec": {
+        "type": "uniform",
+        "queryGranularity": "DAY",
+        "rollup": false,
+        "segmentGranularity": "WEEK"
+      },
+      "timestampSpec": {
+        "column": "date",
+        "format": "auto"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type":"string",
+            "name":"transaction_id"
+          },
+          {
+            "type":"string",
+            "name":"source"
+          },
+          {
+            "type":"string",
+            "name":"medium"
+          },
+          {
+            "type":"string",
+            "name":"device_category"
+          },
+          {
+            "type":"string",
+            "name":"campaign"
+          },
+          {
+            "type":"string",
+            "name":"browser"
+          },
+          {
+            "type": "double",
+            "name": "revenue"
+          },
+          {
+            "type": "double",
+            "name": "aov"
+          }
+        ]
+      }
+    }
+  }
+}

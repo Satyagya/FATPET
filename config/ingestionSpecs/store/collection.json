@@ -1,0 +1,70 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "local",
+        "filter": "COLLECTION.csv",
+        "baseDir": "/var/domain-intelligence/data/{{customer_id}}/{{bot_ref}}/{{load_path}}"
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      },
+      "logParseExceptions": true
+    },
+    "dataSchema": {
+      "dataSource": "collection_{{customer_id}}_{{bot_ref}}",
+      "granularitySpec": {
+        "type": "uniform",
+        "queryGranularity": "DAY",
+        "rollup": false,
+        "segmentGranularity": "WEEK"
+      },
+      "timestampSpec": {
+        "column": "created_at",
+        "format": "auto"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type":"string",
+            "name":"collection_id"
+          },
+          {
+            "type":"string",
+            "name":"title"
+          },
+          {
+            "type":"string",
+            "name":"updated_at"
+          },
+          {
+            "type":"long",
+            "name":"products_count"
+          },
+          {
+            "type":"string",
+            "name":"product_id"
+          },
+          {
+            "type":"string",
+            "name":"line_item_sku"
+          },
+          {
+            "type": "string",
+            "name": "product_title"
+          }
+        ]
+      }
+    }
+  }
+}

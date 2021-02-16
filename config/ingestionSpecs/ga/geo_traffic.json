@@ -1,0 +1,90 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "local",
+        "filter": "GEO_TRAFFIC.csv",
+        "baseDir": "/var/domain-intelligence/data/{{customer_id}}/{{bot_ref}}/{{load_path}}"
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      },
+      "logParseExceptions": true
+    },
+    "dataSchema": {
+      "dataSource": "geo_traffic_{{customer_id}}_{{bot_ref}}",
+      "granularitySpec": {
+        "type": "uniform",
+        "queryGranularity": "DAY",
+        "rollup": false,
+        "segmentGranularity": "WEEK"
+      },
+      "timestampSpec": {
+        "column": "date",
+        "format": "auto"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type":"string",
+            "name":"city"
+          },
+          {
+            "type":"string",
+            "name":"region"
+          },
+          {
+            "type":"string",
+            "name":"country"
+          },
+          {
+            "type":"string",
+            "name":"device_category"
+          },
+          {
+            "type":"string",
+            "name":"source"
+          },
+          {
+            "type":"string",
+            "name":"medium"
+          },
+          {
+            "type": "long",
+            "name": "users"
+          },
+          {
+            "type": "long",
+            "name": "new_users"
+          },
+          {
+            "type": "long",
+            "name": "sessions"
+          },
+          {
+            "type": "long",
+            "name": "session_duration"
+          },
+          {
+            "type": "double",
+            "name": "bounce_rate"
+          },
+          {
+            "type": "long",
+            "name": "hits"
+          }
+        ]
+      }
+    }
+  }
+}

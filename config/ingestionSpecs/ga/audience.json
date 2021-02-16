@@ -1,0 +1,86 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "local",
+        "filter": "AUDIENCE.csv",
+        "baseDir": "/var/domain-intelligence/data/{{customer_id}}/{{bot_ref}}/{{load_path}}"
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      },
+      "logParseExceptions": true
+    },
+    "dataSchema": {
+      "dataSource": "audience_{{customer_id}}_{{bot_ref}}",
+      "granularitySpec": {
+        "type": "uniform",
+        "queryGranularity": "DAY",
+        "rollup": false,
+        "segmentGranularity": "WEEK"
+      },
+      "timestampSpec": {
+        "column": "date",
+        "format": "auto"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type":"string",
+            "name":"user_gender"
+          },
+          {
+            "type":"string",
+            "name":"user_age_bracket"
+          },
+          {
+            "type":"string",
+            "name":"other_category_interests"
+          },
+          {
+            "type":"string",
+            "name":"campaign"
+          },
+          {
+            "type":"string",
+            "name":"browser"
+          },
+          {
+            "type":"long",
+            "name":"users"
+          },
+          {
+            "type": "long",
+            "name": "new_users"
+          },
+          {
+            "type": "long",
+            "name": "sessions"
+          },
+          {
+            "type": "long",
+            "name": "session_duration"
+          },
+          {
+            "type": "double",
+            "name": "bounce_rate"
+          },
+          {
+            "type": "long",
+            "name": "hits"
+          }
+        ]
+      }
+    }
+  }
+}
