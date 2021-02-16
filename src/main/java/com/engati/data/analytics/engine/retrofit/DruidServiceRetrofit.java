@@ -10,4 +10,7 @@ public interface DruidServiceRetrofit {
 
   @POST("/druid/v2/?pretty")
   Call<JsonArray> getResponseFromDruid(@Body RequestBody druidJsonQuery);
+
+  @POST("/druid/v2/sql?pretty")
+  Call<JsonArray> getResponseForDruidSqlFromDruid(@Body RequestBody druidSqlJsonQuery);
 }
