@@ -41,12 +41,12 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
       QueryGenerationRequest request) {
     QueryResponse response = new QueryResponse();
     for (DruidQueryMetaInfo druidQueryMetaInfo: request.getQueriesMetaInfo()) {
-      if (DruidQueryType.MULTI_DATA_SOURCE.equals(druidQueryMetaInfo.getQueryType())) {
+      if (DruidQueryType.MULTI_DATA_SOURCE.name().equals(druidQueryMetaInfo.getType())) {
         String metricHandlerKey = getMetricHandlerKey(druidQueryMetaInfo);
         response = metricHandlerFactory.getMetricHandler(metricHandlerKey, botRef, customerId)
             .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
       } else {
-        response = queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name(),
+        response = queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getType(),
             botRef, customerId).generateAndExecuteQuery(botRef, customerId,
             druidQueryMetaInfo, response);
       }

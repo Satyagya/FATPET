@@ -16,11 +16,15 @@ import in.zapr.druid.druidry.dimension.SimpleDimension;
 import in.zapr.druid.druidry.filter.DruidFilter;
 import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
 import in.zapr.druid.druidry.query.aggregation.DruidGroupByQuery;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
+@Slf4j
 public class GroupByQuery extends QueryHandler {
 
   private static final String QUERY_TYPE = "GROUP_BY";
@@ -68,7 +72,7 @@ public class GroupByQuery extends QueryHandler {
     GroupByResponse groupByResponse = GroupByResponse.builder()
         .groupByResponse(druidResponseParser.convertGroupByJsonToMap(response,
             botRef, customerId)).build();
-    groupByResponse.setType(ResponseType.GROUP_BY);
+    groupByResponse.setType(ResponseType.GROUP_BY.name());
     return groupByResponse;
   }
 

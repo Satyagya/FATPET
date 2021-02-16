@@ -1,0 +1,138 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "local",
+        "filter": "CUSTOMER.csv",
+        "baseDir": "/var/domain-intelligence/data/{{customer_id}}/{{bot_ref}}/{{load_path}}"
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      },
+      "logParseExceptions": true
+    },
+    "dataSchema": {
+      "dataSource": "customer_{{customer_id}}_{{bot_ref}}",
+      "granularitySpec": {
+        "type": "uniform",
+        "queryGranularity": "DAY",
+        "rollup": false,
+        "segmentGranularity": "WEEK"
+      },
+      "timestampSpec": {
+        "column": "created_at",
+        "format": "auto"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type":"string",
+            "name":"customer_id"
+          },
+          {
+            "type":"string",
+            "name":"updated_at"
+          },
+          {
+            "type":"string",
+            "name":"accepts_marketing"
+          },
+          {
+            "type":"string",
+            "name":"city"
+          },
+          {
+            "type":"string",
+            "name":"province"
+          },
+          {
+            "type": "string",
+            "name": "country"
+          },
+          {
+            "type": "string",
+            "name": "phone"
+          },
+          {
+            "type":"string",
+            "name":"email"
+          },
+          {
+            "type":"string",
+            "name":"verified_email"
+          },
+          {
+            "type":"string",
+            "name":"display_name"
+          },
+          {
+            "type":"string",
+            "name":"tax_exempt"
+          },
+          {
+            "type":"double",
+            "name":"average_order_amount"
+          },
+          {
+            "type": "double",
+            "name": "total_spent"
+          },
+          {
+            "type":"long",
+            "name":"orders_count"
+          },
+          {
+            "type": "string",
+            "name": "order_names"
+          },
+          {
+            "type": "string",
+            "name": "state"
+          },
+          {
+            "type": "string",
+            "name": "first_purchase_date"
+          },
+          {
+            "type":"string",
+            "name":"last_purchase_date"
+          },
+          {
+            "type":"double",
+            "name":"total_discounts"
+          },
+          {
+            "type":"double",
+            "name":"total_cancellations"
+          },
+          {
+            "type":"long",
+            "name":"lifetime_duration"
+          },
+          {
+            "type":"long",
+            "name":"frequency"
+          },
+          {
+            "type":"string",
+            "name":"active"
+          },
+          {
+            "type": "string",
+            "name": "loyal"
+          }
+        ]
+      }
+    }
+  }
+}

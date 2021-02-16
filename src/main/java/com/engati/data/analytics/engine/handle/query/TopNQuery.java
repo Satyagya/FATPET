@@ -76,7 +76,7 @@ public class TopNQuery extends QueryHandler {
     SimpleResponse simpleResponse = SimpleResponse.builder()
         .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
         .build();
-    simpleResponse.setType(ResponseType.SIMPLE);
+    simpleResponse.setType(ResponseType.SIMPLE.name());
     return simpleResponse;
   }
 }

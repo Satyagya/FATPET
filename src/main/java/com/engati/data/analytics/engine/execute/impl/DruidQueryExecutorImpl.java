@@ -1,6 +1,5 @@
 package com.engati.data.analytics.engine.execute.impl;
 
-
 import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.retrofit.DruidServiceRetrofit;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineException;
@@ -24,19 +23,23 @@ public class DruidQueryExecutorImpl implements DruidQueryExecutor {
   private DruidServiceRetrofit druidServiceRetrofit;
 
   @Override
-  public JsonArray getResponseFromDruid(String druidJsonQuery, Integer botRef, Integer customerId) {
-    JsonArray output = new JsonArray();
+  public JsonArray getResponseFromDruid(String druidJsonQuery, Integer botRef,
+      Integer customerId) {
+    JsonArray output;
     try {
       okhttp3.RequestBody body = okhttp3.RequestBody
           .create(okhttp3.MediaType.parse("application/json; charset=utf-8"), druidJsonQuery);
       retrofit2.Response<JsonArray> response;
-      response = druidServiceRetrofit.getResponseFromDruid(body).execute();
-      if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
-          .isSuccessful()) {
+      response =
+          druidServiceRetrofit.getResponseFromDruid(body).execute();
+      if (Objects.nonNull(response) && Objects.nonNull(response.body())
+          && response.isSuccessful()) {
         output = response.body();
+        log.info("DruidQueryExecutorImpl: Successfully got response: {} from the druid query: {} "
+            + "for botRef: {} and customerId: {}", output, druidJsonQuery, botRef, customerId);
       } else {
-        log.error("DruidQueryExecutorImpl: Failed to get response from druid " + "errorBody:{}",
-            response.errorBody().toString());
+        log.error("DruidQueryExecutorImpl: Failed to get response from druid "
+            + "errorBody:{}", response.errorBody().toString());
         throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
       }
     } catch (IOException ex) {

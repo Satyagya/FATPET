@@ -43,7 +43,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator:${spring_boot_version}")
     compile("net.logstash.logback:logstash-logback-encoder:${logback_version}")
 
-	compile group: 'in.zapr.druid', name: 'druidry', version: '2.0'
+    implementation group: 'in.zapr.druid', name: 'druidry', version: "${druidry_version}"
 
     implementation("com.google.code.gson:gson:${gson_version}")
 

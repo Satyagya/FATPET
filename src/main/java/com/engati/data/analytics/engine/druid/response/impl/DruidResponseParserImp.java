@@ -25,8 +25,8 @@ public class DruidResponseParserImp implements DruidResponseParser {
     ObjectMapper objectMapper = new ObjectMapper();
     List<List<Map<String, Object>>> responseMapList = new ArrayList<>();
     try {
-      for (int i = 0; i < response.size(); i++) {
-        JsonElement jsonElement = response.get(i).getAsJsonObject().get(Constants.RESULT);
+      for (int index = 0; index < response.size(); index++) {
+        JsonElement jsonElement = response.get(index).getAsJsonObject().get(Constants.RESULT);
         if (jsonElement instanceof JsonArray) {
           List<Map<String, Object>> data = objectMapper
               .readValue(jsonElement.toString(), new TypeReference<List<Map<String, Object>>>() {
@@ -50,8 +50,8 @@ public class DruidResponseParserImp implements DruidResponseParser {
     ObjectMapper objectMapper = new ObjectMapper();
     List<Map<String, Object>> responseMapList = new ArrayList<>();
     try {
-      for (int i = 0; i < response.size(); i++) {
-        JsonElement jsonElement = response.get(i).getAsJsonObject().get(Constants.EVENT);
+      for (int index = 0; index < response.size(); index++) {
+        JsonElement jsonElement = response.get(index).getAsJsonObject().get(Constants.EVENT);
         Map<String, Object> data = objectMapper.readValue(jsonElement.toString(), Map.class);
         responseMapList.add(data);
       }

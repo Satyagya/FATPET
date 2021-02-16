@@ -36,6 +36,8 @@ public class DataAnalyticsController {
       @PathVariable(Constants.REQ_PARAM_CUSTOMER_ID) Integer customerId,
       @PathVariable(Constants.REQ_PARAM_BOT_REF) Integer botRef,
       @RequestBody QueryGenerationRequest queryGenerationRequest) {
+    log.info("DataAnalyticsController: Request to execute the druid query request: {} "
+        + "for botRef: {} and customerId: {}", queryGenerationRequest, botRef, customerId);
     QueryResponse responseFromDruid = dataAnalyticsService.executeQueryRequest(botRef, customerId,
         queryGenerationRequest);
     DataAnalyticsEngineResponse<QueryResponse> response =

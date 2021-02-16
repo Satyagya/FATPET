@@ -48,7 +48,7 @@ public class ConversionRateMetric extends MetricHandler {
     MultiQueryMetaInfo multiQueryMetaInfo = ((MultiQueryMetaInfo) druidQueryMetaInfo);
     for (DruidQueryMetaInfo druidQuery: multiQueryMetaInfo.getMultiMetricQuery()) {
       QueryResponse response = new QueryResponse();
-      responses.add(queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getQueryType().name(),
+      responses.add(queryHandlerFactory.getQueryHandler(druidQuery.getType(),
           botRef, customerId).generateAndExecuteQuery(botRef, customerId,
           druidQuery, response));
     }
@@ -62,7 +62,7 @@ public class ConversionRateMetric extends MetricHandler {
       Integer botRef, Integer customerId) {
     SimpleResponse conversionRateResponse = new SimpleResponse();
     if (CollectionUtils.isNotEmpty(responses)) {
-      if (ResponseType.GROUP_BY.equals(responses.get(0).getType())) {
+      if (ResponseType.GROUP_BY.name().equals(responses.get(0).getType())) {
         List<GroupByResponse> groupByResponses = responses.stream()
             .map(GroupByResponse.class::cast).collect(Collectors.toList());
         conversionRateResponse.setQueryResponse(getConversionRateForGroupBy(
@@ -72,11 +72,13 @@ public class ConversionRateMetric extends MetricHandler {
             .map(SimpleResponse.class::cast).collect(Collectors.toList());
         conversionRateResponse.setQueryResponse(getConversionRateFromTimeSeries(
             simpleResponses, metric, botRef, customerId));
-        conversionRateResponse = mergePreviousResponse(conversionRateResponse,
-            (SimpleResponse) prevResponse);
+        if (prevResponse instanceof SimpleResponse) {
+          conversionRateResponse = mergePreviousResponse(conversionRateResponse,
+              (SimpleResponse) prevResponse);
+        }
       }
     }
-    conversionRateResponse.setType(ResponseType.SIMPLE);
+    conversionRateResponse.setType(ResponseType.SIMPLE.name());
     return conversionRateResponse;
   }
 
@@ -120,12 +122,15 @@ public class ConversionRateMetric extends MetricHandler {
     List<Map<String, Object>> geoCVRList = new ArrayList<>();
     try {
       GroupByResponse orderResponse = responses.stream().filter(
-          response -> response.getGroupByResponse().get(0).containsKey(Constants.ORDER_COUNT)).findFirst().get();
+          response -> response.getGroupByResponse().get(0)
+              .containsKey(Constants.ORDER_COUNT)).findFirst().get();
       GroupByResponse sessionResponse = responses.stream().filter(
-          response -> response.getGroupByResponse().get(0).containsKey(Constants.SESSION_COUNT)).findFirst().get();
+          response -> response.getGroupByResponse().get(0)
+              .containsKey(Constants.SESSION_COUNT)).findFirst().get();
 
       Map<String, Integer> geoOrderCount =
-          getGeoAndMetricMap(orderResponse.getGroupByResponse(), Constants.ORDER_COUNT, dimensionKey);
+          getGeoAndMetricMap(orderResponse.getGroupByResponse(), Constants.ORDER_COUNT,
+              dimensionKey);
       Map<String, Integer> geoSessionCount =
           getGeoAndMetricMap(sessionResponse.getGroupByResponse(), Constants.SESSION_COUNT,
               dimensionKey);
@@ -133,14 +138,16 @@ public class ConversionRateMetric extends MetricHandler {
       geoSet.retainAll(geoSessionCount.keySet());
       Map<String, Double> geoByValue = new HashMap<>();
       for (String geoValue : geoSet) {
-        Double cvr = calculateConversionRate(geoOrderCount.get(geoValue), geoSessionCount.get(geoValue));
+        Double cvr = calculateConversionRate(geoOrderCount.get(geoValue),
+            geoSessionCount.get(geoValue));
         geoByValue.put(geoValue, cvr);
       }
       geoByValue = applySortAndLimit(geoByValue, modifier, limit);
       for (String geoValue : geoByValue.keySet()) {
         Map<String, Object> value = new HashMap<>();
         value.put(dimensionKey, geoValue);
-        Double cvr = calculateConversionRate(geoOrderCount.get(geoValue), geoSessionCount.get(geoValue));
+        Double cvr = calculateConversionRate(geoOrderCount.get(geoValue),
+            geoSessionCount.get(geoValue));
         value.put(metric, Constants.DECIMAL_FORMAT.format(cvr));
         geoCVRList.add(value);
       }
@@ -160,15 +167,17 @@ public class ConversionRateMetric extends MetricHandler {
 
   private Map<String, Double> applySortAndLimit(Map<String, Double> geoByValue, String modifier,
       Integer limit) {
+    Map<String, Double> result = new HashMap<>();
     if (Constants.TOP.equals(modifier)) {
-      return geoByValue.entrySet().stream().sorted(Collections.reverseOrder(comparingByValue()))
+      result = geoByValue.entrySet().stream().sorted(Collections.reverseOrder(comparingByValue()))
           .limit(limit).collect(Collectors
               .toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
     } else {
-      return geoByValue.entrySet().stream().sorted(comparingByValue())
+      result = geoByValue.entrySet().stream().sorted(comparingByValue())
           .limit(limit).collect(Collectors
               .toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
     }
+    return result;
   }
 
   private Double calculateConversionRate(int orders, int sessions) {
