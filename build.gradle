@@ -43,7 +43,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator:${spring_boot_version}")
     compile("net.logstash.logback:logstash-logback-encoder:${logback_version}")
 
-	compile group: 'in.zapr.druid', name: 'druidry', version: '2.0'
+    implementation group: 'in.zapr.druid', name: 'druidry', version: "${druidry_version}"
 
     implementation("com.google.code.gson:gson:${gson_version}")
 
@@ -52,12 +52,15 @@ dependencies {
 	implementation("io.springfox:springfox-swagger2:${swagger_version}")
 	implementation("io.springfox:springfox-swagger-ui:${swagger_version}")
 
-	implementation("org.springframework.boot:spring-boot-starter-web:${spring_boot_version}")
+    implementation("com.engati:data-analytics-sdk:${data_analytics_sdk}")
+
+    implementation("org.springframework.boot:spring-boot-starter-web:${spring_boot_version}")
 	implementation("org.projectlombok:lombok:${lombok_version}")
 
 	implementation group: 'org.springframework', name: 'spring-test', version: '3.1.1.RELEASE'
 
 	implementation("net.rakugakibox.spring.boot:logback-access-spring-boot-starter:${logback_access_version}")
+    implementation("com.nethum.common:error-handling-service:${error_handling_version}")
 
 	implementation("com.squareup.retrofit2:retrofit:${retrofit2_version}")
 	implementation("com.squareup.retrofit2:converter-jackson:${retrofit2_version}")
