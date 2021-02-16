@@ -24,6 +24,9 @@ public class DruidPostAggregateGeneratorImpl implements DruidPostAggregateGenera
   public List<DruidPostAggregator> getQueryPostAggregators(List<DruidPostAggregatorMetaInfo>
       postAggregateMetaInfoDtos, Integer botRef, Integer customerId) {
 
+    log.debug("DruidPostAggregateGeneratorImpl: Generating druid post-aggregator from the "
+        + "meta-info: {} for botRef: {} and customerId: {}", postAggregateMetaInfoDtos,
+        botRef, customerId);
     List<DruidPostAggregator> druidPostAggregatorList = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(postAggregateMetaInfoDtos)) {
       for (DruidPostAggregatorMetaInfo postAggregateMetaInfoDto : postAggregateMetaInfoDtos) {

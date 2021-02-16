@@ -23,6 +23,8 @@ public class DruidAggregateGeneratorImpl implements DruidAggregateGenerator {
   public List<DruidAggregator> getQueryAggregators(List<DruidAggregatorMetaInfo>
       aggregateMetaInfos, Integer botRef, Integer customerId) {
 
+    log.debug("DruidAggregateGeneratorImpl: Generating druid aggregator from the meta-info: {} "
+        + "for botRef: {} and customerId: {}", aggregateMetaInfos, botRef, customerId);
     List<DruidAggregator> druidAggregators = new ArrayList<>();
     for(DruidAggregatorMetaInfo druidAggregateMetaInfo: aggregateMetaInfos) {
       switch (druidAggregateMetaInfo.getType()) {

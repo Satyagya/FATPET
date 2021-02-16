@@ -18,6 +18,8 @@ public class DruidFilterGeneratorImpl implements DruidFilterGenerator {
   @Override
   public DruidFilter getFiltersByType(DruidFilterMetaInfo druidFilterMetaInfoDto,
       Integer botRef, Integer customerId) {
+    log.debug("DruidFilterGeneratorImpl: Generating druid filter from the meta-info: {} "
+        + "for botRef: {} and customerId: {}", druidFilterMetaInfoDto, botRef, customerId);
     DruidFilter druidFilter = null;
     if (Objects.nonNull(druidFilterMetaInfoDto) &&
         Objects.nonNull(druidFilterMetaInfoDto.getType())) {
