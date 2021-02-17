@@ -130,7 +130,7 @@ public class ConversionRateMetric extends MetricHandler {
 
       Map<String, Integer> geoOrderCount =
           getGeoAndMetricMap(orderResponse.getGroupByResponse(), Constants.ORDER_COUNT,
-              dimensionKey);
+              Constants.BILLING_CITY);
       Map<String, Integer> geoSessionCount =
           getGeoAndMetricMap(sessionResponse.getGroupByResponse(), Constants.SESSION_COUNT,
               dimensionKey);
