@@ -101,6 +101,8 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
           .create(okhttp3.MediaType.parse("application/json; charset=utf-8"), requestBody);
       Response<JsonObject> response;
       response = druidIngestionServiceRetrofit.ingestDataToDruid(body).execute();
+      log.info("Request body :{}, response body:{}, response code :{} for customerId:{} and botRef:{}",
+          body.toString(), response.toString(), response.code(), customerId, botRef);
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
           .isSuccessful()) {
         log.info("response for customerId:{}, botRef:{} is {}", customerId, botRef, response);
