@@ -39,9 +39,40 @@ targetCompatibility = 1.8
 
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-data-solr:${spring_boot_version}"
     implementation "org.springframework.boot:spring-boot-starter-data-rest:${spring_boot_version}"
-    testImplementation "org.springframework.boot:spring-boot-starter-test:${spring_boot_version}"
     compile("org.springframework.boot:spring-boot-starter-actuator:${spring_boot_version}")
     compile("net.logstash.logback:logstash-logback-encoder:${logback_version}")
+
+    implementation group: 'in.zapr.druid', name: 'druidry', version: "${druidry_version}"
+
+    implementation("com.google.code.gson:gson:${gson_version}")
+
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: "${apache_commons_version}"
+
+	implementation("io.springfox:springfox-swagger2:${swagger_version}")
+	implementation("io.springfox:springfox-swagger-ui:${swagger_version}")
+
+	implementation("com.engati:data-analytics-sdk:${data_analytics_sdk}")
+
+	implementation("org.springframework.boot:spring-boot-starter-web:${spring_boot_version}")
+	implementation("org.projectlombok:lombok:${lombok_version}")
+
+	implementation group: 'org.springframework', name: 'spring-test', version: '3.1.1.RELEASE'
+
+	implementation("net.rakugakibox.spring.boot:logback-access-spring-boot-starter:${logback_access_version}")
+    implementation("com.nethum.common:error-handling-service:${error_handling_version}")
+
+	implementation("com.squareup.retrofit2:retrofit:${retrofit2_version}")
+	implementation("com.squareup.retrofit2:converter-jackson:${retrofit2_version}")
+	implementation("com.squareup.retrofit2:adapter-rxjava2:${retrofit2_version}")
+    implementation("com.squareup.retrofit2:converter-gson:${retrofit2_version}")
+
+	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "${jackson_dataformat_version}"
+	implementation(group: 'org.asynchttpclient', name: 'async-http-client', version: "${asynchttpclient_version}")
+
+	testImplementation group: 'junit', name: 'junit', version: '4.12'
+	testImplementation "org.springframework.boot:spring-boot-starter-test:${spring_boot_version}"
+	testImplementation("com.squareup.retrofit2:retrofit-mock:2.4.0")
+	testImplementation group: 'org.springframework', name: 'spring-mock', version: '2.0.8'
+
 }
