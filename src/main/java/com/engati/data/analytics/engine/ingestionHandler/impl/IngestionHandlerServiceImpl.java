@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.RequestBody;
+import okio.Buffer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -101,8 +102,10 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
           .create(okhttp3.MediaType.parse("application/json; charset=utf-8"), requestBody);
       Response<JsonObject> response;
       response = druidIngestionServiceRetrofit.ingestDataToDruid(body).execute();
+      Buffer buffer = new Buffer();
+      body.writeTo(buffer);
       log.info("Request body :{}, response body:{}, response code :{} for customerId:{} and botRef:{}",
-          body.toString(), response.toString(), response.code(), customerId, botRef);
+          buffer.readUtf8(), response.toString(), response.code(), customerId, botRef);
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
           .isSuccessful()) {
         log.info("response for customerId:{}, botRef:{} is {}", customerId, botRef, response);
