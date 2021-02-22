@@ -101,8 +101,9 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
           .create(okhttp3.MediaType.parse("application/json; charset=utf-8"), requestBody);
       Response<JsonObject> response;
       response = druidIngestionServiceRetrofit.ingestDataToDruid(body).execute();
-      log.info("Request body :{}, response body:{}, response code :{} for customerId:{} and botRef:{}",
-          body.toString(), response.toString(), response.code(), customerId, botRef);
+      log.info(
+          "Request body :{}, response body:{}, response code :{} for customerId:{} and botRef:{}",
+          requestBody, response.toString(), response.code(), customerId, botRef);
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
           .isSuccessful()) {
         log.info("response for customerId:{}, botRef:{} is {}", customerId, botRef, response);
@@ -136,10 +137,9 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
         requestBody = requestBody.replace(field.getKey(), field.getValue());
       }
     } catch (Exception e) {
-      log.error(
-          "Error while replacing place holder from the filename:{} with replaceMap:{} for "
-              + "customerId:{} and botRef:{}",
-          ingestionFileName, replaceMap.toString(), customerId, botRef, e);
+      log.error("Error while replacing place holder from the filename:{} with replaceMap:{} for "
+              + "customerId:{} and botRef:{}", ingestionFileName, replaceMap.toString(), customerId,
+          botRef, e);
     }
     return requestBody;
   }
