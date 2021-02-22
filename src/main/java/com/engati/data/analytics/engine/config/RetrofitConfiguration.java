@@ -21,11 +21,11 @@ public class RetrofitConfiguration {
   private static final Gson gson = new Gson();
 
   @Bean(name = "retrofitDruidApi")
-  public Retrofit retrofitDruidApi(DruidQueryConfiguration druidQueryConfiguration) {
-    Retrofit.Builder builder = new Retrofit.Builder().baseUrl(druidQueryConfiguration.getUrl()).client(
+  public Retrofit retrofitDruidApi(DruidConfiguration druidConfiguration) {
+    Retrofit.Builder builder = new Retrofit.Builder().baseUrl(druidConfiguration.getUrl()).client(
         new OkHttpClient().newBuilder()
-            .connectTimeout(druidQueryConfiguration.getConnectTimeout(), TimeUnit.MILLISECONDS)
-            .readTimeout(druidQueryConfiguration.getReadTimeout(), TimeUnit.MILLISECONDS).build())
+            .connectTimeout(druidConfiguration.getConnectTimeout(), TimeUnit.MILLISECONDS)
+            .readTimeout(druidConfiguration.getReadTimeout(), TimeUnit.MILLISECONDS).build())
         .addConverterFactory(GsonConverterFactory.create(gson))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
     return builder.build();
@@ -38,11 +38,11 @@ public class RetrofitConfiguration {
   }
 
   @Bean(name = "retrofitDruidIngestionApi")
-  public Retrofit retrofitDruidIngestionApi(DruidIngestionConfiguration druidIngestionConfiguration) {
-    Retrofit.Builder builder = new Retrofit.Builder().baseUrl(druidIngestionConfiguration.getUrl()).client(
+  public Retrofit retrofitDruidIngestionApi(DruidConfiguration druidConfiguration) {
+    Retrofit.Builder builder = new Retrofit.Builder().baseUrl(druidConfiguration.getUrl()).client(
         new OkHttpClient().newBuilder()
-            .connectTimeout(druidIngestionConfiguration.getConnectTimeout(), TimeUnit.MILLISECONDS)
-            .readTimeout(druidIngestionConfiguration.getReadTimeout(), TimeUnit.MILLISECONDS).build())
+            .connectTimeout(druidConfiguration.getConnectTimeout(), TimeUnit.MILLISECONDS)
+            .readTimeout(druidConfiguration.getReadTimeout(), TimeUnit.MILLISECONDS).build())
         .addConverterFactory(GsonConverterFactory.create(gson))
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
     return builder.build();
