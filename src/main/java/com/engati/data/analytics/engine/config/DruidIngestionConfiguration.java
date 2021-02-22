@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "engati.data.analytics.engine.druid.ingestion")
+@ConfigurationProperties(prefix = "engati.data.analytics.engine.druid")
 @Data
 public class DruidIngestionConfiguration {
   private String url;
