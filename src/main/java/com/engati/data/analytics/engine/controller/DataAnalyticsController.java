@@ -7,11 +7,13 @@ import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.request.QueryGenerationRequest;
 import com.engati.data.analytics.sdk.response.DruidIngestionResponse;
+import com.engati.data.analytics.sdk.response.DruidTaskInfo;
 import com.engati.data.analytics.sdk.response.QueryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +22,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 import static com.engati.data.analytics.engine.util.Constants.DRUID_INGESTION_API_PATH;
 import static com.engati.data.analytics.engine.util.Constants.DRUID_SQL_RESPONSE_API_PATH;
+import static com.engati.data.analytics.engine.util.Constants.DRUID_TASK_RESPONSE_API_PATH;
 
 @RestController
 @RequestMapping("/v1")
@@ -69,5 +74,11 @@ public class DataAnalyticsController {
         dataAnalyticsService.executeDruidSql(customerId, botRef, query);
     return new ResponseEntity<>(dataAnalyticsEngineResponse,
         dataAnalyticsEngineResponse.getStatusCode());
+  }
+
+  @GetMapping(value = DRUID_TASK_RESPONSE_API_PATH)
+  public ResponseEntity<DataAnalyticsEngineResponse<List<DruidTaskInfo>>> getDruidTasksInfo(){
+    DataAnalyticsEngineResponse<List<DruidTaskInfo>> dataAnalyticsEngineResponse = dataAnalyticsService.getAllTasks();
+    return new ResponseEntity<>(dataAnalyticsEngineResponse,dataAnalyticsEngineResponse.getStatusCode());
   }
 }

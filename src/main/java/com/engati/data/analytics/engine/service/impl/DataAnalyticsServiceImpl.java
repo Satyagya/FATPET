@@ -4,20 +4,28 @@ import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.handle.metric.factory.MetricHandlerFactory;
 import com.engati.data.analytics.engine.handle.query.factory.QueryHandlerFactory;
 import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
+import com.engati.data.analytics.engine.retrofit.DruidServiceRetrofit;
 import com.engati.data.analytics.engine.service.DataAnalyticsService;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryType;
 import com.engati.data.analytics.sdk.druid.query.MultiQueryMetaInfo;
 import com.engati.data.analytics.sdk.request.QueryGenerationRequest;
 import com.engati.data.analytics.sdk.response.DruidIngestionResponse;
+import com.engati.data.analytics.sdk.response.DruidTaskInfo;
 import com.engati.data.analytics.sdk.response.QueryResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.Interval;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import retrofit2.Response;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -34,7 +42,11 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
   private DruidQueryExecutor druidQueryExecutor;
 
   @Autowired
-  IngestionHandlerService ingestionHandlerService;
+  private IngestionHandlerService ingestionHandlerService;
+
+  @Autowired
+  private DruidServiceRetrofit druidServiceRetrofit;
+
 
   @Override
   public QueryResponse executeQueryRequest(Integer botRef, Integer customerId,
@@ -67,6 +79,33 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
         .ingestToDruid(customerId, botRef, timestamp, dataSourceName, isInitialLoad);
   }
 
+  @Override
+  public DataAnalyticsEngineResponse<List<DruidTaskInfo>> getAllTasks() {
+    List<DruidTaskInfo> druidTaskInfoList = Collections.emptyList();
+    DataAnalyticsEngineResponse<List<DruidTaskInfo>> dataAnalyticsEngineResponse =
+        new DataAnalyticsEngineResponse<>(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
+    dataAnalyticsEngineResponse.setResponseObject(druidTaskInfoList);
+    try {
+      Response<JsonArray> response;
+      response = druidServiceRetrofit.getAllIngestionTasks("complete",getInterval()).execute();
+      if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
+          .isSuccessful()) {
+        log.info("Ingestion tasks response from druid: {}", response.body());
+        String json = response.body().toString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        druidTaskInfoList = objectMapper.readValue(json, new TypeReference<List<DruidTaskInfo>>() {
+        });
+        dataAnalyticsEngineResponse.setResponseObject(druidTaskInfoList);
+        dataAnalyticsEngineResponse.setStatus(DataAnalyticsEngineStatusCode.SUCCESS);
+      } else {
+        log.info("Failed to get ingestion tasks response from druid");
+      }
+    } catch (IOException e) {
+      log.error("Failed to get ingestion tasks from druid", e);
+    }
+    return dataAnalyticsEngineResponse;
+  }
+
   private String getMetricHandlerKey(DruidQueryMetaInfo druidQueryMetaInfo) {
     String metricHandlerKey = null;
     if (druidQueryMetaInfo instanceof MultiQueryMetaInfo) {
@@ -74,5 +113,10 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
       metricHandlerKey = multiQueryMetaInfo.getMetricName();
     }
     return metricHandlerKey;
+  }
+
+  private String getInterval() {
+    return new Interval(System.currentTimeMillis() - 7200000L, System.currentTimeMillis())
+        .toString();
   }
 }
