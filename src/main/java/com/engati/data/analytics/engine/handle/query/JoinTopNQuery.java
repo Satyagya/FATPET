@@ -5,6 +5,8 @@ import com.engati.data.analytics.engine.druid.query.service.DruidQueryGenerator;
 import com.engati.data.analytics.engine.druid.response.DruidResponseParser;
 import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.util.Utility;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineException;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryType;
 import com.engati.data.analytics.sdk.druid.query.join.JoinTopNMetaInfo;
@@ -44,41 +46,45 @@ public class JoinTopNQuery extends QueryHandler {
   @Override
   public QueryResponse generateAndExecuteQuery(Integer botRef, Integer customerId,
       DruidQueryMetaInfo druidQueryMetaInfo, QueryResponse prevResponse) {
+    try {
+      JoinTopNMetaInfo joinTopNMetaInfo = ((JoinTopNMetaInfo) druidQueryMetaInfo);
+      List<DruidAggregator> druidAggregators = druidQueryGenerator
+          .generateAggregators(joinTopNMetaInfo.getDruidAggregateMetaInfo(),
+              botRef, customerId);
+      List<DruidPostAggregator> postAggregators = druidQueryGenerator
+          .generatePostAggregator(joinTopNMetaInfo.getDruidPostAggregateMetaInfo(),
+              botRef, customerId);
+      DruidFilter druidFilter = druidQueryGenerator
+          .generateFilters(joinTopNMetaInfo.getDruidFilterMetaInfo(),
+              botRef, customerId);
 
-    JoinTopNMetaInfo joinTopNMetaInfo = ((JoinTopNMetaInfo) druidQueryMetaInfo);
+      DruidJoinTopN topNQuery = DruidJoinTopN.builder()
+          .dataSource(druidQueryGenerator.getJoinDataSource(joinTopNMetaInfo.getDataSource(),
+              botRef, customerId))
+          .intervals(Utility.extractInterval(joinTopNMetaInfo.getIntervals()))
+          .granularity(Utility.getGranularity(joinTopNMetaInfo.getGrain()))
+          .dimension(getDruidDimension(joinTopNMetaInfo.getDimension(),
+              joinTopNMetaInfo.getDataSource().getRightPrefix()))
+          .threshold(joinTopNMetaInfo.getThreshold())
+          .topNMetric(Utility.getMetric(joinTopNMetaInfo.getMetricType(),
+              joinTopNMetaInfo.getMetricValue()))
+          .aggregators(druidAggregators)
+          .postAggregators(postAggregators)
+          .filter(druidFilter)
+          .build();
 
-    List<DruidAggregator> druidAggregators = druidQueryGenerator
-        .generateAggregators(joinTopNMetaInfo.getDruidAggregateMetaInfo(),
-            botRef, customerId);
-    List<DruidPostAggregator> postAggregators = druidQueryGenerator
-        .generatePostAggregator(joinTopNMetaInfo.getDruidPostAggregateMetaInfo(),
-            botRef, customerId);
-    DruidFilter druidFilter = druidQueryGenerator
-        .generateFilters(joinTopNMetaInfo.getDruidFilterMetaInfo(),
-            botRef, customerId);
-
-    DruidJoinTopN topNQuery = DruidJoinTopN.builder()
-        .dataSource(Utility.getDruidJoin(joinTopNMetaInfo.getDataSource(),
-            botRef, customerId))
-        .intervals(Utility.extractInterval(joinTopNMetaInfo.getIntervals()))
-        .granularity(Utility.getGranularity(joinTopNMetaInfo.getGrain()))
-        .dimension(getDruidDimension(joinTopNMetaInfo.getDimension(),
-            joinTopNMetaInfo.getDataSource().getRightPrefix()))
-        .threshold(joinTopNMetaInfo.getThreshold())
-        .topNMetric(Utility.getMetric(joinTopNMetaInfo.getMetricType(),
-            joinTopNMetaInfo.getMetricValue()))
-        .aggregators(druidAggregators)
-        .postAggregators(postAggregators)
-        .filter(druidFilter)
-        .build();
-
-    String query = Utility.convertDruidQueryToJsonString(topNQuery);
-    JsonArray response = druidQueryExecutor.getResponseFromDruid(query, botRef, customerId);
-    SimpleResponse simpleResponse = SimpleResponse.builder()
-        .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
-        .build();
-    simpleResponse.setType(ResponseType.SIMPLE.name());
-    return simpleResponse;
+      String query = Utility.convertDruidQueryToJsonString(topNQuery);
+      JsonArray response = druidQueryExecutor.getResponseFromDruid(query, botRef, customerId);
+      SimpleResponse simpleResponse = SimpleResponse.builder()
+          .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
+          .build();
+      simpleResponse.setType(ResponseType.SIMPLE.name());
+      return simpleResponse;
+    } catch (Exception ex) {
+      log.error("Error while executing the join-topN query: {} for botRef: {}, customerId: {}, "
+          + "prevResponse: {}", druidQueryMetaInfo, botRef, customerId, prevResponse, ex);
+      throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.QUERY_FAILURE);
+    }
   }
 
   private DruidDimension getDruidDimension(String dimension, String prefix) {

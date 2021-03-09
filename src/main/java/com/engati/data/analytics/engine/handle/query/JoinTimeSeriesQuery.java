@@ -5,6 +5,8 @@ import com.engati.data.analytics.engine.druid.query.service.DruidQueryGenerator;
 import com.engati.data.analytics.engine.druid.response.DruidResponseParser;
 import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.util.Utility;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineException;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryType;
 import com.engati.data.analytics.sdk.druid.query.join.JoinTimeSeriesMetaInfo;
@@ -42,41 +44,46 @@ public class JoinTimeSeriesQuery extends QueryHandler {
   @Override
   public QueryResponse generateAndExecuteQuery(Integer botRef, Integer
       customerId, DruidQueryMetaInfo druidQueryMetaInfo, QueryResponse prevResponse) {
-    JoinTimeSeriesMetaInfo joinTimeSeriesMetaInfo = ((JoinTimeSeriesMetaInfo)
-        druidQueryMetaInfo);
+    try {
+      JoinTimeSeriesMetaInfo joinTimeSeriesMetaInfo = ((JoinTimeSeriesMetaInfo)
+          druidQueryMetaInfo);
+      List<DruidAggregator> druidAggregators = druidQueryGenerator
+          .generateAggregators(joinTimeSeriesMetaInfo.getDruidAggregateMetaInfo(),
+              botRef, customerId);
+      List<DruidPostAggregator> postAggregators = druidQueryGenerator
+          .generatePostAggregator(joinTimeSeriesMetaInfo.getDruidPostAggregateMetaInfo(),
+              botRef, customerId);
+      DruidFilter druidFilter = druidQueryGenerator
+          .generateFilters(joinTimeSeriesMetaInfo.getDruidFilterMetaInfo(), botRef, customerId);
 
-    List<DruidAggregator> druidAggregators = druidQueryGenerator
-        .generateAggregators(joinTimeSeriesMetaInfo.getDruidAggregateMetaInfo(),
-            botRef, customerId);
-    List<DruidPostAggregator> postAggregators = druidQueryGenerator
-        .generatePostAggregator(joinTimeSeriesMetaInfo.getDruidPostAggregateMetaInfo(),
-            botRef, customerId);
-    DruidFilter druidFilter = druidQueryGenerator
-        .generateFilters(joinTimeSeriesMetaInfo.getDruidFilterMetaInfo(), botRef, customerId);
+      DruidJoinTimeSeries timeSeriesQuery = DruidJoinTimeSeries.builder()
+          .dataSource(druidQueryGenerator.getJoinDataSource(joinTimeSeriesMetaInfo.getDataSource(),
+              botRef, customerId))
+          .intervals(Utility.extractInterval(joinTimeSeriesMetaInfo.getIntervals()))
+          .aggregators(druidAggregators)
+          .postAggregators(postAggregators)
+          .filter(druidFilter)
+          .granularity(Utility.getGranularity(joinTimeSeriesMetaInfo.getGrain()))
+          .build();
 
-    DruidJoinTimeSeries timeSeriesQuery = DruidJoinTimeSeries.builder()
-        .dataSource(Utility.getDruidJoin(joinTimeSeriesMetaInfo.getDataSource(),
-            botRef, customerId))
-        .intervals(Utility.extractInterval(joinTimeSeriesMetaInfo.getIntervals()))
-        .aggregators(druidAggregators)
-        .postAggregators(postAggregators)
-        .filter(druidFilter)
-        .granularity(Utility.getGranularity(joinTimeSeriesMetaInfo.getGrain()))
-        .build();
-
-    String query = Utility.convertDruidQueryToJsonString(timeSeriesQuery);
-    JsonArray response = druidQueryExecutor.getResponseFromDruid(query, botRef, customerId);
-    SimpleResponse simpleResponse = SimpleResponse.builder()
-        .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
-        .build();
-    simpleResponse.setType(ResponseType.SIMPLE.name());
-
-    if (prevResponse instanceof SimpleResponse) {
-      prevResponse = Utility.mergePreviousResponse(simpleResponse,
-          (SimpleResponse) prevResponse);
-    } else {
-      prevResponse = simpleResponse;
+      String query = Utility.convertDruidQueryToJsonString(timeSeriesQuery);
+      JsonArray response = druidQueryExecutor.getResponseFromDruid(query, botRef, customerId);
+      SimpleResponse simpleResponse = SimpleResponse.builder()
+          .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
+          .build();
+      simpleResponse.setType(ResponseType.SIMPLE.name());
+      if (prevResponse instanceof SimpleResponse) {
+        prevResponse = druidResponseParser.mergePreviousResponse(simpleResponse,
+            (SimpleResponse) prevResponse);
+      } else {
+        prevResponse = simpleResponse;
+      }
+      return prevResponse;
+    } catch (Exception ex) {
+      log.error("Error while executing the join-timeseries query: {} for botRef: {},"
+          + " customerId: {}, prevResponse: {}", druidQueryMetaInfo, botRef, customerId,
+          prevResponse, ex);
+      throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.QUERY_FAILURE);
     }
-    return prevResponse;
   }
 }

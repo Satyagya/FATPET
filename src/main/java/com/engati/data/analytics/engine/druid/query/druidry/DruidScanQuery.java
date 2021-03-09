@@ -13,7 +13,7 @@ import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
-public class ScanQuery {
+public class DruidScanQuery {
 
   private static final String SCAN_QUERY = "scan";
   private String queryType;
@@ -24,7 +24,7 @@ public class ScanQuery {
   private Context context;
 
   @Builder
-  private ScanQuery(@NonNull String dataSource, @NonNull List<Interval> intervals,
+  private DruidScanQuery(@NonNull String dataSource, @NonNull List<Interval> intervals,
       List<String> columns, DruidFilter filter, Context context) {
 
     this.queryType = SCAN_QUERY;
