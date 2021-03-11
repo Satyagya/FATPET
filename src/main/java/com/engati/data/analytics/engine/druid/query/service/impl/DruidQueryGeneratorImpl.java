@@ -80,8 +80,8 @@ public class DruidQueryGeneratorImpl implements DruidQueryGenerator {
       Integer customerId) {
     DruidDataSource druidDataSource = null;
     if (dataSource instanceof SimpleDataSourceType) {
-      druidDataSource = new TableDataSource(((SimpleDataSourceType) dataSource)
-          .getDataSource());
+      druidDataSource = new TableDataSource(Utility.convertDataSource(botRef, customerId,
+          ((SimpleDataSourceType) dataSource).getDataSource()));
     } else if (dataSource instanceof QueryDataSourceType) {
       Object query = generateQueryFromMetaInfo(((QueryDataSourceType) dataSource)
           .getDruidQueryMetaInfo(), botRef, customerId);
