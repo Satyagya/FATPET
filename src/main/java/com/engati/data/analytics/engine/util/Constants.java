@@ -9,6 +9,8 @@ public class Constants {
       "/customer/{customerId}/bot/{botRef}/ingest";
   public static final String DRUID_SQL_RESPONSE_API_PATH =
       "/customer/{customerId}/bot/{botRef}/sql/response";
+  public static final String DRUID_TASK_RESPONSE_API_PATH =
+      "/ingestion/tasks";
   public static final String REQ_PARAM_CUSTOMER_ID = "customerId";
   public static final String REQ_PARAM_BOT_REF = "botRef";
   public static final String REQ_PARAM_IS_INITIAL = "isInitialLoad";
