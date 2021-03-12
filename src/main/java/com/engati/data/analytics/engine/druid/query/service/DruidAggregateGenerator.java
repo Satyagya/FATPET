@@ -7,6 +7,15 @@ import java.util.List;
 
 public interface DruidAggregateGenerator {
 
+  /**
+   * Create druid aggregator for given metaInfo
+   *
+   * @param druidAggregateMetaInfoDtos
+   * @param botRef
+   * @param customerId
+   *
+   * @return Druid Aggregator List
+   */
   List<DruidAggregator> getQueryAggregators(List<DruidAggregatorMetaInfo>
       druidAggregateMetaInfoDtos, Integer botRef, Integer customerId);
 }

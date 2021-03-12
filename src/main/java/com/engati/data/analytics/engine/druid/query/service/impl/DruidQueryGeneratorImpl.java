@@ -66,6 +66,8 @@ public class DruidQueryGeneratorImpl implements DruidQueryGenerator {
   @Override
   public DruidJoin getJoinDataSource(JoinMetaInfo joinMetaInfo, Integer botRef,
       Integer customerId) {
+    log.debug("Generate druid join for joinMetaInfo: {}, botRef: {}, customerId: {}",
+        joinMetaInfo, botRef, customerId);
     DruidDataSource left = getDataSource(joinMetaInfo.getLeftDataSource(),
         botRef, customerId);
     DruidDataSource right = getDataSource(joinMetaInfo.getRightDataSource(),
