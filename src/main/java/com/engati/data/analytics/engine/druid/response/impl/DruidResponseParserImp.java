@@ -46,7 +46,7 @@ public class DruidResponseParserImp implements DruidResponseParser {
         }
       }
     } catch (Exception ex) {
-      log.error("DruidResponseParserImp: Error while parsing the druid response "
+      log.error("Exception while parsing the druid response "
           + "from the jsonArray for botRef: {}, customerId: {}", botRef, customerId, ex);
       throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
@@ -70,7 +70,7 @@ public class DruidResponseParserImp implements DruidResponseParser {
         }
       }
     } catch (Exception ex) {
-      log.error("DruidResponseParserImp: Error while parsing the druid response "
+      log.error("Exception while parsing the druid response "
           + "from the jsonArray for botRef: {}, customerId: {}", botRef, customerId, ex);
       throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }

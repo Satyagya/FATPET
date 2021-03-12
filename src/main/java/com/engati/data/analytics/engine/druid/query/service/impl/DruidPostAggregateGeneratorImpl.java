@@ -24,18 +24,23 @@ public class DruidPostAggregateGeneratorImpl implements DruidPostAggregateGenera
   public List<DruidPostAggregator> getQueryPostAggregators(List<DruidPostAggregatorMetaInfo>
       postAggregateMetaInfoDtos, Integer botRef, Integer customerId) {
 
-    log.debug("DruidPostAggregateGeneratorImpl: Generating druid post-aggregator from the "
+    log.debug("Generating druid post-aggregator from the "
         + "meta-info: {} for botRef: {} and customerId: {}", postAggregateMetaInfoDtos,
         botRef, customerId);
     List<DruidPostAggregator> druidPostAggregatorList = new ArrayList<>();
-    if (CollectionUtils.isNotEmpty(postAggregateMetaInfoDtos)) {
-      for (DruidPostAggregatorMetaInfo postAggregateMetaInfoDto : postAggregateMetaInfoDtos) {
-        DruidPostAggregator postAggregator =
-            getPostAggregatorRespectToType(postAggregateMetaInfoDto, botRef, customerId);
-        if (Objects.nonNull(postAggregator)) {
-          druidPostAggregatorList.add(postAggregator);
+    try {
+      if (CollectionUtils.isNotEmpty(postAggregateMetaInfoDtos)) {
+        for (DruidPostAggregatorMetaInfo postAggregateMetaInfoDto : postAggregateMetaInfoDtos) {
+          DruidPostAggregator postAggregator =
+              getPostAggregatorRespectToType(postAggregateMetaInfoDto, botRef, customerId);
+          if (Objects.nonNull(postAggregator)) {
+            druidPostAggregatorList.add(postAggregator);
+          }
         }
       }
+    } catch (Exception ex) {
+      log.error("Exception while generation post-aggregator for request: {}, botRef: {}"
+          + "customerId: {}", postAggregateMetaInfoDtos, botRef, customerId, ex);
     }
     return druidPostAggregatorList;
   }
@@ -61,7 +66,7 @@ public class DruidPostAggregateGeneratorImpl implements DruidPostAggregateGenera
             botRef, customerId);
         break;
       default:
-        log.error("DruidPostAggregateGeneratorImpl: Provided postAggregator type: {} does not "
+        log.error("Provided postAggregator type: {} does not "
                 + "have implementation for botRef: {}, customerId: {}",
             postAggregateMetaInfoDto, botRef, customerId);
     }

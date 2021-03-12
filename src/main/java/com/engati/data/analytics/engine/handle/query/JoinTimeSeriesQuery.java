@@ -80,7 +80,7 @@ public class JoinTimeSeriesQuery extends QueryHandler {
       }
       return prevResponse;
     } catch (Exception ex) {
-      log.error("Error while executing the join-timeseries query: {} for botRef: {},"
+      log.error("Exception while executing the join-timeseries query: {} for botRef: {},"
           + " customerId: {}, prevResponse: {}", druidQueryMetaInfo, botRef, customerId,
           prevResponse, ex);
       throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.QUERY_FAILURE);
