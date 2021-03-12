@@ -64,4 +64,14 @@ public class Utility {
     return dimension.stream()
         .map(SimpleDimension::new).collect(Collectors.toList());
   }
+
+  public static List<String> convertObjectToList(Object value) {
+    List<String> filterValues = new ArrayList<>();
+    if (value instanceof List) {
+      filterValues = (List) value;
+    } else if (value instanceof String) {
+      filterValues.add((String) value);
+    }
+    return filterValues;
+  }
 }
