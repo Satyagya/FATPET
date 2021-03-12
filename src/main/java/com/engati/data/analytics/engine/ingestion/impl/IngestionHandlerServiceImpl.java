@@ -132,6 +132,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
     String requestBody = null;
     try {
       InputStream inputStream = getClass().getClassLoader().getResourceAsStream(ingestionFileName);
+      log.info("input stream : {}", inputStream.toString());
       if (Objects.nonNull(inputStream)) {
         byte[] bytes = IOUtils.readFully(inputStream, -1, true);
         requestBody = new String(bytes);
