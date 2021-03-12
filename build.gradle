@@ -42,6 +42,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-data-rest:${spring_boot_version}"
     compile("org.springframework.boot:spring-boot-starter-actuator:${spring_boot_version}")
     compile("net.logstash.logback:logstash-logback-encoder:${logback_version}")
+    compile group: 'net.java.openjfx.backport', name: 'openjfx-78-backport-compat', version: '1.8.0.1'
 
     implementation group: 'in.zapr.druid', name: 'druidry', version: "${druidry_version}"
 
