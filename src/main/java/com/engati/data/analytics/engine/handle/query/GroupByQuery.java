@@ -21,11 +21,12 @@ import in.zapr.druid.druidry.query.aggregation.DruidGroupByQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @Slf4j
 public class GroupByQuery extends QueryHandler {
 
