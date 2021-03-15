@@ -10,11 +10,11 @@ import com.engati.data.analytics.sdk.response.DruidIngestionResponse;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.RequestBody;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
-import sun.misc.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,7 +133,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
     try {
       InputStream inputStream = getClass().getClassLoader().getResourceAsStream(ingestionFileName);
       if (Objects.nonNull(inputStream)) {
-        byte[] bytes = IOUtils.readFully(inputStream, Integer.MAX_VALUE, true);
+        byte[] bytes = IOUtils.toByteArray(inputStream);
         requestBody = new String(bytes);
         for (Map.Entry<String, String> field : replaceMap.entrySet()) {
           requestBody = requestBody.replace(field.getKey(), field.getValue());
