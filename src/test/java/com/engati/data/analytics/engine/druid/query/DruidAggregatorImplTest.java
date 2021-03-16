@@ -1,6 +1,5 @@
 package com.engati.data.analytics.engine.druid.query;
 
-import com.engati.data.analytics.engine.druid.query.service.DruidAggregateGenerator;
 import com.engati.data.analytics.engine.druid.query.service.impl.DruidAggregateGeneratorImpl;
 import com.engati.data.analytics.sdk.druid.aggregator.DruidAggregatorMetaInfo;
 import com.engati.data.analytics.sdk.druid.aggregator.DruidAggregatorType;
