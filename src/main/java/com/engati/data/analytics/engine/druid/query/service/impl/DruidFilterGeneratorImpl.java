@@ -1,6 +1,7 @@
 package com.engati.data.analytics.engine.druid.query.service.impl;
 
 import com.engati.data.analytics.engine.druid.query.service.DruidFilterGenerator;
+import com.engati.data.analytics.engine.util.Utility;
 import com.engati.data.analytics.sdk.druid.filters.DruidFilterMetaInfo;
 import in.zapr.druid.druidry.filter.DruidFilter;
 import in.zapr.druid.druidry.filter.InFilter;
@@ -21,21 +22,26 @@ public class DruidFilterGeneratorImpl implements DruidFilterGenerator {
     log.debug("DruidFilterGeneratorImpl: Generating druid filter from the meta-info: {} "
         + "for botRef: {} and customerId: {}", druidFilterMetaInfoDto, botRef, customerId);
     DruidFilter druidFilter = null;
-    if (Objects.nonNull(druidFilterMetaInfoDto) &&
-        Objects.nonNull(druidFilterMetaInfoDto.getType())) {
-      switch (druidFilterMetaInfoDto.getType()) {
-        case SELECTOR:
-          druidFilter = getSelectorFilter((String) druidFilterMetaInfoDto.getDimension(),
-              (String) druidFilterMetaInfoDto.getValue(), botRef, customerId);
-          break;
-        case IN:
-          druidFilter = getInFilter(druidFilterMetaInfoDto, botRef, customerId);
-          break;
-        default:
-          log.error("DruidFilterGeneratorImpl: Provided filter type: {} does not "
-              + "have implementation for botRef: {}, customerId: {}",
-              druidFilterMetaInfoDto.getType(), botRef, customerId);
+    try {
+      if (Objects.nonNull(druidFilterMetaInfoDto) &&
+          Objects.nonNull(druidFilterMetaInfoDto.getType())) {
+        switch (druidFilterMetaInfoDto.getType()) {
+          case SELECTOR:
+            druidFilter = getSelectorFilter((String) druidFilterMetaInfoDto.getDimension(),
+                (String) druidFilterMetaInfoDto.getValue(), botRef, customerId);
+            break;
+          case IN:
+            druidFilter = getInFilter(druidFilterMetaInfoDto, botRef, customerId);
+            break;
+          default:
+            log.error("Provided filter type: {} does not "
+                + "have implementation for botRef: {}, customerId: {}",
+                druidFilterMetaInfoDto.getType(), botRef, customerId);
+        }
       }
+    } catch (Exception ex) {
+      log.error("Exception while generating the druid filters for request: {}, botRef: {}, "
+          + "customerId: {}", druidFilterMetaInfoDto, botRef, customerId, ex);
     }
     return druidFilter;
   }
@@ -48,7 +54,7 @@ public class DruidFilterGeneratorImpl implements DruidFilterGenerator {
   private InFilter getInFilter(DruidFilterMetaInfo druidFilterMetaInfoDto,
       Integer botRef, Integer customerId) {
     return new InFilter((String) druidFilterMetaInfoDto.getDimension(),
-        (List) druidFilterMetaInfoDto.getValue());
+        Utility.convertObjectToList(druidFilterMetaInfoDto.getValue()));
   }
 }
 

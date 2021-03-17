@@ -3,6 +3,7 @@ package com.engati.data.analytics.engine.service.impl;
 import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.handle.metric.factory.MetricHandlerFactory;
 import com.engati.data.analytics.engine.handle.query.factory.QueryHandlerFactory;
+import com.engati.data.analytics.engine.ingestion.IngestionHandlerService;
 import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
 import com.engati.data.analytics.engine.retrofit.DruidServiceRetrofit;
 import com.engati.data.analytics.engine.service.DataAnalyticsService;
@@ -60,15 +61,15 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
   public QueryResponse executeQueryRequest(Integer botRef, Integer customerId,
       QueryGenerationRequest request) {
     QueryResponse response = new QueryResponse();
-    for (DruidQueryMetaInfo druidQueryMetaInfo : request.getQueriesMetaInfo()) {
+    for (DruidQueryMetaInfo druidQueryMetaInfo: request.getQueriesMetaInfo()) {
       if (DruidQueryType.MULTI_DATA_SOURCE.name().equals(druidQueryMetaInfo.getType())) {
         String metricHandlerKey = getMetricHandlerKey(druidQueryMetaInfo);
         response = metricHandlerFactory.getMetricHandler(metricHandlerKey, botRef, customerId)
             .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
       } else {
-        response =
-            queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getType(), botRef, customerId)
-                .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
+        response = queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getType(),
+            botRef, customerId).generateAndExecuteQuery(botRef, customerId,
+            druidQueryMetaInfo, response);
       }
     }
     return response;

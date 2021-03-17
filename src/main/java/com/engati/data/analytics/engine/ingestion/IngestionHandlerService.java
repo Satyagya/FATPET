@@ -1,4 +1,4 @@
-package com.engati.data.analytics.engine.ingestionHandler;
+package com.engati.data.analytics.engine.ingestion;
 
 
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;

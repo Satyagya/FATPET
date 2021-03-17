@@ -10,6 +10,7 @@ import in.zapr.druid.druidry.aggregator.DruidAggregator;
 import in.zapr.druid.druidry.aggregator.JavaScriptAggregator;
 import in.zapr.druid.druidry.aggregator.LongSumAggregator;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,41 +26,43 @@ public class DruidAggregateGeneratorImpl implements DruidAggregateGenerator {
 
     log.debug("DruidAggregateGeneratorImpl: Generating druid aggregator from the meta-info: {} "
         + "for botRef: {} and customerId: {}", aggregateMetaInfos, botRef, customerId);
-    List<DruidAggregator> druidAggregators = new ArrayList<>();
-    for(DruidAggregatorMetaInfo druidAggregateMetaInfo: aggregateMetaInfos) {
-      switch (druidAggregateMetaInfo.getType()) {
-        case COUNT:
-          druidAggregators.add(new CountAggregator(druidAggregateMetaInfo.getAggregatorName()));
-          break;
-        case LONGSUM:
-          druidAggregators.add(new LongSumAggregator(druidAggregateMetaInfo.getAggregatorName(),
-              druidAggregateMetaInfo.getFieldName()));
-          break;
-        case DOUBLESUM:
-          druidAggregators.add(new DoubleSumAggregator(druidAggregateMetaInfo.getAggregatorName(),
-              druidAggregateMetaInfo.getFieldName()));
-          break;
-        case DISTINCT_COUNT:
-          druidAggregators.add(new DistinctCountAggregator(druidAggregateMetaInfo
-              .getAggregatorName(), druidAggregateMetaInfo.getFieldName()));
-          break;
-        case CARDINALITY:
-          druidAggregators.add(new NewCardinalityAggregator(druidAggregateMetaInfo
-              .getAggregatorName(), druidAggregateMetaInfo.getFields(),
-              druidAggregateMetaInfo.getByRow(), druidAggregateMetaInfo.getRound()));
-          break;
-        case JAVASCRIPT:
-          druidAggregators.add(JavaScriptAggregator.builder()
-              .name(druidAggregateMetaInfo.getAggregatorName())
-              .fieldNames(druidAggregateMetaInfo.getFields())
-              .functionAggregate(druidAggregateMetaInfo.getFnAggregate())
-              .functionCombine(druidAggregateMetaInfo.getFnCombine())
-              .functionReset(druidAggregateMetaInfo.getFnReset()).build());
-          break;
-        default:
-          log.error("DruidAggregateGeneratorImpl: Provided aggregator: {} does not have "
-                  + "implementation for botRef: {}, customerId: {}",
-              druidAggregateMetaInfo.getType(), botRef, customerId);
+    List<DruidAggregator> druidAggregators = new ArrayList<>();;
+    if (CollectionUtils.isNotEmpty(aggregateMetaInfos)) {
+      for (DruidAggregatorMetaInfo druidAggregateMetaInfo : aggregateMetaInfos) {
+        switch (druidAggregateMetaInfo.getType()) {
+          case COUNT:
+            druidAggregators.add(new CountAggregator(druidAggregateMetaInfo.getAggregatorName()));
+            break;
+          case LONGSUM:
+            druidAggregators.add(new LongSumAggregator(druidAggregateMetaInfo
+                .getAggregatorName(), druidAggregateMetaInfo.getFieldName()));
+            break;
+          case DOUBLESUM:
+            druidAggregators.add(new DoubleSumAggregator(druidAggregateMetaInfo
+                .getAggregatorName(), druidAggregateMetaInfo.getFieldName()));
+            break;
+          case DISTINCT_COUNT:
+            druidAggregators.add(new DistinctCountAggregator(druidAggregateMetaInfo
+                .getAggregatorName(), druidAggregateMetaInfo.getFieldName()));
+            break;
+          case CARDINALITY:
+            druidAggregators.add(new NewCardinalityAggregator(druidAggregateMetaInfo
+                .getAggregatorName(), druidAggregateMetaInfo.getFields(),
+                druidAggregateMetaInfo.getByRow(), druidAggregateMetaInfo.getRound()));
+            break;
+          case JAVASCRIPT:
+            druidAggregators.add(
+                JavaScriptAggregator.builder().name(druidAggregateMetaInfo.getAggregatorName())
+                    .fieldNames(druidAggregateMetaInfo.getFields())
+                    .functionAggregate(druidAggregateMetaInfo.getFnAggregate())
+                    .functionCombine(druidAggregateMetaInfo.getFnCombine())
+                    .functionReset(druidAggregateMetaInfo.getFnReset()).build());
+            break;
+          default:
+            log.error("DruidAggregateGeneratorImpl: Provided aggregator: {} does not have "
+                    + "implementation for botRef: {}, customerId: {}",
+                druidAggregateMetaInfo.getType(), botRef, customerId);
+        }
       }
     }
     return druidAggregators;
