@@ -6,6 +6,7 @@ import com.engati.data.analytics.engine.handle.query.factory.QueryHandlerFactory
 import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
 import com.engati.data.analytics.engine.retrofit.DruidServiceRetrofit;
 import com.engati.data.analytics.engine.service.DataAnalyticsService;
+import com.engati.data.analytics.sdk.common.DataAnalyticsEngineException;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
@@ -21,12 +22,16 @@ import com.google.gson.JsonArray;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.Interval;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import static com.engati.data.analytics.engine.constants.DruidConstants.DRUID_COMPLETE_STATUS;
 
 @Service
 @Slf4j
@@ -47,20 +52,23 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
   @Autowired
   private DruidServiceRetrofit druidServiceRetrofit;
 
+  @Value("${druid.ingestion.tasks.interval}")
+  private Long druidIngestionTasksInterval;
+
 
   @Override
   public QueryResponse executeQueryRequest(Integer botRef, Integer customerId,
       QueryGenerationRequest request) {
     QueryResponse response = new QueryResponse();
-    for (DruidQueryMetaInfo druidQueryMetaInfo: request.getQueriesMetaInfo()) {
+    for (DruidQueryMetaInfo druidQueryMetaInfo : request.getQueriesMetaInfo()) {
       if (DruidQueryType.MULTI_DATA_SOURCE.name().equals(druidQueryMetaInfo.getType())) {
         String metricHandlerKey = getMetricHandlerKey(druidQueryMetaInfo);
         response = metricHandlerFactory.getMetricHandler(metricHandlerKey, botRef, customerId)
             .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
       } else {
-        response = queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getType(),
-            botRef, customerId).generateAndExecuteQuery(botRef, customerId,
-            druidQueryMetaInfo, response);
+        response =
+            queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getType(), botRef, customerId)
+                .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
       }
     }
     return response;
@@ -80,14 +88,15 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
   }
 
   @Override
-  public DataAnalyticsEngineResponse<List<DruidTaskInfo>> getAllTasks() {
+  public DataAnalyticsEngineResponse<List<DruidTaskInfo>> ingestionTaskListResponse() {
     List<DruidTaskInfo> druidTaskInfoList = Collections.emptyList();
     DataAnalyticsEngineResponse<List<DruidTaskInfo>> dataAnalyticsEngineResponse =
         new DataAnalyticsEngineResponse<>(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     dataAnalyticsEngineResponse.setResponseObject(druidTaskInfoList);
     try {
       Response<JsonArray> response;
-      response = druidServiceRetrofit.getAllIngestionTasks("complete",getInterval()).execute();
+      response =
+          druidServiceRetrofit.getAllIngestionTasks(DRUID_COMPLETE_STATUS, getInterval()).execute();
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
           .isSuccessful()) {
         log.info("Ingestion tasks response from druid: {}", response.body());
@@ -98,10 +107,11 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
         dataAnalyticsEngineResponse.setResponseObject(druidTaskInfoList);
         dataAnalyticsEngineResponse.setStatus(DataAnalyticsEngineStatusCode.SUCCESS);
       } else {
-        log.info("Failed to get ingestion tasks response from druid");
+        log.info("Failed to get ingestion tasks response from druid with responseCode:{}",
+            response.code());
       }
     } catch (IOException e) {
-      log.error("Failed to get ingestion tasks from druid", e);
+      throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
     return dataAnalyticsEngineResponse;
   }
@@ -116,7 +126,7 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
   }
 
   private String getInterval() {
-    return new Interval(System.currentTimeMillis() - 7200000L, System.currentTimeMillis())
-        .toString();
+    return new Interval(System.currentTimeMillis() - druidIngestionTasksInterval,
+        System.currentTimeMillis()).toString();
   }
 }

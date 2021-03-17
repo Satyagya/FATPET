@@ -102,8 +102,8 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
       Response<JsonObject> response;
       response = druidIngestionServiceRetrofit.ingestDataToDruid(body).execute();
       log.info(
-          "Request body :{}, response body:{}, response code :{} for customerId:{} and botRef:{}",
-          requestBody, response.toString(), response.code(), customerId, botRef);
+          "Request body :{}for customerId:{} and botRef:{}",
+          requestBody, customerId, botRef);
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
           .isSuccessful()) {
         log.info("response for customerId:{}, botRef:{} is {}", customerId, botRef, response);
@@ -112,7 +112,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
         log.error("Failed to get response for customerId:{}, botRef:{}, errorBody:{}", customerId,
             botRef, response.errorBody().string());
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Failed to get response for customerId:{}, botRef:{}", customerId, botRef, e);
     }
     return output;
