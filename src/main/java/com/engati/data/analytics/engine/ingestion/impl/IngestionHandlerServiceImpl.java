@@ -1,23 +1,23 @@
-package com.engati.data.analytics.engine.ingestionHandler.impl;
+package com.engati.data.analytics.engine.ingestion.impl;
 
 
-import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
+import com.engati.data.analytics.engine.ingestion.IngestionHandlerService;
 import com.engati.data.analytics.engine.retrofit.DruidIngestionServiceRetrofit;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.enums.DataSourceMetaInfo;
 import com.engati.data.analytics.sdk.response.DruidIngestionResponse;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.RequestBody;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -35,13 +35,13 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
   private DruidIngestionServiceRetrofit druidIngestionServiceRetrofit;
 
   @Value("${s3.initial.load.bucket}")
-  String initialLoadPath;
+  private String initialLoadPath;
 
   @Value("${s3.net.load.bucket}")
-  String netChangePath;
+  private String netChangePath;
 
   @Value("${druid.ingestion.specs.path}")
-  String ingestionSpecsPath;
+  private String ingestionSpecsPath;
 
 
   /**
@@ -102,8 +102,8 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
       Response<JsonObject> response;
       response = druidIngestionServiceRetrofit.ingestDataToDruid(body).execute();
       log.info(
-          "Request body :{}, response body:{}, response code :{} for customerId:{} and botRef:{}",
-          requestBody, response.toString(), response.code(), customerId, botRef);
+          "Request body :{}for customerId:{} and botRef:{}",
+          requestBody, customerId, botRef);
       if (Objects.nonNull(response) && Objects.nonNull(response.body()) && response
           .isSuccessful()) {
         log.info("response for customerId:{}, botRef:{} is {}", customerId, botRef, response);
@@ -112,7 +112,7 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
         log.error("Failed to get response for customerId:{}, botRef:{}, errorBody:{}", customerId,
             botRef, response.errorBody().string());
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Failed to get response for customerId:{}, botRef:{}", customerId, botRef, e);
     }
     return output;
@@ -131,13 +131,19 @@ public class IngestionHandlerServiceImpl implements IngestionHandlerService {
       Map<String, String> replaceMap) {
     String requestBody = null;
     try {
-      requestBody =
-          new JsonParser().parse(new FileReader(ingestionFileName)).getAsJsonObject().toString();
-      for (Map.Entry<String, String> field : replaceMap.entrySet()) {
-        requestBody = requestBody.replace(field.getKey(), field.getValue());
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream(ingestionFileName);
+      if (Objects.nonNull(inputStream)) {
+        byte[] bytes = IOUtils.toByteArray(inputStream);
+        requestBody = new String(bytes);
+        for (Map.Entry<String, String> field : replaceMap.entrySet()) {
+          requestBody = requestBody.replace(field.getKey(), field.getValue());
+        }
+      } else {
+        log.error("Ingestion file: {} not found for cid: {} botRef: {}", ingestionFileName,
+            customerId, botRef);
       }
-    } catch (Exception e) {
-      log.error("Error while replacing place holder from the filename:{} with replaceMap:{} for "
+    } catch (IOException e) {
+      log.error("Exception while replacing place holder from the filename:{} with replaceMap:{} for "
               + "customerId:{} and botRef:{}", ingestionFileName, replaceMap.toString(), customerId,
           botRef, e);
     }
