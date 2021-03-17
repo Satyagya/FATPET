@@ -43,8 +43,8 @@ public class DataAnalyticsController {
       @RequestBody QueryGenerationRequest queryGenerationRequest) {
     log.info("DataAnalyticsController: Request to execute the druid query request: {} "
         + "for botRef: {} and customerId: {}", queryGenerationRequest, botRef, customerId);
-    QueryResponse responseFromDruid = dataAnalyticsService.executeQueryRequest(botRef, customerId,
-        queryGenerationRequest);
+    QueryResponse responseFromDruid =
+        dataAnalyticsService.executeQueryRequest(botRef, customerId, queryGenerationRequest);
     DataAnalyticsEngineResponse<QueryResponse> response =
         new DataAnalyticsEngineResponse<>(responseFromDruid, DataAnalyticsEngineStatusCode.SUCCESS,
             HttpStatus.OK);
@@ -77,8 +77,10 @@ public class DataAnalyticsController {
   }
 
   @GetMapping(value = DRUID_TASK_RESPONSE_API_PATH)
-  public ResponseEntity<DataAnalyticsEngineResponse<List<DruidTaskInfo>>> getDruidTasksInfo(){
-    DataAnalyticsEngineResponse<List<DruidTaskInfo>> dataAnalyticsEngineResponse = dataAnalyticsService.getAllTasks();
-    return new ResponseEntity<>(dataAnalyticsEngineResponse,dataAnalyticsEngineResponse.getStatusCode());
+  public ResponseEntity<DataAnalyticsEngineResponse<List<DruidTaskInfo>>> getDruidTasksInfo() {
+    DataAnalyticsEngineResponse<List<DruidTaskInfo>> dataAnalyticsEngineResponse =
+        dataAnalyticsService.ingestionTaskListResponse();
+    return new ResponseEntity<>(dataAnalyticsEngineResponse,
+        dataAnalyticsEngineResponse.getStatusCode());
   }
 }
