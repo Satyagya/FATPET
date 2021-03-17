@@ -3,7 +3,7 @@ package com.engati.data.analytics.engine.service.impl;
 import com.engati.data.analytics.engine.execute.DruidQueryExecutor;
 import com.engati.data.analytics.engine.handle.metric.factory.MetricHandlerFactory;
 import com.engati.data.analytics.engine.handle.query.factory.QueryHandlerFactory;
-import com.engati.data.analytics.engine.ingestionHandler.IngestionHandlerService;
+import com.engati.data.analytics.engine.ingestion.IngestionHandlerService;
 import com.engati.data.analytics.engine.service.DataAnalyticsService;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
