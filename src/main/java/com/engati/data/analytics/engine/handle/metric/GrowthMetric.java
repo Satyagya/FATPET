@@ -10,6 +10,7 @@ import com.engati.data.analytics.sdk.druid.query.MultiQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.TimeSeriesQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.join.JoinTimeSeriesMetaInfo;
 import com.engati.data.analytics.sdk.response.QueryResponse;
+import com.engati.data.analytics.sdk.response.ResponseType;
 import com.engati.data.analytics.sdk.response.SimpleResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -105,7 +106,9 @@ public class GrowthMetric extends MetricHandler {
         modifiedSimpleResponse.put(index.toString(), Collections.singletonList(growthMap));
       }
     }
-    return SimpleResponse.builder().queryResponse(modifiedSimpleResponse).build();
+    SimpleResponse resultantResponse = SimpleResponse.builder().queryResponse(modifiedSimpleResponse).build();
+    resultantResponse.setType(ResponseType.SIMPLE.name());
+    return resultantResponse;
   }
 
   private List<DruidTimeIntervalMetaInfo> getPreviousStartTime(String startTime, String endTime,
