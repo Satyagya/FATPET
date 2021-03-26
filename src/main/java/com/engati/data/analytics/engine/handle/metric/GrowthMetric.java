@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 @Service
 public class GrowthMetric extends MetricHandler {
 
-  private static final String METRIC_HANDLER_NAME = "GROWTH";
+  private static final String METRIC_HANDLER_NAME = "growth_metric";
 
   @Autowired
   private QueryHandlerFactory queryHandlerFactory;
