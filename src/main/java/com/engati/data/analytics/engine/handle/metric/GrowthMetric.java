@@ -106,7 +106,8 @@ public class GrowthMetric extends MetricHandler {
         modifiedSimpleResponse.put(index.toString(), Collections.singletonList(growthMap));
       }
     }
-    SimpleResponse resultantResponse = SimpleResponse.builder().queryResponse(modifiedSimpleResponse).build();
+    SimpleResponse resultantResponse =
+        SimpleResponse.builder().queryResponse(modifiedSimpleResponse).build();
     resultantResponse.setType(ResponseType.SIMPLE.name());
     return resultantResponse;
   }
@@ -128,13 +129,18 @@ public class GrowthMetric extends MetricHandler {
       case Constants.DAY:
         startDate = startDate.minusDays(1);
         break;
+      case Constants.QUARTER:
+        startDate = startDate.minusMonths(3);
+        break;
       default:
         log.error("No matching grain found for : {}", grain);
         throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
-    return Collections.singletonList(DruidTimeIntervalMetaInfo.builder()
-        .startTime(startDate.toString(DateTimeFormat.forPattern(Constants.ISO_TIME_FORMAT)))
-        .endTime(endTime).build());
+    List<String> timeRange =
+        getTimeRange(startDate.toString(DateTimeFormat.forPattern(Constants.ISO_TIME_FORMAT)),
+            endTime, grain);
+    return Collections.singletonList(DruidTimeIntervalMetaInfo.builder().startTime(timeRange.get(0))
+        .endTime(timeRange.get(timeRange.size() - 1)).build());
   }
 
   private List<String> getTimeRange(String startTime, String endTime, String grain) {
@@ -163,6 +169,13 @@ public class GrowthMetric extends MetricHandler {
       case Constants.DAY:
         long numOfDays = Days.daysBetween(startDate, endDate).getDays();
         timeRange = Stream.iterate(startDate, date -> date.plusDays(1)).limit(numOfDays).limit(13)
+            .collect(Collectors.toList());
+        break;
+      case Constants.QUARTER:
+        long months = Months.monthsBetween(startDate, endDate).getMonths();
+        timeRange = Stream.iterate(startDate, date -> date.plusMonths(1)).limit(months).limit(36)
+            .filter(date -> date.getMonthOfYear() == 1 || date.getMonthOfYear() == 4
+                || date.getMonthOfYear() == 7 || date.getMonthOfYear() == 10)
             .collect(Collectors.toList());
         break;
       default:
