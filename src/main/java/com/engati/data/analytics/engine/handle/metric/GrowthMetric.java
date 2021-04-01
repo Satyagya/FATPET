@@ -54,27 +54,28 @@ public class GrowthMetric extends MetricHandler {
       DruidQueryMetaInfo druidQueryMetaInfo, QueryResponse prevResponse) {
     List<QueryResponse> responses = new ArrayList<>();
     MultiQueryMetaInfo multiQueryMetaInfo = ((MultiQueryMetaInfo) druidQueryMetaInfo);
-    String startTime = null;
-    String endTime = null;
     String grain = null;
+    List<String> timeRange = Collections.emptyList();
     for (DruidQueryMetaInfo druidQuery : multiQueryMetaInfo.getMultiMetricQuery()) {
       if (druidQuery instanceof TimeSeriesQueryMetaInfo) {
         TimeSeriesQueryMetaInfo timeSeriesQueryMetaInfo = (TimeSeriesQueryMetaInfo) druidQuery;
         grain = timeSeriesQueryMetaInfo.getGrain();
-        List<DruidTimeIntervalMetaInfo> druidTimeIntervalMetaInfos =
+        timeRange = getTimeRange(
             getPreviousStartTime(timeSeriesQueryMetaInfo.getIntervals().get(0).getStartTime(),
-                timeSeriesQueryMetaInfo.getIntervals().get(0).getEndTime(), grain);
-        startTime = druidTimeIntervalMetaInfos.get(0).getStartTime();
-        endTime = druidTimeIntervalMetaInfos.get(0).getEndTime();
+                grain), timeSeriesQueryMetaInfo.getIntervals().get(0).getEndTime(), grain);
+        List<DruidTimeIntervalMetaInfo> druidTimeIntervalMetaInfos = Collections.singletonList(
+            DruidTimeIntervalMetaInfo.builder().startTime(timeRange.get(0))
+                .endTime(timeRange.get(timeRange.size() - 1)).build());
         timeSeriesQueryMetaInfo.setIntervals(druidTimeIntervalMetaInfos);
       } else if (druidQuery instanceof JoinTimeSeriesMetaInfo) {
         JoinTimeSeriesMetaInfo joinTimeSeriesMetaInfo = (JoinTimeSeriesMetaInfo) druidQuery;
         grain = joinTimeSeriesMetaInfo.getGrain();
-        List<DruidTimeIntervalMetaInfo> druidTimeIntervalMetaInfos =
+        timeRange = getTimeRange(
             getPreviousStartTime(joinTimeSeriesMetaInfo.getIntervals().get(0).getStartTime(),
-                joinTimeSeriesMetaInfo.getIntervals().get(0).getEndTime(), grain);
-        startTime = druidTimeIntervalMetaInfos.get(0).getStartTime();
-        endTime = druidTimeIntervalMetaInfos.get(0).getEndTime();
+                grain), joinTimeSeriesMetaInfo.getIntervals().get(0).getEndTime(), grain);
+        List<DruidTimeIntervalMetaInfo> druidTimeIntervalMetaInfos = Collections.singletonList(
+            DruidTimeIntervalMetaInfo.builder().startTime(timeRange.get(0))
+                .endTime(timeRange.get(timeRange.size() - 1)).build());
         joinTimeSeriesMetaInfo.setIntervals(druidTimeIntervalMetaInfos);
       }
       QueryResponse response = new QueryResponse();
@@ -82,7 +83,6 @@ public class GrowthMetric extends MetricHandler {
           .generateAndExecuteQuery(botRef, customerId, druidQuery, response));
     }
     SimpleResponse simpleResponse = (SimpleResponse) responses.get(0);
-    List<String> timeRange = getTimeRange(startTime, endTime, grain);
     return computeGrowth(timeRange, simpleResponse.getQueryResponse(),
         multiQueryMetaInfo.getMetricList().get(0));
   }
@@ -113,8 +113,7 @@ public class GrowthMetric extends MetricHandler {
     return resultantResponse;
   }
 
-  private List<DruidTimeIntervalMetaInfo> getPreviousStartTime(String startTime, String endTime,
-      String grain) {
+  private String getPreviousStartTime(String startTime, String grain) {
     DateTimeFormatter formatter = DateTimeFormat.forPattern(Constants.ISO_TIME_FORMAT);
     DateTime startDate = formatter.parseDateTime(startTime);
     switch (grain) {
@@ -137,11 +136,7 @@ public class GrowthMetric extends MetricHandler {
         log.error("No matching grain found for : {}", grain);
         throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
     }
-    List<String> timeRange =
-        getTimeRange(startDate.toString(DateTimeFormat.forPattern(Constants.ISO_TIME_FORMAT)),
-            endTime, grain);
-    return Collections.singletonList(DruidTimeIntervalMetaInfo.builder().startTime(timeRange.get(0))
-        .endTime(timeRange.get(timeRange.size() - 1)).build());
+    return startDate.toString(DateTimeFormat.forPattern(Constants.ISO_TIME_FORMAT));
   }
 
   private List<String> getTimeRange(String startTime, String endTime, String grain) {
