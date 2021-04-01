@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -88,7 +89,7 @@ public class GrowthMetric extends MetricHandler {
 
   private QueryResponse computeGrowth(List<String> timeRange,
       Map<String, List<Map<String, Object>>> simpleResponse, String metricName) {
-    Map<String, List<Map<String, Object>>> modifiedSimpleResponse = new HashMap<>();
+    Map<String, List<Map<String, Object>>> modifiedSimpleResponse = new LinkedHashMap<>();
     for (Integer index = 0; index < timeRange.size() - 1; index++) {
       Map<String, Object> growthMap = new HashMap<>();
       Pair<Object, Object> prevAndCurrMetric =
@@ -100,10 +101,10 @@ public class GrowthMetric extends MetricHandler {
             .parseDouble(prevAndCurrMetric.getFirst().toString())) / Double
             .parseDouble(prevAndCurrMetric.getFirst().toString());
         growthMap.put(Constants.GROWTH_METRIC, growth * 100);
-        modifiedSimpleResponse.put(index.toString(), Collections.singletonList(growthMap));
+        modifiedSimpleResponse.put(timeRange.get(index), Collections.singletonList(growthMap));
       } else {
         growthMap.put(Constants.GROWTH_METRIC, Constants.NOT_APPLICABLE);
-        modifiedSimpleResponse.put(index.toString(), Collections.singletonList(growthMap));
+        modifiedSimpleResponse.put(timeRange.get(index), Collections.singletonList(growthMap));
       }
     }
     SimpleResponse resultantResponse =
