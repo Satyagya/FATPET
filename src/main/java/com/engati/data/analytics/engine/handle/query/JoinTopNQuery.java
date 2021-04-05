@@ -63,7 +63,8 @@ public class JoinTopNQuery extends QueryHandler {
               botRef, customerId))
           .intervals(Utility.extractInterval(joinTopNMetaInfo.getIntervals()))
           .granularity(Utility.getGranularity(joinTopNMetaInfo.getGrain()))
-          .dimension(getDruidDimension(joinTopNMetaInfo.getDimension()))
+          .dimension(getDruidDimension(joinTopNMetaInfo.getDimension(),
+              joinTopNMetaInfo.getDataSource().getRightPrefix()))
           .threshold(joinTopNMetaInfo.getThreshold())
           .topNMetric(Utility.getMetric(joinTopNMetaInfo.getMetricType(),
               joinTopNMetaInfo.getMetricValue()))
@@ -86,8 +87,9 @@ public class JoinTopNQuery extends QueryHandler {
     }
   }
 
-  private DruidDimension getDruidDimension(String dimension) {
+  private DruidDimension getDruidDimension(String dimension, String prefix) {
+    String outputName = dimension.replace(prefix, "");
      return DefaultDimension.builder().dimension(dimension)
-         .outputName(dimension).build();
+         .outputName(outputName).build();
   }
 }
