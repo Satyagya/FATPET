@@ -101,10 +101,10 @@ public class GrowthMetric extends MetricHandler {
             .parseDouble(prevAndCurrMetric.getFirst().toString())) / Double
             .parseDouble(prevAndCurrMetric.getFirst().toString());
         growthMap.put(Constants.GROWTH_METRIC, growth * 100);
-        modifiedSimpleResponse.put(timeRange.get(index), Collections.singletonList(growthMap));
+        modifiedSimpleResponse.put(timeRange.get(index+1), Collections.singletonList(growthMap));
       } else {
         growthMap.put(Constants.GROWTH_METRIC, Constants.NOT_APPLICABLE);
-        modifiedSimpleResponse.put(timeRange.get(index), Collections.singletonList(growthMap));
+        modifiedSimpleResponse.put(timeRange.get(index+1), Collections.singletonList(growthMap));
       }
     }
     SimpleResponse resultantResponse =
