@@ -88,7 +88,8 @@ public class JoinTopNQuery extends QueryHandler {
   }
 
   private DruidDimension getDruidDimension(String dimension, String prefix) {
-     return DefaultDimension.builder().dimension(prefix.concat(dimension))
-         .outputName(dimension).build();
+    String outputName = dimension.replace(prefix, "");
+     return DefaultDimension.builder().dimension(dimension)
+         .outputName(outputName).build();
   }
 }

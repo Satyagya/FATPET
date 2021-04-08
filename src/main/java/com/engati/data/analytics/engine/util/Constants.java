@@ -19,4 +19,15 @@ public class Constants {
   public static final String TIMESTAMP = "timestamp";
   public static final String RESULT = "result";
   public static final String EVENT = "event";
+
+  public static final String GROWTH_METRIC = "growth_metric";
+  public static final String ISO_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.sss'Z'";
+  public static final String YEAR = "YEAR";
+  public static final String MONTH = "MONTH";
+  public static final String DAY = "DAY";
+  public static final String QUARTER = "QUARTER";
+  public static final String WEEK = "WEEK";
+  public static final String NOT_APPLICABLE = "N/A";
+
 }
+
