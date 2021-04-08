@@ -39,7 +39,7 @@ public class DruidQueryExecutorImpl implements DruidQueryExecutor {
             + "for botRef: {} and customerId: {}", output, druidJsonQuery, botRef, customerId);
       } else {
         log.error("DruidQueryExecutorImpl: Failed to get response from druid "
-            + "errorBody:{}", response.errorBody().toString());
+            + "errorBody:{} for query: {}", response.errorBody().toString(), druidJsonQuery);
         throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.PROCESSING_ERROR);
       }
     } catch (IOException ex) {
