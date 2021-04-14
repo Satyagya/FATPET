@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,7 +30,7 @@ public class DruidResponseParserImp implements DruidResponseParser {
   public Map<String, List<Map<String, Object>>> convertJsonToMap(JsonArray response,
       Integer botRef, Integer customerId) {
     ObjectMapper objectMapper = new ObjectMapper();
-    Map<String, List<Map<String, Object>>> responseMap = new HashMap<>();
+    Map<String, List<Map<String, Object>>> responseMap = new LinkedHashMap<>();
     try {
       for (int index = 0; index < response.size(); index++) {
         String timestamp = response.get(index).getAsJsonObject().get(Constants.TIMESTAMP)
