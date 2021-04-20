@@ -65,7 +65,7 @@ public class GrowthMetric extends MetricHandler {
                 grain), timeSeriesQueryMetaInfo.getIntervals().get(0).getEndTime(), grain);
         List<DruidTimeIntervalMetaInfo> druidTimeIntervalMetaInfos = Collections.singletonList(
             DruidTimeIntervalMetaInfo.builder().startTime(timeRange.get(0))
-                .endTime(timeRange.get(timeRange.size() - 1)).build());
+                .endTime(timeSeriesQueryMetaInfo.getIntervals().get(0).getEndTime()).build());
         timeSeriesQueryMetaInfo.setIntervals(druidTimeIntervalMetaInfos);
       } else if (druidQuery instanceof JoinTimeSeriesMetaInfo) {
         JoinTimeSeriesMetaInfo joinTimeSeriesMetaInfo = (JoinTimeSeriesMetaInfo) druidQuery;
@@ -75,7 +75,7 @@ public class GrowthMetric extends MetricHandler {
                 grain), joinTimeSeriesMetaInfo.getIntervals().get(0).getEndTime(), grain);
         List<DruidTimeIntervalMetaInfo> druidTimeIntervalMetaInfos = Collections.singletonList(
             DruidTimeIntervalMetaInfo.builder().startTime(timeRange.get(0))
-                .endTime(timeRange.get(timeRange.size() - 1)).build());
+                .endTime(joinTimeSeriesMetaInfo.getIntervals().get(0).getEndTime()).build());
         joinTimeSeriesMetaInfo.setIntervals(druidTimeIntervalMetaInfos);
       }
       QueryResponse response = new QueryResponse();
