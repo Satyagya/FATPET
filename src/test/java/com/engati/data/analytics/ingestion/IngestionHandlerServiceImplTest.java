@@ -6,10 +6,14 @@ import com.engati.data.analytics.sdk.common.DataAnalyticsEngineResponse;
 import com.engati.data.analytics.sdk.common.DataAnalyticsEngineStatusCode;
 import com.engati.data.analytics.sdk.response.DruidIngestionResponse;
 import com.google.gson.JsonObject;
+import okhttp3.RequestBody;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -34,6 +38,9 @@ public class IngestionHandlerServiceImplTest {
   @Mock
   private DruidIngestionServiceRetrofit druidIngestionServiceRetrofit;
 
+  @Captor
+  private ArgumentCaptor<RequestBody> requestBodyCaptor;
+
   @Before
   public void init() throws IllegalAccessException {
     MockitoAnnotations.initMocks(this);
@@ -56,6 +63,7 @@ public class IngestionHandlerServiceImplTest {
         ingestionHandlerService.ingestToDruid(1234L, 5678L, null, PRODUCT.name(), Boolean.FALSE);
     Assert.assertEquals(dataAnalyticsEngineResponse.getStatus(),
         DataAnalyticsEngineStatusCode.INGESTION_SUCCESS);
+    Mockito.verify(druidIngestionServiceRetrofit).ingestDataToDruid(requestBodyCaptor.capture());
   }
 
   @Test
@@ -73,5 +81,11 @@ public class IngestionHandlerServiceImplTest {
         ingestionHandlerService.ingestToDruid(1234L, 5678L, null, PRODUCT.name(), Boolean.FALSE);
     Assert.assertEquals(dataAnalyticsEngineResponse.getStatus(),
         DataAnalyticsEngineStatusCode.INGESTION_FAILURE);
+    Mockito.verify(druidIngestionServiceRetrofit).ingestDataToDruid(requestBodyCaptor.capture());
+  }
+
+  @After
+  public void tearDown() {
+    Mockito.verifyNoMoreInteractions(druidIngestionServiceRetrofit);
   }
 }

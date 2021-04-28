@@ -16,6 +16,7 @@ import com.engati.data.analytics.sdk.druid.postaggregator.DruidPostAggregatorMet
 import com.engati.data.analytics.sdk.druid.query.DruidQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.GroupByQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.ScanMetaInfo;
+import com.engati.data.analytics.sdk.druid.query.TimeSeriesQueryMetaInfo;
 import com.engati.data.analytics.sdk.druid.query.datasource.DataSourceType;
 import com.engati.data.analytics.sdk.druid.query.datasource.QueryDataSourceType;
 import com.engati.data.analytics.sdk.druid.query.datasource.SimpleDataSourceType;
@@ -24,6 +25,7 @@ import in.zapr.druid.druidry.aggregator.DruidAggregator;
 import in.zapr.druid.druidry.filter.DruidFilter;
 import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
 import in.zapr.druid.druidry.query.aggregation.DruidGroupByQuery;
+import in.zapr.druid.druidry.query.aggregation.DruidTimeSeriesQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,6 +68,8 @@ public class DruidQueryGeneratorImpl implements DruidQueryGenerator {
   @Override
   public DruidJoin getJoinDataSource(JoinMetaInfo joinMetaInfo, Integer botRef,
       Integer customerId) {
+    log.debug("Generate druid join for joinMetaInfo: {}, botRef: {}, customerId: {}",
+        joinMetaInfo, botRef, customerId);
     DruidDataSource left = getDataSource(joinMetaInfo.getLeftDataSource(),
         botRef, customerId);
     DruidDataSource right = getDataSource(joinMetaInfo.getRightDataSource(),
@@ -97,6 +101,9 @@ public class DruidQueryGeneratorImpl implements DruidQueryGenerator {
       query = getScanQuery(((ScanMetaInfo) druidQueryMetaInfo), botRef, customerId);
     } else if (druidQueryMetaInfo instanceof GroupByQueryMetaInfo) {
       query = getGroupByQuery((GroupByQueryMetaInfo) druidQueryMetaInfo, botRef, customerId);
+    } else if (druidQueryMetaInfo instanceof TimeSeriesQueryMetaInfo) {
+      query = getTimeSeriesQuery((TimeSeriesQueryMetaInfo) druidQueryMetaInfo, botRef,
+          customerId);
     }
     return query;
   }
@@ -123,6 +130,22 @@ public class DruidQueryGeneratorImpl implements DruidQueryGenerator {
             customerId))
         .dimensions(Utility.getDimension(groupByQueryMetaInfo.getDimension()))
         .granularity(Utility.getGranularity(groupByQueryMetaInfo.getGrain()))
+        .build();
+  }
+
+  private DruidTimeSeriesQuery getTimeSeriesQuery(TimeSeriesQueryMetaInfo timeSeriesQueryMetaInfo,
+      Integer botRef, Integer customerId) {
+    return DruidTimeSeriesQuery.builder()
+        .dataSource(Utility.convertDataSource(botRef, customerId,
+            timeSeriesQueryMetaInfo.getDataSource()))
+        .intervals(Utility.extractInterval(timeSeriesQueryMetaInfo.getIntervals()))
+        .aggregators(generateAggregators(timeSeriesQueryMetaInfo.getDruidAggregateMetaInfo(),
+            botRef, customerId))
+        .postAggregators(generatePostAggregator(timeSeriesQueryMetaInfo
+            .getDruidPostAggregateMetaInfo(), botRef, customerId))
+        .filter(generateFilters(timeSeriesQueryMetaInfo.getDruidFilterMetaInfo(), botRef,
+            customerId))
+        .granularity(Utility.getGranularity(timeSeriesQueryMetaInfo.getGrain()))
         .build();
   }
 }

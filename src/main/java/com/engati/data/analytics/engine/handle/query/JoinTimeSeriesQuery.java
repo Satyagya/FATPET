@@ -19,12 +19,12 @@ import in.zapr.druid.druidry.filter.DruidFilter;
 import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 public class JoinTimeSeriesQuery extends QueryHandler {
 
   @Autowired
@@ -72,12 +72,9 @@ public class JoinTimeSeriesQuery extends QueryHandler {
           .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
           .build();
       simpleResponse.setType(ResponseType.SIMPLE.name());
-      if (prevResponse instanceof SimpleResponse) {
-        prevResponse = druidResponseParser.mergePreviousResponse(simpleResponse,
-            (SimpleResponse) prevResponse);
-      } else {
-        prevResponse = simpleResponse;
-      }
+      prevResponse = (prevResponse instanceof SimpleResponse) ?
+          druidResponseParser.mergePreviousResponse(simpleResponse, (SimpleResponse) prevResponse)
+          : simpleResponse;
       return prevResponse;
     } catch (Exception ex) {
       log.error("Exception while executing the join-timeseries query: {} for botRef: {},"

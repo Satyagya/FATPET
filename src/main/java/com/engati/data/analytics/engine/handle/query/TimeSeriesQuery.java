@@ -18,13 +18,12 @@ import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
 import in.zapr.druid.druidry.query.aggregation.DruidTimeSeriesQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
-@Component
+@Service
 public class TimeSeriesQuery extends QueryHandler {
 
   private static final String QUERY_TYPE = "TIME_SERIES";
@@ -74,15 +73,12 @@ public class TimeSeriesQuery extends QueryHandler {
           .queryResponse(druidResponseParser.convertJsonToMap(response, botRef, customerId))
           .build();
       simpleResponse.setType(ResponseType.SIMPLE.name());
-      if (prevResponse instanceof SimpleResponse) {
-        prevResponse = druidResponseParser.mergePreviousResponse(simpleResponse,
-            (SimpleResponse) prevResponse);
-      } else {
-        prevResponse = simpleResponse;
-      }
+      prevResponse = (prevResponse instanceof SimpleResponse) ?
+          druidResponseParser.mergePreviousResponse(simpleResponse, (SimpleResponse) prevResponse)
+          : simpleResponse;
       return prevResponse;
     } catch (Exception ex) {
-    log.error("Error while executing the time-series query: {} for botRef: {}, customerId: {}, "
+    log.error("Exception while executing the time-series query: {} for botRef: {}, customerId: {}, "
         + "prevResponse: {}", druidQueryMetaInfo, botRef, customerId, prevResponse, ex);
     throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.QUERY_FAILURE);
     }

@@ -19,12 +19,12 @@ import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
 import in.zapr.druid.druidry.query.aggregation.DruidTopNQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 public class TopNQuery extends QueryHandler {
 
   private static final String QUERY_TYPE = "TOPN";
@@ -77,7 +77,7 @@ public class TopNQuery extends QueryHandler {
       simpleResponse.setType(ResponseType.SIMPLE.name());
       return simpleResponse;
     } catch (Exception ex) {
-      log.error("Error while executing the topN query: {} for botRef: {}, customerId: {}, "
+      log.error("Exception while executing the topN query: {} for botRef: {}, customerId: {}, "
               + "prevResponse: {}", druidQueryMetaInfo, botRef, customerId, prevResponse, ex);
       throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.QUERY_FAILURE);
     }

@@ -1,7 +1,5 @@
 package com.engati.data.analytics.engine.util;
 
-import java.text.DecimalFormat;
-
 public class Constants {
   public static final String DRUID_RESPONSE_API_PATH =
       "/customer/{customerId}/bot/{botRef}/druid/response";
@@ -17,12 +15,19 @@ public class Constants {
   public static final String REQ_PARAM_DATA_SOURCE_NAME = "dataSourceName";
   public static final String REQ_PARAM_TIMESTAMP = "timestamp";
 
-  public static final String TOP = "top";
-  public static final String ORDER_COUNT = "order_count";
-  public static final String SESSION_COUNT = "session_count";
-  public static final String BILLING_CITY = "billing_city";
-  public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
+  public static final String TOP = "top";;
   public static final String TIMESTAMP = "timestamp";
   public static final String RESULT = "result";
   public static final String EVENT = "event";
+
+  public static final String GROWTH_METRIC = "growth_metric";
+  public static final String ISO_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.sss'Z'";
+  public static final String YEAR = "YEAR";
+  public static final String MONTH = "MONTH";
+  public static final String DAY = "DAY";
+  public static final String QUARTER = "QUARTER";
+  public static final String WEEK = "WEEK";
+  public static final String NOT_APPLICABLE = "N/A";
+
 }
+

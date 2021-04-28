@@ -21,12 +21,12 @@ import in.zapr.druid.druidry.filter.DruidFilter;
 import in.zapr.druid.druidry.postAggregator.DruidPostAggregator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 public class JoinTopNQuery extends QueryHandler {
 
   @Autowired
@@ -81,14 +81,15 @@ public class JoinTopNQuery extends QueryHandler {
       simpleResponse.setType(ResponseType.SIMPLE.name());
       return simpleResponse;
     } catch (Exception ex) {
-      log.error("Error while executing the join-topN query: {} for botRef: {}, customerId: {}, "
+      log.error("Exception while executing the join-topN query: {} for botRef: {}, customerId: {}, "
           + "prevResponse: {}", druidQueryMetaInfo, botRef, customerId, prevResponse, ex);
       throw new DataAnalyticsEngineException(DataAnalyticsEngineStatusCode.QUERY_FAILURE);
     }
   }
 
   private DruidDimension getDruidDimension(String dimension, String prefix) {
-     return DefaultDimension.builder().dimension(prefix.concat(dimension))
-         .outputName(dimension).build();
+    String outputName = dimension.replace(prefix, "");
+     return DefaultDimension.builder().dimension(dimension)
+         .outputName(outputName).build();
   }
 }

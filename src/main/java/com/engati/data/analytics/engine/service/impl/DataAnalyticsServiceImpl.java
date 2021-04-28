@@ -60,15 +60,15 @@ public class DataAnalyticsServiceImpl implements DataAnalyticsService {
   public QueryResponse executeQueryRequest(Integer botRef, Integer customerId,
       QueryGenerationRequest request) {
     QueryResponse response = new QueryResponse();
-    for (DruidQueryMetaInfo druidQueryMetaInfo : request.getQueriesMetaInfo()) {
+    for (DruidQueryMetaInfo druidQueryMetaInfo: request.getQueriesMetaInfo()) {
       if (DruidQueryType.MULTI_DATA_SOURCE.name().equals(druidQueryMetaInfo.getType())) {
         String metricHandlerKey = getMetricHandlerKey(druidQueryMetaInfo);
         response = metricHandlerFactory.getMetricHandler(metricHandlerKey, botRef, customerId)
             .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
       } else {
-        response =
-            queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getType(), botRef, customerId)
-                .generateAndExecuteQuery(botRef, customerId, druidQueryMetaInfo, response);
+        response = queryHandlerFactory.getQueryHandler(druidQueryMetaInfo.getType(),
+            botRef, customerId).generateAndExecuteQuery(botRef, customerId,
+            druidQueryMetaInfo, response);
       }
     }
     return response;
