@@ -35,7 +35,7 @@ public class DruidAggregateGeneratorImpl implements DruidAggregateGenerator {
     log.debug("DruidAggregateGeneratorImpl: Generating druid aggregator from the meta-info: {} "
         + "for botRef: {} and customerId: {}", aggregateMetaInfos, botRef, customerId);
     List<DruidAggregator> druidAggregators = new ArrayList<>();
-    ;
+
     if (CollectionUtils.isNotEmpty(aggregateMetaInfos)) {
       for (DruidAggregatorMetaInfo druidAggregateMetaInfo : aggregateMetaInfos) {
 
