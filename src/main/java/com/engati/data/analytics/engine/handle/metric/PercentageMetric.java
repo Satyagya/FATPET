@@ -11,13 +11,14 @@ import com.engati.data.analytics.sdk.response.SimpleResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static com.engati.data.analytics.engine.constants.DruidConstants.PERCENTAGE_SUFFIX;
 
 @Slf4j
 @Service
@@ -68,8 +69,11 @@ public class PercentageMetric extends MetricHandler {
   private QueryResponse computePercentageContribution(QueryResponse timeSeriesResponse,
       QueryResponse topNQueryResponse, QueryResponse joinTopNQueryResponse, String metric) {
     SimpleResponse timeSeriesSimpleResponse = (SimpleResponse) timeSeriesResponse;
-    SimpleResponse topNSimpleResponse = Objects.nonNull(topNQueryResponse.getType())? ((SimpleResponse) topNQueryResponse): null;
-    SimpleResponse joinTopNSimpleResponse = Objects.nonNull(joinTopNQueryResponse.getType())? ((SimpleResponse) joinTopNQueryResponse): null;
+    SimpleResponse topNSimpleResponse =
+        Objects.nonNull(topNQueryResponse.getType()) ? ((SimpleResponse) topNQueryResponse) : null;
+    SimpleResponse joinTopNSimpleResponse = Objects.nonNull(joinTopNQueryResponse.getType()) ?
+        ((SimpleResponse) joinTopNQueryResponse) :
+        null;
     List<Map<String, Object>> simpleResponseList = new ArrayList<>();
     Double overallDoubleValue;
     SimpleResponse simpleResponse = new SimpleResponse();
@@ -77,21 +81,21 @@ public class PercentageMetric extends MetricHandler {
       if (Objects.isNull(topNSimpleResponse) && Objects.isNull(joinTopNSimpleResponse)) {
         return topNSimpleResponse;
       }
-      simpleResponse = Objects.nonNull(topNSimpleResponse)? topNSimpleResponse: joinTopNSimpleResponse;
+      simpleResponse =
+          Objects.nonNull(topNSimpleResponse) ? topNSimpleResponse : joinTopNSimpleResponse;
       simpleResponseList = simpleResponse.getQueryResponse().values().iterator().next();
-      overallDoubleValue = Double.valueOf(
+      overallDoubleValue =
           ((Number) timeSeriesSimpleResponse.getQueryResponse().values().iterator().next().get(0)
-              .get(metric)).doubleValue());
+              .get(metric)).doubleValue();
       for (Map<String, Object> singleResponse : simpleResponseList) {
-        String metricPercentage = metric.concat("_percentage");
-        Double metricValue =
-            Double.valueOf(((Number) singleResponse.get(metric)).doubleValue());
+        String metricPercentage = metric.concat(PERCENTAGE_SUFFIX);
+        Double metricValue = ((Number) singleResponse.get(metric)).doubleValue();
         singleResponse.put(metricPercentage, (metricValue / overallDoubleValue) * 100);
       }
     } catch (ArithmeticException ex) {
       log.error("Division by zero exception", ex);
       for (Map<String, Object> singleResponse : simpleResponseList) {
-        String metricPercentage = metric.concat("_percentage");
+        String metricPercentage = metric.concat(PERCENTAGE_SUFFIX);
         singleResponse.put(metricPercentage, 0);
       }
     }
