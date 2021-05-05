@@ -77,26 +77,28 @@ public class PercentageMetric extends MetricHandler {
     List<Map<String, Object>> simpleResponseList = new ArrayList<>();
     Double overallDoubleValue;
     SimpleResponse simpleResponse = new SimpleResponse();
-    try {
-      if (Objects.isNull(topNSimpleResponse) && Objects.isNull(joinTopNSimpleResponse)) {
-        return topNSimpleResponse;
+    if (Objects.isNull(topNSimpleResponse) && Objects.isNull(joinTopNSimpleResponse)) {
+      return topNSimpleResponse;
+    }
+    overallDoubleValue =
+        ((Number) timeSeriesSimpleResponse.getQueryResponse().values().iterator().next().get(0)
+            .get(metric)).doubleValue();
+    if (overallDoubleValue == 0){
+      log.error("overallMetricValue is zero");
+      for (Map<String, Object> singleResponse : simpleResponseList) {
+        String metricPercentage = metric.concat(PERCENTAGE_SUFFIX);
+        singleResponse.put(metricPercentage, 0);
       }
+    }
+    else
+    {
       simpleResponse =
           Objects.nonNull(topNSimpleResponse) ? topNSimpleResponse : joinTopNSimpleResponse;
       simpleResponseList = simpleResponse.getQueryResponse().values().iterator().next();
-      overallDoubleValue =
-          ((Number) timeSeriesSimpleResponse.getQueryResponse().values().iterator().next().get(0)
-              .get(metric)).doubleValue();
       for (Map<String, Object> singleResponse : simpleResponseList) {
         String metricPercentage = metric.concat(PERCENTAGE_SUFFIX);
         Double metricValue = ((Number) singleResponse.get(metric)).doubleValue();
         singleResponse.put(metricPercentage, (metricValue / overallDoubleValue) * 100);
-      }
-    } catch (ArithmeticException ex) {
-      log.error("Division by zero exception", ex);
-      for (Map<String, Object> singleResponse : simpleResponseList) {
-        String metricPercentage = metric.concat(PERCENTAGE_SUFFIX);
-        singleResponse.put(metricPercentage, 0);
       }
     }
     return simpleResponse;
