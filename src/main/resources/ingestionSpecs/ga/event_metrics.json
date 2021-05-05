@@ -36,7 +36,7 @@
           "medium",
           {
             "type": "long",
-            "name": "product_adds_to_cart"
+            "name": "initiated_sales"
           },
           {
             "type": "string",
