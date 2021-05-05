@@ -6,4 +6,5 @@ public class DruidConstants {
   public static final String DIR_PATH_PLACE_HOLDER = "{{load_path}}";
   public static final String TASK_ID = "task";
   public static final String DRUID_COMPLETE_STATUS ="complete";
+  public static final String PERCENTAGE_SUFFIX ="_percentage";
 }
