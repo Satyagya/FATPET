@@ -80,9 +80,9 @@ public class PercentageMetric extends MetricHandler {
     if (Objects.isNull(topNSimpleResponse) && Objects.isNull(joinTopNSimpleResponse)) {
       return topNSimpleResponse;
     }
-    overallDoubleValue =
+    overallDoubleValue = Objects.nonNull(timeSeriesSimpleResponse.getQueryResponse())?
         ((Number) timeSeriesSimpleResponse.getQueryResponse().values().iterator().next().get(0)
-            .get(metric)).doubleValue();
+            .get(metric)).doubleValue(): 0.0;
     if (overallDoubleValue == 0){
       log.error("overallMetricValue is zero");
       for (Map<String, Object> singleResponse : simpleResponseList) {
