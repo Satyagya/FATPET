@@ -1,0 +1,58 @@
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index_parallel",
+      "inputSource": {
+        "type": "local",
+        "baseDir": "/var/domain-intelligence/data/{{customer_id}}/{{bot_ref}}/{{load_path}}",
+        "filter": "EVENT_METRICS.csv"
+      },
+      "inputFormat": {
+        "type": "csv",
+        "findColumnsFromHeader": true
+      },
+      "appendToExisting": true
+    },
+    "tuningConfig": {
+      "type": "index_parallel",
+      "partitionsSpec": {
+        "type": "dynamic"
+      },
+      "maxRowsInMemory": 2147483647
+    },
+    "dataSchema": {
+      "dataSource": "event_metrics_{{customer_id}}_{{bot_ref}}",
+      "timestampSpec": {
+        "column": "date",
+        "format": "iso"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          "campaign",
+          "city",
+          "country",
+          "device_category",
+          "medium",
+          {
+            "type": "long",
+            "name": "initiated_sales"
+          },
+          {
+            "type": "string",
+            "name": "product_sku"
+          },
+          "product_title",
+          "product_type",
+          "region",
+          "source"
+        ]
+      },
+      "granularitySpec": {
+        "queryGranularity": "none",
+        "rollup": false,
+        "segmentGranularity": "week"
+      }
+    }
+  }
+}
