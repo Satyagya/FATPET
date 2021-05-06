@@ -21,6 +21,8 @@ public class Constants {
   public static final String EVENT = "event";
 
   public static final String GROWTH_METRIC = "growth_metric";
+  public static final String INITIATED_SALES = "initiated_sales";
+  public static final String CART_ABANDONMENT = "cart_abandonment";
   public static final String ISO_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.sss'Z'";
   public static final String YEAR = "YEAR";
   public static final String MONTH = "MONTH";
