@@ -1,6 +1,6 @@
 @Library('jenkins-library@0.28.0') _
 
-gradleVersion='4.4.1'
+gradleVersion='6.8.1'
 gradle="/opt/gradle/gradle-${gradleVersion}/bin/gradle"
 appName="data-analytics-engine"
 ansibleGitLocation="git@gitlab.com:engati/engati-infrastructure/deployment-ansible.git"
