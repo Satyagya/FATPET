@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Entity
 @IdClass(StoreSegmentationConfigurationKey.class)
 @Table(name = "SEGMENTATION_CONFIGURATION_STORE")
-public class StoreSegmentationConfiguration<S> {
+public class StoreSegmentationConfiguration {
 
   @Id
   @Column(name = "BOT_REF")

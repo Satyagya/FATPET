@@ -29,6 +29,7 @@ public class StoreSegmentationConfigurationServiceImpl implements StoreSegmentat
   public SegmentConfigResponse<SegmentationConfigurationResponse> getConfigByBotRefAndSegment(Long customerId, Long botRef, String segmentName) {
     SegmentConfigResponse<SegmentationConfigurationResponse> response = new SegmentConfigResponse<>();
     SegmentationConfigurationResponse segmentationConfigurationResponse = new SegmentationConfigurationResponse();
+    log.info("Trying to get config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
     try {
       if (customerId != null && botRef != null && StringUtils.isNotBlank(segmentName)){
         List<Long> botRefList = new ArrayList<>();
@@ -73,7 +74,7 @@ public class StoreSegmentationConfigurationServiceImpl implements StoreSegmentat
     SegmentationConfigurationResponse segmentationConfigurationResponse = new SegmentationConfigurationResponse();
     try {
       if (customerId != null && botRef != null && StringUtils.isNotBlank(segmentName)){
-        StoreSegmentationConfiguration storeSegmentationConfiguration = new StoreSegmentationConfiguration<>();
+        StoreSegmentationConfiguration storeSegmentationConfiguration = new StoreSegmentationConfiguration();
         BeanUtils.copyProperties(storeSegmentationConfiguration, segmentationConfigurationRequest);
         BeanUtils.copyProperties(segmentationConfigurationResponse, segmentationConfigurationRequest);
         storeSegmentationConfigurationRepository.save(storeSegmentationConfiguration);
