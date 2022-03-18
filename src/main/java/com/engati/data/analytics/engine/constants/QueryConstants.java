@@ -2,14 +2,14 @@ package com.engati.data.analytics.engine.constants;
 
 public class QueryConstants {
 
-   public static String recencyQuery = "select customer_id from " +
+   public static String RECENCY_QUERY = "select customer_id from " +
        "(select customer_id, aggregator(created_date)as col_name " +
        "from parquet_scan('parquet_store/botRef/*.parquet') " +
        "where cancelled_at like '%nan%' " +
        "group by customer_id)as a " +
        "where col_name operator CURRENT_DATE - INTERVAL gap day;";
 
-   public static String frequencyQuery = "select customer_id from\n" +
+   public static String FREQUENCY_QUERY = "select customer_id from\n" +
        "(select customer_id, count(distinct order_id)as orders_in_last_gap_days\n" +
        "from\n" +
        "(select customer_id, order_id, created_date\n" +
@@ -18,9 +18,9 @@ public class QueryConstants {
        "and created_date >= CURRENT_DATE - INTERVAL gap day)as a\n" +
        "group by customer_id)as b\n" +
        "where orders_in_last_gap_days operator orders_configured;";
-// operator used to handle scenarios around -> more than 20 orders in 30 days, let than 3 orders in 90 days
+// atleast one order in past 12 month -> Greater than equal 1 order in last 365 days -> opeartor => GTE, gap => 365, orders_configured => 1
 
-   public static String monetaryQuery = "select customer_id from \n" +
+   public static String MONETARY_QUERY = "select customer_id from \n" +
        "(select customer_id, ((sum_total)*1.0/(number_of_orders))as AOV,number_of_orders from\n" +
        "(select customer_id, sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
        "(select customer_id, order_id, cast(total_price as int) total_price\n" +
@@ -31,12 +31,30 @@ public class QueryConstants {
        "group by customer_id)as b)as c\n" +
        "where metric operator value";
 
-   public static String storeAOVQuery = "select round(sum_total*1.0/number_of_orders, 2)as Store_AOV from\n" +
+   public static String STORE_AOV_QUERY = "select round(sum_total*1.0/number_of_orders, 2)as STORE_AOV from\n" +
        "(select sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
        "(select order_id, cast(total_price as int) total_price from\n" +
        "parquet_scan('parquet_store/botRef/*.parquet')\n" +
        "where cancelled_at like '%nan%'\n" +
        "and created_date >= CURRENT_DATE - INTERVAL 6 MONTH\n" +
        "group by order_id, total_price)as a)as b";
+
+   public static String CUSTOMER_AOV_QUERY = "select customer_id, round(AOV,2)as AOV from \n" +
+       "(select customer_id, ((sum_total)*1.0/(number_of_orders))as AOV from\n" +
+       "(select customer_id, sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
+       "(select customer_id, order_id, cast(total_price as int) total_price\n" +
+       "from parquet_scan('parquet_store/botRef/*.parquet')\n" +
+       "where cancelled_at like '%nan%'\n" +
+       "and customer_id in customerSet" +
+       "and created_date >= CURRENT_DATE - INTERVAL 6 MONTH\n" +
+       "group by customer_id, order_id, total_price)as a\n" +
+       "group by customer_id)as b)as c" ;
+
+   public static String ORDERS_FOR_X_MONTHS = "select customer_id, count(distinct order_id)as orders__last_gap_months \n" +
+       "       from parquet_scan('parquet_store/botRef/*.parquet')\n" +
+       "       where cancelled_at like '%nan%'\n" +
+       "       and created_date >= CURRENT_DATE - INTERVAL gap MONTH\n" +
+       "       and customer_id in customerSet" +
+       "       group by customer_id";
 
 }

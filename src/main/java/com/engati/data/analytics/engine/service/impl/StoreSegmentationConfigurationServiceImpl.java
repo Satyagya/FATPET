@@ -34,7 +34,7 @@ public class StoreSegmentationConfigurationServiceImpl implements StoreSegmentat
       if (customerId != null && botRef != null && StringUtils.isNotBlank(segmentName)){
         List<Long> botRefList = new ArrayList<>();
         botRefList.add(botRef);
-        botRefList.add(Constants.defaultBotRef);
+        botRefList.add(Constants.DEFAULT_BOTREF);
         List<StoreSegmentationConfiguration> storeSegmentationConfiguration = storeSegmentationConfigurationRepository
             .findBySegmentNameAndBotRefIn(segmentName, botRefList);
         if (storeSegmentationConfiguration.stream().anyMatch(p -> p.getBotRef().longValue() == botRef)) {
@@ -47,10 +47,10 @@ public class StoreSegmentationConfigurationServiceImpl implements StoreSegmentat
         }
         else {
           Optional<StoreSegmentationConfiguration> filteredStoreSegmentationConfiguration =
-              storeSegmentationConfiguration.stream().filter(p -> p.getBotRef().longValue() == Constants.defaultBotRef).findFirst();
+              storeSegmentationConfiguration.stream().filter(p -> p.getBotRef().longValue() == Constants.DEFAULT_BOTREF).findFirst();
           BeanUtils.copyProperties(segmentationConfigurationResponse, filteredStoreSegmentationConfiguration.get());
         }
-        if(segmentationConfigurationResponse.getBotRef().longValue() == Constants.defaultBotRef){
+        if(segmentationConfigurationResponse.getBotRef().longValue() == Constants.DEFAULT_BOTREF){
           segmentationConfigurationResponse.setBotRef(botRef);
           segmentationConfigurationResponse.setCustomerId(customerId);
        }

@@ -14,8 +14,8 @@ public class CustomerSegmentationResponse {
   private String customerPhone;
   private Double storeAOV;
   private Double customerAOV;
-  private Integer ordersLast1Month;
-  private Integer ordersLast6Month;
-  private Integer ordersLast12Month;
+  private Long ordersLast1Month;
+  private Long ordersLast6Month;
+  private Long ordersLast12Month;
 
 }

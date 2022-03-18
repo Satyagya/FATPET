@@ -1,12 +1,12 @@
 package com.engati.data.analytics.engine.service;
-
-import com.engati.data.analytics.engine.common.model.SegmentConfigResponse;
-import com.engati.data.analytics.engine.model.response.SegmentationConfigurationResponse;
+import com.engati.data.analytics.engine.common.model.CustomerSegmentResponse;
+import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.List;
+
 
 public interface GenerateSegmentsService {
+    CustomerSegmentResponse<List<CustomerSegmentationResponse>> getCustomersForSegment(Long customerId, Long botRef, String segmentName) throws SQLException;
 
-  Set<Long> getCustomersForSegment(Long customerId, Long botRef, String segmentName) throws SQLException;
 }
