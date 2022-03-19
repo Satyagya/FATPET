@@ -12,6 +12,7 @@ import com.engati.data.analytics.engine.service.GenerateSegmentsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -86,55 +87,62 @@ public class GenerateSegmentsServiceImpl implements GenerateSegmentsService {
     response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
     SegmentConfigResponse<SegmentationConfigurationResponse> configDetails = storeSegmentationConfigurationService.getConfigByBotRefAndSegment(customerId, botRef, segmentName);
     log.info("Checking for Config values for the segment values for {} for botRef: {}, and customerId: {}", segmentName, botRef, customerId);
-    Set<Long> resultSet = new HashSet<>();
+    Set<Long> resultSet = null;
     Set<Long> recencySegment = null;
     if (configDetails.getResponseObject().getRecencyMetric() != null) {
       log.info("Recency configurations found for the segmentName {}", segmentName);
       recencySegment = getRecencySegment(configDetails);
-      resultSet = getMergedResultForSegmentation(recencySegment, resultSet);
     }
     Set<Long> frequencySegment = null;
     if (configDetails.getResponseObject().getFrequencyMetric() != null) {
       log.info("Frequency configurations found for the segmentName {}", segmentName);
       frequencySegment = getFrequencySegment(configDetails);
-      resultSet = getMergedResultForSegmentation(frequencySegment, resultSet);
     }
     Set<Long> monetarySegment = null;
     if (configDetails.getResponseObject().getMonetaryMetric() != null) {
       log.info("Monetary configurations found for the segmentName {}", segmentName);
       monetarySegment = getMonetarySegment(configDetails);
-      resultSet = getMergedResultForSegmentation(monetarySegment, resultSet);
     }
-    if ((configDetails.getResponseObject().getMonetaryMetric() != null) && (configDetails.getResponseObject().getRecencyMetric() != null) && (configDetails.getResponseObject().getFrequencyMetric() != null)){
-      recencySegment.retainAll(frequencySegment);
-      recencySegment.retainAll(monetarySegment);
-      resultSet = recencySegment;
-    }
+    resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
     try {
       if (resultSet.size() != 0) {
         List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
         response.setResponseObject(customerDetail);
-      }else{
+      } else {
         response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
       }
-    }catch (Exception e){
+    } catch (Exception e) {
       response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Unhandled exception caught while getting customer details for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
     }
     return response;
   }
+  private Set<Long> getIntersectionForSegments(Set<Long> set1, Set<Long> set2, Set<Long> set3){
+    List<Set<Long>> ListSegment = new ArrayList<>();
+    if(!CollectionUtils.isEmpty(set1))
+      ListSegment.add(set1);
+    if(!CollectionUtils.isEmpty(set2))
+      ListSegment.add(set2);
+    if(!CollectionUtils.isEmpty(set3))
+      ListSegment.add(set3);
 
-  private Set<Long> getMergedResultForSegmentation(Set<Long> baseResults, Set<Long> newResults) {
-    if (newResults.isEmpty()) {
-      return baseResults;
-    } else {
-      Set<Long> set = new HashSet<>();
-      for (Long longValue : baseResults) {
-        if (newResults.contains(longValue)) {
-          set.add(longValue);
-        }
-      }
-      return set;
+    if (ListSegment.size() == 0)
+      return null;
+    else if (ListSegment.size() == 1)
+      return ListSegment.get(0);
+    else if (ListSegment.size() == 2){
+      Set<Long> resSet1 = ListSegment.get(0);
+      Set<Long> resSet2 = ListSegment.get(1);
+      resSet1.retainAll(resSet2);
+      return resSet1;
+    }
+    else {
+      Set<Long> resSet1 = ListSegment.get(0);
+      Set<Long> resSet2 = ListSegment.get(1);
+      Set<Long> resSet3 = ListSegment.get(2);
+      resSet1.retainAll(resSet2);
+      resSet1.retainAll(resSet3);
+      return resSet1;
     }
   }
 

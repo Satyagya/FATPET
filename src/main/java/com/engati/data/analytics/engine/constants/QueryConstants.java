@@ -26,7 +26,7 @@ public class QueryConstants {
        "(select customer_id, order_id, cast(total_price as int) total_price\n" +
        "from parquet_scan('parquet_store/botRef/*.parquet')\n" +
        "where cancelled_at like '%nan%'\n" +
-       "and created_date >= CURRENT_DATE - INTERVAL 6 MONTH\n" +
+       "and created_date >= CURRENT_DATE - INTERVAL 12 MONTH\n" +
        "group by customer_id, order_id, total_price)as a\n" +
        "group by customer_id)as b)as c\n" +
        "where metric operator value";
@@ -36,7 +36,7 @@ public class QueryConstants {
        "(select order_id, cast(total_price as int) total_price from\n" +
        "parquet_scan('parquet_store/botRef/*.parquet')\n" +
        "where cancelled_at like '%nan%'\n" +
-       "and created_date >= CURRENT_DATE - INTERVAL 6 MONTH\n" +
+       "and created_date >= CURRENT_DATE - INTERVAL 12 MONTH\n" +
        "group by order_id, total_price)as a)as b";
 
    public static String CUSTOMER_AOV_QUERY = "select customer_id, round(AOV,2)as AOV from \n" +
@@ -46,7 +46,7 @@ public class QueryConstants {
        "from parquet_scan('parquet_store/botRef/*.parquet')\n" +
        "where cancelled_at like '%nan%'\n" +
        "and customer_id in customerSet" +
-       "and created_date >= CURRENT_DATE - INTERVAL 6 MONTH\n" +
+       "and created_date >= CURRENT_DATE - INTERVAL 12 MONTH\n" +
        "group by customer_id, order_id, total_price)as a\n" +
        "group by customer_id)as b)as c" ;
 
