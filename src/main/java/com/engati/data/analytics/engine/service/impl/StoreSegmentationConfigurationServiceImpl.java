@@ -1,8 +1,8 @@
 package com.engati.data.analytics.engine.service.impl;
 
-import com.engati.data.analytics.engine.common.model.SegmentConfigResponse;
-import com.engati.data.analytics.engine.constants.Constants;
-import com.engati.data.analytics.engine.constants.ResponseStatusCode;
+import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
+import com.engati.data.analytics.engine.constants.constant.Constants;
+import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
 import com.engati.data.analytics.engine.entity.StoreSegmentationConfiguration;
 import com.engati.data.analytics.engine.model.request.SegmentationConfigurationRequest;
 import com.engati.data.analytics.engine.model.response.SegmentationConfigurationResponse;
@@ -26,8 +26,8 @@ public class StoreSegmentationConfigurationServiceImpl implements StoreSegmentat
   private StoreSegmentationConfigurationRepository storeSegmentationConfigurationRepository;
 
   @Override
-  public SegmentConfigResponse<SegmentationConfigurationResponse> getConfigByBotRefAndSegment(Long customerId, Long botRef, String segmentName) {
-    SegmentConfigResponse<SegmentationConfigurationResponse> response = new SegmentConfigResponse<>();
+  public DataAnalyticsResponse<SegmentationConfigurationResponse> getConfigByBotRefAndSegment(Long customerId, Long botRef, String segmentName) {
+    DataAnalyticsResponse<SegmentationConfigurationResponse> response = new DataAnalyticsResponse<>();
     SegmentationConfigurationResponse segmentationConfigurationResponse = new SegmentationConfigurationResponse();
     log.info("Trying to get config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
     try {
@@ -68,14 +68,18 @@ public class StoreSegmentationConfigurationServiceImpl implements StoreSegmentat
   }
 
   @Override
-  public SegmentConfigResponse<SegmentationConfigurationResponse> updateConfigByBotRefAndSegment
+  public DataAnalyticsResponse<SegmentationConfigurationResponse> updateConfigByBotRefAndSegment
       (Long customerId, Long botRef, String segmentName, SegmentationConfigurationRequest segmentationConfigurationRequest) {
-    SegmentConfigResponse<SegmentationConfigurationResponse> response = new SegmentConfigResponse<>();
+    DataAnalyticsResponse<SegmentationConfigurationResponse> response = new DataAnalyticsResponse<>();
     SegmentationConfigurationResponse segmentationConfigurationResponse = new SegmentationConfigurationResponse();
     try {
       if (customerId != null && botRef != null && StringUtils.isNotBlank(segmentName)){
         StoreSegmentationConfiguration storeSegmentationConfiguration = new StoreSegmentationConfiguration();
+
         BeanUtils.copyProperties(storeSegmentationConfiguration, segmentationConfigurationRequest);
+        storeSegmentationConfiguration.setBotRef(botRef);
+        storeSegmentationConfiguration.setCustomerId(customerId);
+        storeSegmentationConfiguration.setSegmentName(segmentName);
         BeanUtils.copyProperties(segmentationConfigurationResponse, segmentationConfigurationRequest);
         storeSegmentationConfigurationRepository.save(storeSegmentationConfiguration);
         response.setResponseObject(segmentationConfigurationResponse);

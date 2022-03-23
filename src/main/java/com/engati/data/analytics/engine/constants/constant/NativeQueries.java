@@ -1,6 +1,6 @@
-package com.engati.data.analytics.engine.constants;
+package com.engati.data.analytics.engine.constants.constant;
 
-public class QueryConstants {
+public class NativeQueries {
 
    public static String RECENCY_QUERY = "select customer_id from " +
        "(select customer_id, aggregator(created_date)as col_name " +

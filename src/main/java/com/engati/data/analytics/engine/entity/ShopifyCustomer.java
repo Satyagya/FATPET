@@ -1,8 +1,5 @@
 package com.engati.data.analytics.engine.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -16,8 +13,8 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "shopify_customer")
-public class Shopify_Customer {
+@Table(name = "shopify_customer_backup")
+public class ShopifyCustomer {
 
   @Id
   @Column(name = "id")

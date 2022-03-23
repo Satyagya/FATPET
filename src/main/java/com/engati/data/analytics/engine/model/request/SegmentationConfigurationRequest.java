@@ -9,9 +9,6 @@ import lombok.*;
 @ToString(doNotUseGetters = true)
 public class SegmentationConfigurationRequest {
 
-  private Long botRef;
-  private Long customerId;
-  private String segmentName;
   private String recencyMetric;
   private String recencyOperator;
   private Long recencyValue;
