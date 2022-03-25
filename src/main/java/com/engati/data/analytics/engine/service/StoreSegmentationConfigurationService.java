@@ -12,5 +12,5 @@ public interface StoreSegmentationConfigurationService {
 
   DataAnalyticsResponse<SegmentationConfigurationResponse> getConfigByBotRefAndSegment (Long customerId, Long botRef, String segmentName);
 
-  DataAnalyticsResponse<SegmentationConfigurationResponse> updateConfigByBotRefAndSegment(Long customerId, Long botRef, String segmentName, SegmentationConfigurationRequest segmentationConfigurationRequest);
+  DataAnalyticsResponse<StoreSegmentationConfiguration> updateConfigByBotRefAndSegment(Long customerId, Long botRef, String segmentName, SegmentationConfigurationRequest segmentationConfigurationRequest);
 }

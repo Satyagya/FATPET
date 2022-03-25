@@ -1,5 +1,6 @@
 package com.engati.data.analytics.engine.service.impl;
 
+import com.engati.data.analytics.engine.Utils.CommonUtils;
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.constants.constant.NativeQueries;
@@ -23,14 +24,14 @@ import java.util.*;
 @Service("com.engati.data.analytics.engine.service.SegmentsService")
 public class SegmentServiceImpl implements SegmentService {
 
-  Connection conn;
-  {
-    try {
-      conn = DriverManager.getConnection(Constants.DUCKDB_CONNECTION_URI);
-    } catch (SQLException e) {
-      log.error("Failed to connect to DuckDB", e);
-    }
-  }
+//  Connection conn;
+//  {
+//    try {
+//      conn = DriverManager.getConnection(Constants.DUCKDB_CONNECTION_URI);
+//    } catch (SQLException e) {
+//      log.error("Failed to connect to DuckDB", e);
+//    }
+//  }
 
   @Autowired
   private StoreSegmentationConfigurationServiceImpl storeSegmentationConfigurationService;
@@ -164,7 +165,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     }
     query = query.replace(QueryConstants.VALUE, configDetails.getResponseObject().getMonetaryValue());
-    Set<Long> monetaryList = executeQuery(query);
+    Set<Long> monetaryList = CommonUtils.executeQuery(query);
     return monetaryList;
   }
 
@@ -174,7 +175,7 @@ public class SegmentServiceImpl implements SegmentService {
     query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
     query = query.replace(QueryConstants.GAP, configDetails.getResponseObject().getFrequencyValue().toString());
     query = query.replace(QueryConstants.ORDERS_CONFIGURED, configDetails.getResponseObject().getFrequencyMetric().toString());
-    Set<Long> frequencyList = executeQuery(query);
+    Set<Long> frequencyList = CommonUtils.executeQuery(query);
     return frequencyList;
   }
 
@@ -189,57 +190,17 @@ public class SegmentServiceImpl implements SegmentService {
     query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
     query = query.replace(QueryConstants.GAP, configDetails.getResponseObject().getRecencyValue().toString());
     query = query.replace(QueryConstants.COLUMN_NAME, configDetails.getResponseObject().getRecencyMetric().toLowerCase(Locale.ROOT));
-    Set<Long> recencyList = executeQuery(query);
+    Set<Long> recencyList = CommonUtils.executeQuery(query);
     return recencyList;
   }
 
-  private Map<Long, Map<String, Object>> executeQueryForDetails(String query) {
-    Statement statement = null;
-    Map<Long, Map<String, Object>> querySet = new HashMap<>();
-    try {
-      statement = conn.createStatement();
-      ResultSet rs = statement.executeQuery(query);
-      ResultSetMetaData md = rs.getMetaData();
-      int columns = md.getColumnCount();
 
-      while (rs.next()) {
-        HashMap row = new HashMap(columns);
-        for (int i = 1; i <= columns; ++i) {
-          row.put(md.getColumnName(i), rs.getObject(i));
-        }
-        querySet.put((Long) row.get(Constants.CUSTOMER_ID), row);
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-    return querySet;
-  }
-
-  private Set<Long> executeQuery(String query) {
-    Statement statement = null;
-    Set<Long> querySet = new LinkedHashSet<>();
-    try {
-      statement = conn.createStatement();
-      ResultSet rs = statement.executeQuery(query);
-      ResultSetMetaData md = rs.getMetaData();
-      int columns = md.getColumnCount();
-      while (rs.next()) {
-        HashMap row = new HashMap(columns);
-        for (int i = 1; i <= columns; ++i) {
-          row.put(md.getColumnName(i), rs.getObject(i));
-        }
-        querySet.add((Long) row.get(Constants.CUSTOMER_ID));
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-    }
-    return querySet;
-  }
 
   private String getStoreAOV(Long botRef) throws SQLException {
     Statement statement = null;
     ResultSet rs = null;
     try {
+      Connection conn = CommonUtils.getDuckDBConnection();
       statement = conn.createStatement();
       String query = NativeQueries.STORE_AOV_QUERY;
       String result = query.replace(Constants.BOT_REF, botRef.toString());
@@ -258,7 +219,7 @@ public class SegmentServiceImpl implements SegmentService {
     query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
     query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
     query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
-    Map<Long, Map<String, Object>> customerAOV = executeQueryForDetails(query);
+    Map<Long, Map<String, Object>> customerAOV = CommonUtils.executeQueryForDetails(query, "customer_id");
     return customerAOV;
   }
 
@@ -270,7 +231,7 @@ public class SegmentServiceImpl implements SegmentService {
     if (Month == 1) query = query.replace(QueryConstants.MONTHS, QueryConstants.MONTH);
     query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
     query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
-    Map<Long, Map<String, Object>> customerOrders = executeQueryForDetails(query);
+    Map<Long, Map<String, Object>> customerOrders = CommonUtils.executeQueryForDetails(query, "customer_id");
     return customerOrders;
   }
 

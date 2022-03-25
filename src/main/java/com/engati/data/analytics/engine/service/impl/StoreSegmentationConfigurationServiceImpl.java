@@ -68,10 +68,9 @@ public class StoreSegmentationConfigurationServiceImpl implements StoreSegmentat
   }
 
   @Override
-  public DataAnalyticsResponse<SegmentationConfigurationResponse> updateConfigByBotRefAndSegment
+  public DataAnalyticsResponse<StoreSegmentationConfiguration> updateConfigByBotRefAndSegment
       (Long customerId, Long botRef, String segmentName, SegmentationConfigurationRequest segmentationConfigurationRequest) {
-    DataAnalyticsResponse<SegmentationConfigurationResponse> response = new DataAnalyticsResponse<>();
-    SegmentationConfigurationResponse segmentationConfigurationResponse = new SegmentationConfigurationResponse();
+    DataAnalyticsResponse<StoreSegmentationConfiguration> response = new DataAnalyticsResponse<>();
     try {
       if (customerId != null && botRef != null && StringUtils.isNotBlank(segmentName)){
         StoreSegmentationConfiguration storeSegmentationConfiguration = new StoreSegmentationConfiguration();
@@ -80,9 +79,8 @@ public class StoreSegmentationConfigurationServiceImpl implements StoreSegmentat
         storeSegmentationConfiguration.setBotRef(botRef);
         storeSegmentationConfiguration.setCustomerId(customerId);
         storeSegmentationConfiguration.setSegmentName(segmentName);
-        BeanUtils.copyProperties(segmentationConfigurationResponse, segmentationConfigurationRequest);
-        storeSegmentationConfigurationRepository.save(storeSegmentationConfiguration);
-        response.setResponseObject(segmentationConfigurationResponse);
+        storeSegmentationConfiguration = storeSegmentationConfigurationRepository.save(storeSegmentationConfiguration);
+        response.setResponseObject(storeSegmentationConfiguration);
         response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
       }
     } catch (Exception e) {

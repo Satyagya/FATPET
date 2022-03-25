@@ -38,7 +38,7 @@ public class StoreSegmentationConfigurationController {
       @PathVariable(name = ApiPathConstants.SEGMENT_NAME) String segmentName) {
     log.info("Got call for updateSegmentConfig for customerId: {}, botRef: {}, segmentName: {}",
         customerId, botRef, segmentName);
-    DataAnalyticsResponse<SegmentationConfigurationResponse> response =
+    DataAnalyticsResponse<StoreSegmentationConfiguration> response =
         storeSegmentationConfigurationService.updateConfigByBotRefAndSegment(customerId, botRef, segmentName, segmentationConfigurationRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
