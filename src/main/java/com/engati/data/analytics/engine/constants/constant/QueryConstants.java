@@ -38,8 +38,8 @@ public class QueryConstants {
   public static String FROM_DATE = "from_date";
   public static String TO_DATE = "to_date";
   public static String COLLECTION_NAME = "collection_name";
-  public static String COLLECTION_BASE = "and collection = collection_name";
-  public static String PRODUCT_TYPE_BASE = "and product_type = productType";
+  public static String COLLECTION_BASE = "and collection in (collection_name)";
+  public static String PRODUCT_TYPE_BASE = "and product_type in (productType)";
   public static String PRODUCT_TYPE = "productType";
   public static String LINE_ITEM_ID = "line_item_id";
   public static String ORDER_ID = "order_id";

@@ -18,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("com.engati.data.analytics.engine.service.AnalyticsService")
@@ -95,13 +96,15 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       query = query.replace(QueryConstants.TO_DATE, QueryConstants.QUOTE_MARK+purchaseHistoryRequest.getEndTime().toString()+QueryConstants.QUOTE_MARK);
     }
 
-    if (purchaseHistoryRequest.getCollection() != null)
-      query = query.replace(QueryConstants.COLLECTION_NAME, QueryConstants.QUOTE_MARK+purchaseHistoryRequest.getCollection()+QueryConstants.QUOTE_MARK);
+    if (!CollectionUtils.isEmpty(purchaseHistoryRequest.getCollection()))
+      query = query.replace(QueryConstants.COLLECTION_NAME, purchaseHistoryRequest.getCollection()
+          .stream().collect(Collectors.joining("','", "'", "'")));
     else
       query = query.replace(QueryConstants.COLLECTION_BASE, QueryConstants.EMPTY_STRING);
 
-    if (purchaseHistoryRequest.getProductType() != null)
-      query = query.replace(QueryConstants.PRODUCT_TYPE, QueryConstants.QUOTE_MARK+purchaseHistoryRequest.getProductType()+QueryConstants.QUOTE_MARK);
+    if (!CollectionUtils.isEmpty(purchaseHistoryRequest.getProductType()))
+      query = query.replace(QueryConstants.PRODUCT_TYPE, purchaseHistoryRequest.getProductType()
+          .stream().collect(Collectors.joining("','", "'", "'")));
     else
       query = query.replace(QueryConstants.PRODUCT_TYPE_BASE, QueryConstants.EMPTY_STRING);
 

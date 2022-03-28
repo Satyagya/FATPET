@@ -3,6 +3,7 @@ package com.engati.data.analytics.engine.model.request;
 import lombok.Data;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 public class PurchaseHistoryRequest {
@@ -11,7 +12,7 @@ public class PurchaseHistoryRequest {
   private Long customerId;
   private Timestamp startTime;
   private Timestamp endTime;
-  private String collection;
-  private String productType;
+  private List<String> collection;
+  private List<String> productType;
 
 }

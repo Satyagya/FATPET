@@ -57,27 +57,37 @@ public class NativeQueries {
        "       and customer_id in customerSet" +
        "       group by customer_id";
 
-   public static String PRODUCT_VARIANTS_BY_UNIT_SALES = "select product_id, variant_id\n" +
-       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet') " +
-       "where product_id in\n" +
-       "(select product_id from \n" +
-       "(select product_id, count(distinct order_id)as OrderCount\n" +
-       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet') " +
-       "where cancelled_at like '%nan%'\n" +
-       "--add product_type-- \n" +
-       "--add collection-- \n" +
-       "--add product_tags-- \n" +
-       "--add productIds-- \n" +
-       "group by product_id))\n" +
-       "group by product_id, variant_id\n" +
-       "order by count(variant_id) DESC\n" +
-       "Limit number_of_results";
+   public static String PRODUCT_VARIANTS_BY_UNIT_SALES = "with base as\n" +
+       "       (select product_id, variant_id, count(variant_id) as variant_sales\n" +
+       "          from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet') " +
+       "             where product_id in\n" +
+       "             (select product_id from\n" +
+       "                     (select product_id, count(distinct order_id)as product_sales\n" +
+       "                            from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet') " +
+       "                                   where cancelled_at like '%nan%'\n" +
+       "                                   --add product_type-- \n" +
+       "                                   --add collection-- \n" +
+       "                                   --add product_tags-- \n" +
+       "                                   --add productIds-- \n" +
+       "                                   group by product_id\n" +
+       "                     )\n" +
+       "              )\n" +
+       "              group by product_id, variant_id\n" +
+       "              order by variant_sales\n" +
+       "              DESC\n" +
+       "       )\n" +
+       "select product_id, variant_id\n" +
+       "from base \n" +
+       "QUALIFY \n" +
+       "row_number() over (partition by product_id) <= 2\n" +
+       "order by variant_sales desc\n" +
+       "limit number_of_results";
 
   public static final String PURCHASE_HISTORY = "select order_id, line_item_id, product_id, variant_id, collection_id, customer_id, created_at, bot_ref, line_item_price\n" +
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet') \n" +
       "where cancelled_at like '%nan%'\n" +
       "and created_at between from_date and to_date\n" +
-      "and collection = collection_name\n" +
-      "and product_type = productType";
+      "and collection in (collection_name) \n" +
+      "and product_type in (productType)";
 
 }
