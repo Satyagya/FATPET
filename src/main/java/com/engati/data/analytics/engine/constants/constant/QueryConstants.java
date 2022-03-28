@@ -25,4 +25,14 @@ public class QueryConstants {
   public static String ORDERS_LAST_12_MONTHS = "orders__last_12_months";
   public static String ORDERS_LAST_6_MONTHS = "orders__last_6_months";
   public static String ORDERS_LAST_1_MONTH = "orders__last_1_month";
+  public static String NUMBER_OF_RESULTS = "number_of_results";
+  public static String ADD_COLLECTION_DETAILS_TO_QUERY = "--add collection--";
+  public static String ADD_PRODUCT_TYPE_TO_QUERY = "--add product_type--";
+  public static String ADD_PRODUCT_TAG_TO_QUERY = "--add product_tags--";
+  public static String ADD_PRODUCT_IDS_TO_QUERY = "--add productIds--";
+  public static String EMPTY_STRING = "";
+
+
+
+
 }

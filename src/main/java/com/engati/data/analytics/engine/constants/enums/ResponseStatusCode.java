@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 public enum ResponseStatusCode implements AppCode<ResponseStatusCode> {
   PROCESSING_ERROR(999, "PROCESSING_ERROR"),
   SUCCESS(1000, "SUCCESS"),
-  DATA_VALIDATION_FAILED(25001, "DATA_VALIDATION_FAILED"),
   EMPTY_SEGMENT(9999, "EMPTY_SEGMENT");
 
   private final int code;

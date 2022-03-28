@@ -7,10 +7,12 @@ import com.engati.data.analytics.engine.constants.constant.NativeQueries;
 import com.engati.data.analytics.engine.constants.constant.QueryConstants;
 import com.engati.data.analytics.engine.constants.enums.QueryOperators;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
+import com.engati.data.analytics.engine.entity.ShopifyCustomer;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
-import com.engati.data.analytics.engine.model.response.SegmentationConfigurationResponse;
+import com.engati.data.analytics.engine.model.response.CustomerSegmentationConfigurationResponse;
 import com.engati.data.analytics.engine.repository.SegmentRepository;
 import com.engati.data.analytics.engine.service.SegmentService;
+import com.engati.data.analytics.engine.service.CustomerSegmentationConfigurationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,31 +26,22 @@ import java.util.*;
 @Service("com.engati.data.analytics.engine.service.SegmentsService")
 public class SegmentServiceImpl implements SegmentService {
 
-//  Connection conn;
-//  {
-//    try {
-//      conn = DriverManager.getConnection(Constants.DUCKDB_CONNECTION_URI);
-//    } catch (SQLException e) {
-//      log.error("Failed to connect to DuckDB", e);
-//    }
-//  }
-
   @Autowired
-  private StoreSegmentationConfigurationServiceImpl storeSegmentationConfigurationService;
+  private CustomerSegmentationConfigurationService customerSegmentationConfigurationService;
 
   @Autowired
   private SegmentRepository segmentRepository;
 
 
   private List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList, Long botRef) {
-    List<CustomerSegmentationResponse> finalList = new ArrayList<>();
+    List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
     List<Map<Long, Object>> customerDetails = segmentRepository.findByShopifyCustomerId(customerList);
 
     String storeAOV = null;
     try {
       storeAOV = getStoreAOV(botRef);
     } catch (SQLException e) {
-      e.printStackTrace();
+      log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
     }
     Map<Long, Map<String, Object>> customerAOV = getCustomerAOV(customerList, botRef);
     Map<Long, Map<String, Object>> ordersLastMonth = getOrdersForLastXMonth(customerList, botRef,1);
@@ -67,23 +60,23 @@ public class SegmentServiceImpl implements SegmentService {
       customerSegmentationResponse.setStoreAOV(Double.valueOf(storeAOV));
       customerSegmentationResponse.setCustomerAOV((Double) customerAOV.get(customerId).getOrDefault(QueryConstants.AOV, Constants.DEFAULT_AOV_VALUE));
       try {
-        customerSegmentationResponse.setOrdersLast1Month((Long) ordersLastMonth.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_1_MONTH, Constants.DEFAULT_ORDER_VALUE));
+        customerSegmentationResponse.setOrdersInLastOneMonth((Long) ordersLastMonth.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_1_MONTH, Constants.DEFAULT_ORDER_VALUE));
       } catch (NullPointerException e) {
-        customerSegmentationResponse.setOrdersLast1Month(Constants.DEFAULT_ORDER_VALUE);
+        customerSegmentationResponse.setOrdersInLastOneMonth(Constants.DEFAULT_ORDER_VALUE);
       }
       try {
-        customerSegmentationResponse.setOrdersLast6Month((Long) ordersLast6Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_6_MONTHS, Constants.DEFAULT_ORDER_VALUE));
+        customerSegmentationResponse.setOrdersInLastSixMonths((Long) ordersLast6Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_6_MONTHS, Constants.DEFAULT_ORDER_VALUE));
       } catch (NullPointerException e) {
-        customerSegmentationResponse.setOrdersLast6Month(Constants.DEFAULT_ORDER_VALUE);
+        customerSegmentationResponse.setOrdersInLastSixMonths(Constants.DEFAULT_ORDER_VALUE);
       }
       try {
-        customerSegmentationResponse.setOrdersLast12Month((Long) ordersLast12Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_12_MONTHS, Constants.DEFAULT_ORDER_VALUE));
+        customerSegmentationResponse.setOrdersInLastTwelveMonths((Long) ordersLast12Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_12_MONTHS, Constants.DEFAULT_ORDER_VALUE));
       } catch (NullPointerException e) {
-        customerSegmentationResponse.setOrdersLast12Month(Constants.DEFAULT_ORDER_VALUE);
+        customerSegmentationResponse.setOrdersInLastTwelveMonths(Constants.DEFAULT_ORDER_VALUE);
       }
-      finalList.add(customerSegmentationResponse);
+      customerSegmentationResponseList.add(customerSegmentationResponse);
     }
-    return finalList;
+    return customerSegmentationResponseList;
   }
 
   @Override
@@ -91,7 +84,7 @@ public class SegmentServiceImpl implements SegmentService {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
     response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
-    DataAnalyticsResponse<SegmentationConfigurationResponse> configDetails = storeSegmentationConfigurationService.getConfigByBotRefAndSegment(customerId, botRef, segmentName);
+    DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getConfigByBotRefAndSegment(customerId, botRef, segmentName);
     log.info("Checking for Config values for the segment values for {} for botRef: {}, and customerId: {}", segmentName, botRef, customerId);
     Set<Long> resultSet = null;
     Set<Long> recencySegment = null;
@@ -119,40 +112,40 @@ public class SegmentServiceImpl implements SegmentService {
       }
     } catch (Exception e) {
       response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
-      log.error("Unhandled exception caught while getting customer details for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
+      log.error("Exception caught while getting customer details for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName, e);
     }
     return response;
   }
-  private Set<Long> getIntersectionForSegments(Set<Long> set1, Set<Long> set2, Set<Long> set3){
-    List<Set<Long>> ListSegment = new ArrayList<>();
-    if(!CollectionUtils.isEmpty(set1))
-      ListSegment.add(set1);
-    if(!CollectionUtils.isEmpty(set2))
-      ListSegment.add(set2);
-    if(!CollectionUtils.isEmpty(set3))
-      ListSegment.add(set3);
+  private Set<Long> getIntersectionForSegments(Set<Long> recencySet, Set<Long> frequencySet, Set<Long> monetarySet){
+    List<Set<Long>> listSegment = new ArrayList<>();
+    if(!CollectionUtils.isEmpty(recencySet))
+      listSegment.add(recencySet);
+    if(!CollectionUtils.isEmpty(frequencySet))
+      listSegment.add(frequencySet);
+    if(!CollectionUtils.isEmpty(monetarySet))
+      listSegment.add(monetarySet);
 
-    if (ListSegment.size() == 0)
+    if (listSegment.size() == 0)
       return null;
-    else if (ListSegment.size() == 1)
-      return ListSegment.get(0);
-    else if (ListSegment.size() == 2){
-      Set<Long> resSet1 = ListSegment.get(0);
-      Set<Long> resSet2 = ListSegment.get(1);
+    else if (listSegment.size() == 1)
+      return listSegment.get(0);
+    else if (listSegment.size() == 2){
+      Set<Long> resSet1 = listSegment.get(0);
+      Set<Long> resSet2 = listSegment.get(1);
       resSet1.retainAll(resSet2);
       return resSet1;
     }
     else {
-      Set<Long> resSet1 = ListSegment.get(0);
-      Set<Long> resSet2 = ListSegment.get(1);
-      Set<Long> resSet3 = ListSegment.get(2);
+      Set<Long> resSet1 = listSegment.get(0);
+      Set<Long> resSet2 = listSegment.get(1);
+      Set<Long> resSet3 = listSegment.get(2);
       resSet1.retainAll(resSet2);
       resSet1.retainAll(resSet3);
       return resSet1;
     }
   }
 
-  private Set<Long> getMonetarySegment(DataAnalyticsResponse<SegmentationConfigurationResponse> configDetails)  {
+  private Set<Long> getMonetarySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails)  {
     String query = NativeQueries.MONETARY_QUERY;
     query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getMonetaryOperator()));
     query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
@@ -161,7 +154,7 @@ public class SegmentServiceImpl implements SegmentService {
       try {
         query = query.replace(QueryConstants.VALUE, getStoreAOV(configDetails.getResponseObject().getBotRef()));
       } catch (SQLException e) {
-        e.printStackTrace();
+        log.error("Exception while getting StoreAOV for botRef: {}", configDetails.getResponseObject().getBotRef().toString(), e);
       }
     }
     query = query.replace(QueryConstants.VALUE, configDetails.getResponseObject().getMonetaryValue());
@@ -169,7 +162,7 @@ public class SegmentServiceImpl implements SegmentService {
     return monetaryList;
   }
 
-  private Set<Long> getFrequencySegment(DataAnalyticsResponse<SegmentationConfigurationResponse> configDetails) {
+  private Set<Long> getFrequencySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails) {
     String query = NativeQueries.FREQUENCY_QUERY;
     query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getFrequencyOperator()));
     query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
@@ -179,7 +172,7 @@ public class SegmentServiceImpl implements SegmentService {
     return frequencyList;
   }
 
-  private Set<Long> getRecencySegment(DataAnalyticsResponse<SegmentationConfigurationResponse> configDetails)  {
+  private Set<Long> getRecencySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails)  {
     String query = NativeQueries.RECENCY_QUERY;
     query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getRecencyOperator()));
     if (configDetails.getResponseObject().getRecencyMetric().equals(QueryConstants.LAST_ORDER_DATE)) {
@@ -198,19 +191,18 @@ public class SegmentServiceImpl implements SegmentService {
 
   private String getStoreAOV(Long botRef) throws SQLException {
     Statement statement = null;
-    ResultSet rs = null;
+    ResultSet resultSet = null;
     try {
       Connection conn = CommonUtils.getDuckDBConnection();
       statement = conn.createStatement();
       String query = NativeQueries.STORE_AOV_QUERY;
       String result = query.replace(Constants.BOT_REF, botRef.toString());
-      rs = statement.executeQuery(result);
-//    Todo change the var rs
-      rs.next();
+      resultSet = statement.executeQuery(result);
+      resultSet.next();
     } catch (SQLException e) {
-      e.printStackTrace();
+     log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
     }
-    return String.valueOf(rs.getDouble(QueryConstants.STORE_AOV));
+    return String.valueOf(resultSet.getDouble(QueryConstants.STORE_AOV));
   }
 
   private Map<Long, Map<String, Object>> getCustomerAOV(Set<Long> customerIds, Long botRef) {
@@ -219,7 +211,7 @@ public class SegmentServiceImpl implements SegmentService {
     query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
     query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
     query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
-    Map<Long, Map<String, Object>> customerAOV = CommonUtils.executeQueryForDetails(query, "customer_id");
+    Map<Long, Map<String, Object>> customerAOV = CommonUtils.executeQueryForDetails(query, Constants.CUSTOMER_ID );
     return customerAOV;
   }
 
@@ -231,7 +223,7 @@ public class SegmentServiceImpl implements SegmentService {
     if (Month == 1) query = query.replace(QueryConstants.MONTHS, QueryConstants.MONTH);
     query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
     query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
-    Map<Long, Map<String, Object>> customerOrders = CommonUtils.executeQueryForDetails(query, "customer_id");
+    Map<Long, Map<String, Object>> customerOrders = CommonUtils.executeQueryForDetails(query, Constants.CUSTOMER_ID );
     return customerOrders;
   }
 

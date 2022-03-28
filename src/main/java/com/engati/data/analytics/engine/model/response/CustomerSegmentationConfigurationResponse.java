@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(doNotUseGetters = true)
-public class SegmentationConfigurationResponse {
+public class CustomerSegmentationConfigurationResponse {
 
   private Long botRef;
   private Long customerId;

@@ -26,51 +26,48 @@ public class CommonUtils {
     Statement statement = null;
     Set<Long> querySet = new LinkedHashSet<>();
     try {
-      Connection conn = CommonUtils.getDuckDBConnection();
-      statement = conn.createStatement();
-      ResultSet rs = statement.executeQuery(query);
-      ResultSetMetaData md = rs.getMetaData();
+      Connection connection = CommonUtils.getDuckDBConnection();
+      statement = connection.createStatement();
+      ResultSet resultSet = statement.executeQuery(query);
+      ResultSetMetaData md = resultSet.getMetaData();
       int columns = md.getColumnCount();
-      while (rs.next()) {
+      while (resultSet.next()) {
         HashMap row = new HashMap(columns);
         for (int i = 1; i <= columns; ++i) {
-          row.put(md.getColumnName(i), rs.getObject(i));
+          row.put(md.getColumnName(i), resultSet.getObject(i));
         }
         querySet.add((Long) row.get(Constants.CUSTOMER_ID));
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      log.error("Exception encountered while executing Query: {}", query, e);
     }
     return querySet;
   }
 
 
-  //  public List<Map<String, Object>> executeQueryForDetails(String query) {
   public static Map<Long, Map<String, Object>> executeQueryForDetails(String query, String key) {
     Statement statement = null;
     Map<Long, Map<String, Object>> querySet = new LinkedHashMap<>();
-//    List<Map<String, Object>> test = new ArrayList<>();
     try {
-      Connection conn = CommonUtils.getDuckDBConnection();
-      statement = conn.createStatement();
-      ResultSet rs = statement.executeQuery(query);
-      ResultSetMetaData md = rs.getMetaData();
+      Connection connection = CommonUtils.getDuckDBConnection();
+      statement = connection.createStatement();
+      ResultSet resultSet = statement.executeQuery(query);
+      ResultSetMetaData md = resultSet.getMetaData();
       int columns = md.getColumnCount();
 
-      while (rs.next()) {
+      while (resultSet.next()) {
         HashMap row = new HashMap(columns);
-        for (int i = 1; i <= columns; ++i) {
-          row.put(md.getColumnName(i), rs.getObject(i));
+        for (int i = 1; i <= columns;   ++i) {
+          row.put(md.getColumnName(i), resultSet.getObject(i));
         }
-//        test.add(row);
         querySet.put((Long) row.get(key), row);
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      log.error("Exception encountered while executing Query for fetching details: {}", query, e);
     }
     return querySet;
-    // return test;
   }
+
 
 
 }

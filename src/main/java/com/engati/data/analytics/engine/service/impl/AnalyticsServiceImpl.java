@@ -28,47 +28,46 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     List<ProductVariantResponse> responseList = new ArrayList<>();
       String query = NativeQueries.PRODUCT_VARIANTS_BY_UNIT_SALES;
       query = query.replace(Constants.BOT_REF, botRef.toString());
-      query = query.replace("number_of_results", productDiscoveryRequest.getNumberOfVariantsInResponse().toString());
+      query = query.replace(QueryConstants.NUMBER_OF_RESULTS, productDiscoveryRequest.getNumberOfVariantsInResponse().toString());
       if(productDiscoveryRequest.getCollection() != null){
-        query = query.replace("--add collection--", "and collection = '"+productDiscoveryRequest.getCollection()+"'");
-        query = query.replace("--add product_type--", "");
-        query = query.replace("--add product_tags--", "");
-        query = query.replace("--add productIds--", "");
+        query = query.replace(QueryConstants.ADD_COLLECTION_DETAILS_TO_QUERY, "and collection = '"+productDiscoveryRequest.getCollection()+"'");
+        query = query.replace(QueryConstants.ADD_PRODUCT_TYPE_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
       }
       else if (productDiscoveryRequest.getProductType() != null){
-        query = query.replace("--add product_type--", "and product_type = '"+productDiscoveryRequest.getProductType()+"'");
-        query = query.replace("--add collection--", "");
-        query = query.replace("--add product_tags--", "");
-        query = query.replace("--add productIds--", "");
+        query = query.replace(QueryConstants.ADD_PRODUCT_TYPE_TO_QUERY, "and product_type = '"+productDiscoveryRequest.getProductType()+"'");
+        query = query.replace(QueryConstants.ADD_COLLECTION_DETAILS_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
 
       }
       else if (productDiscoveryRequest.getProductTag() != null){
-        query = query.replace("--add product_tags--", "and product_tags in '%"+productDiscoveryRequest.getProductTag()+"%'");
-        query = query.replace("--add collection--", "");
-        query = query.replace("--add product_type--", "");
-        query = query.replace("--add productIds--", "");
+        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, "and product_tags in '%"+productDiscoveryRequest.getProductTag()+"%'");
+        query = query.replace(QueryConstants.ADD_COLLECTION_DETAILS_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_TYPE_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
       }
       else if (!CollectionUtils.isEmpty(productDiscoveryRequest.getProductIds())){
-        query = query.replace("--add product_tags--", "");
-        query = query.replace("--add collection--", "");
-        query = query.replace("--add product_type--", "");
-        query = query.replace("--add productIds--", " and product_id in "+productDiscoveryRequest.getProductIds());
+        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_COLLECTION_DETAILS_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_TYPE_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, " and product_id in "+productDiscoveryRequest.getProductIds());
         query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
         query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
       }
       else{
-        query = query.replace("--add collection--", "");
-        query = query.replace("--add product_tags--", "");
-        query = query.replace("--add product_type--", "");
-        query = query.replace("--add productIds--", "");
-
+        query = query.replace(QueryConstants.ADD_COLLECTION_DETAILS_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_TYPE_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, QueryConstants.EMPTY_STRING);
+        query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
       }
-    Map<Long, Map<String, Object>> productVariants = CommonUtils.executeQueryForDetails(query, "variant_id");
+    Map<Long, Map<String, Object>> productVariants = CommonUtils.executeQueryForDetails(query, Constants.VARIANT_ID);
       for ( Map.Entry<Long, Map<String, Object>> productVariant : productVariants.entrySet()){
         Map<String, Object> variantMap = productVariant.getValue();
         ProductVariantResponse productVariantResponse = new ProductVariantResponse();
-        productVariantResponse.setVariantId((Long) variantMap.get("variant_id"));
-        productVariantResponse.setProductId((Long) variantMap.get("product_id"));
+        productVariantResponse.setVariantId((Long) variantMap.get(Constants.VARIANT_ID));
+        productVariantResponse.setProductId((Long) variantMap.get(Constants.PRODUCT_ID));
         responseList.add(productVariantResponse);
       }
       response.setResponseObject(responseList);

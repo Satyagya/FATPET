@@ -6,20 +6,13 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.sql.Timestamp;
 
-@Getter
-@Setter
-@ToString(doNotUseGetters = true)
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data
 @Entity
 @Table(name = "shopify_customer_backup")
 public class ShopifyCustomer {
 
   @Id
-  @Column(name = "id")
-  @GeneratedValue(generator = "auto_inc_id")
-  @GenericGenerator(name = "auto_inc_id", strategy = "increment")
+  @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
   @Column(name = "user_id")

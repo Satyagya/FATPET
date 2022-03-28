@@ -17,6 +17,8 @@ public class Constants {
   public static String CUSTOMER_EMAIL = "customer_email";
   public static String CUSTOMER_NAME = "customer_name";
   public static String CUSTOMER_PHONE = "customer_phone";
+  public static String VARIANT_ID = "variant_id";
+  public static String PRODUCT_ID = "product_id";
 
 
 }

@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(doNotUseGetters = true)
-public class SegmentationConfigurationRequest {
+public class CustomerSegmentationConfigurationRequest {
 
   private String recencyMetric;
   private String recencyOperator;
