@@ -26,6 +26,14 @@ if (project.hasProperty('appVersion')) {
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        name 'nexus'
+        url "http://nexus.engati.ops:8081/repository/coviam-artifactory/"
+        credentials {
+            username repoUser
+            password repoPassword
+        }
+    }
 }
 
 apply plugin: 'java'
