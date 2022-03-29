@@ -7,6 +7,8 @@ import com.engati.data.analytics.engine.constants.constant.NativeQueries;
 import com.engati.data.analytics.engine.constants.constant.QueryConstants;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
 import com.engati.data.analytics.engine.model.request.ProductDiscoveryRequest;
+import com.engati.data.analytics.engine.model.request.PurchaseHistoryRequest;
+import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("com.engati.data.analytics.engine.service.AnalyticsService")
@@ -73,6 +76,55 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       response.setResponseObject(responseList);
       response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
       return response;
+  }
+
+  @Override
+  public DataAnalyticsResponse<List<OrderDetailsResponse>> getPurchaseHistory(PurchaseHistoryRequest purchaseHistoryRequest) {
+    DataAnalyticsResponse<List<OrderDetailsResponse>> response = new DataAnalyticsResponse<>();
+    List<OrderDetailsResponse> responseList = new ArrayList<>();
+    String query = NativeQueries.PURCHASE_HISTORY;
+    query = query.replace(Constants.BOT_REF, purchaseHistoryRequest.getBotRef().toString());
+
+    if (purchaseHistoryRequest.getStartTime() == null && purchaseHistoryRequest.getEndTime() == null)
+      query = query.replace(QueryConstants.CREATED_AT_WINDOW, QueryConstants.EMPTY_STRING);
+    else if (purchaseHistoryRequest.getStartTime() == null && purchaseHistoryRequest.getEndTime() != null)
+      query = query.replace(QueryConstants.CREATED_AT_WINDOW, QueryConstants.CREATED_AT_LT_BASE + purchaseHistoryRequest.getEndTime().toString()+ QueryConstants.QUOTE_MARK);
+    else if (purchaseHistoryRequest.getStartTime() != null && purchaseHistoryRequest.getEndTime() == null)
+      query = query.replace(QueryConstants.CREATED_AT_WINDOW, QueryConstants.CREATED_AT_GT_BASE+ purchaseHistoryRequest.getStartTime().toString() + QueryConstants.QUOTE_MARK);
+    else {
+      query = query.replace(QueryConstants.FROM_DATE, QueryConstants.QUOTE_MARK+purchaseHistoryRequest.getStartTime().toString()+QueryConstants.QUOTE_MARK);
+      query = query.replace(QueryConstants.TO_DATE, QueryConstants.QUOTE_MARK+purchaseHistoryRequest.getEndTime().toString()+QueryConstants.QUOTE_MARK);
+    }
+
+    if (!CollectionUtils.isEmpty(purchaseHistoryRequest.getCollection()))
+      query = query.replace(QueryConstants.COLLECTION_NAME, purchaseHistoryRequest.getCollection()
+          .stream().collect(Collectors.joining("','", "'", "'")));
+    else
+      query = query.replace(QueryConstants.COLLECTION_BASE, QueryConstants.EMPTY_STRING);
+
+    if (!CollectionUtils.isEmpty(purchaseHistoryRequest.getProductType()))
+      query = query.replace(QueryConstants.PRODUCT_TYPE, purchaseHistoryRequest.getProductType()
+          .stream().collect(Collectors.joining("','", "'", "'")));
+    else
+      query = query.replace(QueryConstants.PRODUCT_TYPE_BASE, QueryConstants.EMPTY_STRING);
+
+    Map<Long, Map<String, Object>> purchaseHistoryDetails = CommonUtils.executeQueryForDetails(query, QueryConstants.LINE_ITEM_ID);
+    for (Map.Entry<Long, Map<String, Object>> purchaseHistoryDetail : purchaseHistoryDetails.entrySet()) {
+      Map<String, Object> purchaseHistoryEntry = purchaseHistoryDetail.getValue();
+      OrderDetailsResponse orderDetailsResponse = new OrderDetailsResponse();
+      orderDetailsResponse.setOrderId((Long) purchaseHistoryEntry.get(QueryConstants.ORDER_ID));
+      orderDetailsResponse.setProductId((Long) purchaseHistoryEntry.get(QueryConstants.PRODUCT_ID));
+      orderDetailsResponse.setVariantId((Long) purchaseHistoryEntry.get(QueryConstants.VARIANT_ID));
+      orderDetailsResponse.setCustomerId((Long) purchaseHistoryEntry.get(QueryConstants.CUSTOMER_ID));
+      orderDetailsResponse.setCollectionId((Long) purchaseHistoryEntry.get(QueryConstants.COLLECTION_ID));
+      orderDetailsResponse.setBotRef((Long) purchaseHistoryEntry.get(QueryConstants.BOT_REF));
+      orderDetailsResponse.setCreatedDate(String.valueOf(purchaseHistoryEntry.get(QueryConstants.CREATED_AT)));
+      orderDetailsResponse.setPrice((Double) purchaseHistoryEntry.get(QueryConstants.LINE_ITEM_PRICE));
+      responseList.add(orderDetailsResponse);
+    }
+    response.setResponseObject(responseList);
+    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    return response;
   }
 }
 
