@@ -31,10 +31,9 @@ public class AnalyticsController {
   @GetMapping(value = ApiPathConstants.API_BASE_PATH_FOR_VARIANTS_BY_UNIT_SALES)
   public ResponseEntity<DataAnalyticsResponse<List<ProductVariantResponse>>> getVariantsByUnitSales(
       @RequestBody ProductDiscoveryRequest productDiscoveryRequest,
-      @PathVariable(name = ApiPathConstants.BOTREF) Long botRef,
-      @PathVariable(name = ApiPathConstants.CUSTOMERID) Long customerId) {
-    log.info("Got call for get variants by Unit Sales for customerId: {}, botRef: {}, segmentName: {}", customerId, botRef);
-    DataAnalyticsResponse<List<ProductVariantResponse>> response = analyticsService.getVariantsByUnitSales(customerId, botRef, productDiscoveryRequest);
+      @PathVariable(name = ApiPathConstants.BOTREF) Long botRef) {
+    log.info("Got call for get variants by Unit Sales for botRef: {}", botRef);
+    DataAnalyticsResponse<List<ProductVariantResponse>> response = analyticsService.getVariantsByUnitSales(botRef, productDiscoveryRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 

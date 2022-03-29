@@ -26,7 +26,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
 
   @Override
-  public DataAnalyticsResponse<List<ProductVariantResponse>> getVariantsByUnitSales(Long customerId, Long botRef, ProductDiscoveryRequest productDiscoveryRequest) {
+  public DataAnalyticsResponse<List<ProductVariantResponse>> getVariantsByUnitSales(Long botRef, ProductDiscoveryRequest productDiscoveryRequest) {
     DataAnalyticsResponse<List<ProductVariantResponse>> response = new DataAnalyticsResponse<>();
     try {
       List<ProductVariantResponse> responseList = new ArrayList<>();

@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface AnalyticsService {
 
-   DataAnalyticsResponse<List<ProductVariantResponse>> getVariantsByUnitSales(Long customerId, Long botRef, ProductDiscoveryRequest productDiscoveryRequest);
+   DataAnalyticsResponse<List<ProductVariantResponse>> getVariantsByUnitSales(Long botRef, ProductDiscoveryRequest productDiscoveryRequest);
 
   DataAnalyticsResponse<List<OrderDetailsResponse>> getPurchaseHistory(PurchaseHistoryRequest purchaseHistoryRequest);
 }
