@@ -21,6 +21,8 @@ import org.springframework.util.CollectionUtils;
 import java.sql.*;
 import java.util.*;
 
+import static com.engati.data.analytics.engine.Utils.CommonUtils.connection;
+
 
 @Slf4j
 @Service("com.engati.data.analytics.engine.service.SegmentsService")
@@ -193,8 +195,7 @@ public class SegmentServiceImpl implements SegmentService {
     Statement statement = null;
     ResultSet resultSet = null;
     try {
-      Connection conn = CommonUtils.getDuckDBConnection();
-      statement = conn.createStatement();
+      statement = connection.createStatement();
       String query = NativeQueries.STORE_AOV_QUERY;
       String result = query.replace(Constants.BOT_REF, botRef.toString());
       resultSet = statement.executeQuery(result);

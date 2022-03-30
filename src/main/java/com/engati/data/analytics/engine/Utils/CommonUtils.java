@@ -1,24 +1,30 @@
 package com.engati.data.analytics.engine.Utils;
 
 import com.engati.data.analytics.engine.constants.constant.Constants;
+import lombok.extern.apachecommons.CommonsLog;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.sql.*;
 import java.util.*;
 
 @Slf4j
+@Component
 public class CommonUtils {
 
-  public static Connection getDuckDBConnection() {
-    Connection connection = null;
+  public static Connection connection;
+
+  @PostConstruct
+  public static void getDuckDBConnection() {
     {
       try {
+        log.info("Going to create a DuckDB connection");
         connection = DriverManager.getConnection(Constants.DUCKDB_CONNECTION_URI);
-      } catch (SQLException e) {
+      } catch (Exception e) {
         log.error("Failed to connect to DuckDB", e);
       }
     }
-    return connection;
   }
 
 
@@ -26,7 +32,6 @@ public class CommonUtils {
     Statement statement = null;
     Set<Long> querySet = new LinkedHashSet<>();
     try {
-      Connection connection = CommonUtils.getDuckDBConnection();
       statement = connection.createStatement();
       ResultSet resultSet = statement.executeQuery(query);
       ResultSetMetaData md = resultSet.getMetaData();
@@ -49,7 +54,6 @@ public class CommonUtils {
     Statement statement = null;
     Map<Long, Map<String, Object>> querySet = new LinkedHashMap<>();
     try {
-      Connection connection = CommonUtils.getDuckDBConnection();
       statement = connection.createStatement();
       ResultSet resultSet = statement.executeQuery(query);
       ResultSetMetaData md = resultSet.getMetaData();
