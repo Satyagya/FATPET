@@ -12,6 +12,7 @@ import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
 @Service("com.engati.data.analytics.engine.service.AnalyticsService")
 public class AnalyticsServiceImpl implements AnalyticsService {
 
+  @Autowired
+  private CommonUtils commonUtils;
 
   @Override
   public DataAnalyticsResponse<List<ProductVariantResponse>> getVariantsByUnitSales(Long botRef, ProductDiscoveryRequest productDiscoveryRequest) {
@@ -62,7 +65,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, QueryConstants.EMPTY_STRING);
         query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
       }
-      Map<Long, Map<String, Object>> productVariants = CommonUtils.executeQueryForDetails(query, Constants.VARIANT_ID);
+      Map<Long, Map<String, Object>> productVariants =  commonUtils.executeQueryForDetails(query, Constants.VARIANT_ID);
       for (Map.Entry<Long, Map<String, Object>> productVariant : productVariants.entrySet()) {
         Map<String, Object> variantMap = productVariant.getValue();
         ProductVariantResponse productVariantResponse = new ProductVariantResponse();
@@ -111,7 +114,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       else
         query = query.replace(QueryConstants.PRODUCT_TYPE_BASE, QueryConstants.EMPTY_STRING);
 
-      Map<Long, Map<String, Object>> purchaseHistoryDetails = CommonUtils.executeQueryForDetails(query, QueryConstants.LINE_ITEM_ID);
+      Map<Long, Map<String, Object>> purchaseHistoryDetails = commonUtils.executeQueryForDetails(query, QueryConstants.LINE_ITEM_ID);
       for (Map.Entry<Long, Map<String, Object>> purchaseHistoryDetail : purchaseHistoryDetails.entrySet()) {
         Map<String, Object> purchaseHistoryEntry = purchaseHistoryDetail.getValue();
         OrderDetailsResponse orderDetailsResponse = new OrderDetailsResponse();

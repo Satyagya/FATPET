@@ -16,7 +16,7 @@ public class CommonUtils {
   public static Connection connection;
 
   @PostConstruct
-  public static void getDuckDBConnection() {
+  public void getDuckDBConnection() {
     {
       try {
         log.info("Going to create a DuckDB connection");
@@ -28,7 +28,7 @@ public class CommonUtils {
   }
 
 
-  public static Set<Long> executeQuery(String query) {
+  public Set<Long> executeQuery(String query) {
     Statement statement = null;
     Set<Long> querySet = new LinkedHashSet<>();
     try {
@@ -50,7 +50,7 @@ public class CommonUtils {
   }
 
 
-  public static Map<Long, Map<String, Object>> executeQueryForDetails(String query, String key) {
+  public Map<Long, Map<String, Object>> executeQueryForDetails(String query, String key) {
     Statement statement = null;
     Map<Long, Map<String, Object>> querySet = new LinkedHashMap<>();
     try {

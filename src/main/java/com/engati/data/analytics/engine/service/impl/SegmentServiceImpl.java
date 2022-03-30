@@ -21,8 +21,6 @@ import org.springframework.util.CollectionUtils;
 import java.sql.*;
 import java.util.*;
 
-import static com.engati.data.analytics.engine.Utils.CommonUtils.connection;
-
 
 @Slf4j
 @Service("com.engati.data.analytics.engine.service.SegmentsService")
@@ -34,6 +32,8 @@ public class SegmentServiceImpl implements SegmentService {
   @Autowired
   private SegmentRepository segmentRepository;
 
+  @Autowired
+  private CommonUtils commonUtils;
 
   private List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList, Long botRef) {
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
@@ -160,7 +160,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     }
     query = query.replace(QueryConstants.VALUE, configDetails.getResponseObject().getMonetaryValue());
-    Set<Long> monetaryList = CommonUtils.executeQuery(query);
+    Set<Long> monetaryList = commonUtils.executeQuery(query);
     return monetaryList;
   }
 
@@ -170,7 +170,7 @@ public class SegmentServiceImpl implements SegmentService {
     query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
     query = query.replace(QueryConstants.GAP, configDetails.getResponseObject().getFrequencyValue().toString());
     query = query.replace(QueryConstants.ORDERS_CONFIGURED, configDetails.getResponseObject().getFrequencyMetric().toString());
-    Set<Long> frequencyList = CommonUtils.executeQuery(query);
+    Set<Long> frequencyList = commonUtils.executeQuery(query);
     return frequencyList;
   }
 
@@ -185,7 +185,7 @@ public class SegmentServiceImpl implements SegmentService {
     query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
     query = query.replace(QueryConstants.GAP, configDetails.getResponseObject().getRecencyValue().toString());
     query = query.replace(QueryConstants.COLUMN_NAME, configDetails.getResponseObject().getRecencyMetric().toLowerCase(Locale.ROOT));
-    Set<Long> recencyList = CommonUtils.executeQuery(query);
+    Set<Long> recencyList = commonUtils.executeQuery(query);
     return recencyList;
   }
 
@@ -195,7 +195,7 @@ public class SegmentServiceImpl implements SegmentService {
     Statement statement = null;
     ResultSet resultSet = null;
     try {
-      statement = connection.createStatement();
+      statement = commonUtils.connection.createStatement();
       String query = NativeQueries.STORE_AOV_QUERY;
       String result = query.replace(Constants.BOT_REF, botRef.toString());
       resultSet = statement.executeQuery(result);
@@ -212,7 +212,7 @@ public class SegmentServiceImpl implements SegmentService {
     query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
     query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
     query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
-    Map<Long, Map<String, Object>> customerAOV = CommonUtils.executeQueryForDetails(query, Constants.CUSTOMER_ID );
+    Map<Long, Map<String, Object>> customerAOV = commonUtils.executeQueryForDetails(query, Constants.CUSTOMER_ID );
     return customerAOV;
   }
 
@@ -224,7 +224,7 @@ public class SegmentServiceImpl implements SegmentService {
     if (Month == 1) query = query.replace(QueryConstants.MONTHS, QueryConstants.MONTH);
     query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
     query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
-    Map<Long, Map<String, Object>> customerOrders = CommonUtils.executeQueryForDetails(query, Constants.CUSTOMER_ID );
+    Map<Long, Map<String, Object>> customerOrders = commonUtils.executeQueryForDetails(query, Constants.CUSTOMER_ID );
     return customerOrders;
   }
 
