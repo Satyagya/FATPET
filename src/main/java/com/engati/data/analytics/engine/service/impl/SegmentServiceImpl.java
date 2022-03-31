@@ -106,7 +106,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
     try {
-      if (resultSet.size() != 0) {
+      if (!CollectionUtils.isEmpty(resultSet)) {
         List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
         response.setResponseObject(customerDetail);
       } else {
