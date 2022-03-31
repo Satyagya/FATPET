@@ -9,7 +9,6 @@ import java.util.List;
 public class PurchaseHistoryRequest {
 
   private Long botRef;
-  private Long customerId;
   private Timestamp startTime;
   private Timestamp endTime;
   private List<String> collection;

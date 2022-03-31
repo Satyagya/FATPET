@@ -41,7 +41,7 @@ public class AnalyticsController {
   public ResponseEntity<DataAnalyticsResponse<List<OrderDetailsResponse>>> getPurchaseHistory(
       @RequestBody PurchaseHistoryRequest purchaseHistoryRequest
   ){
-    log.info("Got call for fetching purchase History for customerId: {}, botRef: {}, segmentName: {}", purchaseHistoryRequest.getCustomerId(), purchaseHistoryRequest.getBotRef());
+    log.info("Got call for fetching purchase History for botRef: {}, segmentName: {}", purchaseHistoryRequest.getBotRef());
     DataAnalyticsResponse<List<OrderDetailsResponse>> response = analyticsService.getPurchaseHistory(purchaseHistoryRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
