@@ -20,6 +20,7 @@ public class CommonUtils {
     {
       try {
         log.info("Going to create a DuckDB connection");
+        Class.forName("org.duckdb.DuckDBDriver");
         connection = DriverManager.getConnection(Constants.DUCKDB_CONNECTION_URI);
       } catch (Exception e) {
         log.error("Failed to connect to DuckDB", e);
