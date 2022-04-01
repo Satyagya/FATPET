@@ -198,6 +198,7 @@ public class SegmentServiceImpl implements SegmentService {
       statement = commonUtils.connection.createStatement();
       String query = NativeQueries.STORE_AOV_QUERY;
       String result = query.replace(Constants.BOT_REF, botRef.toString());
+      log.info(query);
       resultSet = statement.executeQuery(result);
       resultSet.next();
     } catch (SQLException e) {
