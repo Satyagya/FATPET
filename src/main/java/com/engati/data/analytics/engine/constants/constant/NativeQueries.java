@@ -83,6 +83,26 @@ public class NativeQueries {
        "order by variant_sales desc\n" +
        "limit number_of_results";
 
+   public static String PRODUCT_VARIANTS_BY_UNIT_SALES_TEST = "with base as\n" +
+       "         (select product_id, variant_id, count(variant_id)as variant_sales\n" +
+       "          from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet') where product_id in\n" +
+       "             (select product_id from\n" +
+       "                     (select product_id, count(distinct order_id)as product_sales\n" +
+       "                            from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet')\n" +
+       "                                                               where cancelled_at like 'None'\n" +
+       "                                   group by product_id\n" +
+       "                     )\n" +
+       "              )\n" +
+       "group by product_id, variant_id\n" +
+       "    )\n" +
+       "select * from(\n" +
+       "select product_id, variant_id,\n" +
+       "       row_number() over (partition by product_id order by variant_sales desc)as row_num\n" +
+       "from base\n" +
+       "    order by variant_sales desc)as foo\n" +
+       "where row_num <= 2\n" +
+       "limit number_of_results";
+
   public static final String PURCHASE_HISTORY = "select order_id, line_item_id, product_id, variant_id, collection_id, customer_id, created_at, bot_ref, line_item_price\n" +
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet') \n" +
       "where cancelled_at like 'None'\n" +

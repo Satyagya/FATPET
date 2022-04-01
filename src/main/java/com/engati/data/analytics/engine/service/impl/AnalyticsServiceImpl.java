@@ -33,7 +33,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     DataAnalyticsResponse<List<ProductVariantResponse>> response = new DataAnalyticsResponse<>();
     try {
       List<ProductVariantResponse> responseList = new ArrayList<>();
-      String query = NativeQueries.PRODUCT_VARIANTS_BY_UNIT_SALES;
+      String query = NativeQueries.PRODUCT_VARIANTS_BY_UNIT_SALES_TEST;
       query = query.replace(Constants.BOT_REF, botRef.toString());
       query = query.replace(QueryConstants.NUMBER_OF_RESULTS, productDiscoveryRequest.getNumberOfVariantsInResponse().toString());
       if (productDiscoveryRequest.getCollection() != null) {
