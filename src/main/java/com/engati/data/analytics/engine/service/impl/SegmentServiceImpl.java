@@ -197,9 +197,9 @@ public class SegmentServiceImpl implements SegmentService {
     try {
       statement = commonUtils.connection.createStatement();
       String query = NativeQueries.STORE_AOV_QUERY;
-      String result = query.replace(Constants.BOT_REF, botRef.toString());
+      query = query.replace(Constants.BOT_REF, botRef.toString());
       log.info(query);
-      resultSet = statement.executeQuery(result);
+      resultSet = statement.executeQuery(query);
       resultSet.next();
     } catch (SQLException e) {
      log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
