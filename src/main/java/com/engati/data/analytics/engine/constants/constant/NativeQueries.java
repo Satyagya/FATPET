@@ -91,8 +91,8 @@ public class NativeQueries {
        "                            from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet')\n" +
        "                                                               where cancelled_at like 'None'\n" +
        "                                   group by product_id\n" +
-       "                     )\n" +
-       "              )\n" +
+       "                     )as a \n" +
+       "              ) \n" +
        "group by product_id, variant_id\n" +
        "    )\n" +
        "select * from(\n" +
