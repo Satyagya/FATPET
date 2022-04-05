@@ -10,7 +10,8 @@ import java.util.stream.Stream;
 public enum ResponseStatusCode implements AppCode<ResponseStatusCode> {
   PROCESSING_ERROR(999, "PROCESSING_ERROR"),
   SUCCESS(1000, "SUCCESS"),
-  EMPTY_SEGMENT(9999, "EMPTY_SEGMENT");
+  EMPTY_SEGMENT(9999, "EMPTY_SEGMENT"),
+  DUCK_DB_QUERY_FAILED(9998, "DUCK_DB_QUERY_FAILED");
 
   private final int code;
   private final String desc;

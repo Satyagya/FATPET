@@ -1,6 +1,7 @@
 package com.engati.data.analytics.engine.service.impl;
 
 import com.engati.data.analytics.engine.Utils.CommonUtils;
+import com.engati.data.analytics.engine.Utils.EtlEngineRestUtility;
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.constants.constant.NativeQueries;
@@ -13,13 +14,20 @@ import com.engati.data.analytics.engine.model.response.CustomerSegmentationConfi
 import com.engati.data.analytics.engine.repository.SegmentRepository;
 import com.engati.data.analytics.engine.service.SegmentService;
 import com.engati.data.analytics.engine.service.CustomerSegmentationConfigurationService;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import retrofit2.Call;
+import retrofit2.Response;
 
 import java.sql.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -34,6 +42,11 @@ public class SegmentServiceImpl implements SegmentService {
 
   @Autowired
   private CommonUtils commonUtils;
+
+  @Autowired
+  private EtlEngineRestUtility etlEngineRestUtility;
+
+  public static final ObjectMapper MAPPER = new ObjectMapper();
 
   private List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList, Long botRef) {
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
@@ -148,44 +161,84 @@ public class SegmentServiceImpl implements SegmentService {
   }
 
   private Set<Long> getMonetarySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails)  {
-    String query = NativeQueries.MONETARY_QUERY;
-    query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getMonetaryOperator()));
-    query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
-    query = query.replace(QueryConstants.METRIC, configDetails.getResponseObject().getMonetaryMetric());
-    if (configDetails.getResponseObject().getMonetaryValue().equals(QueryConstants.STORE_AOV)) {
-      try {
+    Set<Long> monetaryList = new HashSet<>();
+    try {
+      String query = NativeQueries.MONETARY_QUERY;
+      query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getMonetaryOperator()));
+      query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
+      query = query.replace(QueryConstants.METRIC, configDetails.getResponseObject().getMonetaryMetric());
+      if (configDetails.getResponseObject().getMonetaryValue().equals(QueryConstants.STORE_AOV)) {
         query = query.replace(QueryConstants.VALUE, getStoreAOV(configDetails.getResponseObject().getBotRef()));
-      } catch (SQLException e) {
-        log.error("Exception while getting StoreAOV for botRef: {}", configDetails.getResponseObject().getBotRef().toString(), e);
       }
+
+      query = query.replace(QueryConstants.VALUE, configDetails.getResponseObject().getMonetaryValue());
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.
+              executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+              .nonNull(etlResponse.body())) {
+        monetaryList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().
+                get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_NAME)), JSONObject.class).values().
+                stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
+      }
+    } catch (Exception e) {
+      log.error("Exception while getting StoreAOV for botRef: {}", configDetails.getResponseObject().getBotRef().toString(), e);
     }
-    query = query.replace(QueryConstants.VALUE, configDetails.getResponseObject().getMonetaryValue());
-    Set<Long> monetaryList = commonUtils.executeQuery(query);
     return monetaryList;
   }
 
   private Set<Long> getFrequencySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails) {
-    String query = NativeQueries.FREQUENCY_QUERY;
-    query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getFrequencyOperator()));
-    query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
-    query = query.replace(QueryConstants.GAP, configDetails.getResponseObject().getFrequencyValue().toString());
-    query = query.replace(QueryConstants.ORDERS_CONFIGURED, configDetails.getResponseObject().getFrequencyMetric().toString());
-    Set<Long> frequencyList = commonUtils.executeQuery(query);
+    Set<Long> frequencyList = new HashSet<>();
+    try {
+      String query = NativeQueries.FREQUENCY_QUERY;
+      query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getFrequencyOperator()));
+      query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
+      query = query.replace(QueryConstants.GAP, configDetails.getResponseObject().getFrequencyValue().toString());
+      query = query.replace(QueryConstants.ORDERS_CONFIGURED, configDetails.getResponseObject().getFrequencyMetric().toString());
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.
+              executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+              .nonNull(etlResponse.body())) {
+        frequencyList =  MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
+                get(Constants.CUSTOMER_ID)), JSONObject.class).values().
+                stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
+      }
+    } catch (Exception e) {
+      log.error("Error while getting Frequency Segment for: {}", configDetails, e);
+    }
     return frequencyList;
   }
 
   private Set<Long> getRecencySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails)  {
-    String query = NativeQueries.RECENCY_QUERY;
-    query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getRecencyOperator()));
-    if (configDetails.getResponseObject().getRecencyMetric().equals(QueryConstants.LAST_ORDER_DATE)) {
-      query = query.replace(QueryConstants.AGGREGATOR, QueryConstants.MAX);
-    } else {
-      query = query.replace(QueryConstants.AGGREGATOR, QueryConstants.MIN);
+    Set<Long> recencyList = new HashSet<>();
+    try {
+      String query = NativeQueries.RECENCY_QUERY;
+      query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(configDetails.getResponseObject().getRecencyOperator()));
+      if (configDetails.getResponseObject().getRecencyMetric().equals(QueryConstants.LAST_ORDER_DATE)) {
+        query = query.replace(QueryConstants.AGGREGATOR, QueryConstants.MAX);
+      } else {
+        query = query.replace(QueryConstants.AGGREGATOR, QueryConstants.MIN);
+      }
+      query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
+      query = query.replace(QueryConstants.GAP, configDetails.getResponseObject().getRecencyValue().toString());
+      query = query.replace(QueryConstants.COLUMN_NAME, configDetails.getResponseObject().getRecencyMetric().toLowerCase(Locale.ROOT));
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.
+              executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+              .nonNull(etlResponse.body())) {
+        recencyList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
+                get(Constants.CUSTOMER_ID)), JSONObject.class).values().
+                stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
+        System.out.println(recencyList);
+      }
+    } catch (Exception e) {
+      log.error("Error while getting Recency Segment for:{}", configDetails, e);
     }
-    query = query.replace(Constants.BOT_REF, configDetails.getResponseObject().getBotRef().toString());
-    query = query.replace(QueryConstants.GAP, configDetails.getResponseObject().getRecencyValue().toString());
-    query = query.replace(QueryConstants.COLUMN_NAME, configDetails.getResponseObject().getRecencyMetric().toLowerCase(Locale.ROOT));
-    Set<Long> recencyList = commonUtils.executeQuery(query);
     return recencyList;
   }
 
@@ -208,24 +261,53 @@ public class SegmentServiceImpl implements SegmentService {
   }
 
   private Map<Long, Map<String, Object>> getCustomerAOV(Set<Long> customerIds, Long botRef) {
-    String query = NativeQueries.CUSTOMER_AOV_QUERY;
-    query = query.replace(Constants.BOT_REF, botRef.toString());
-    query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
-    query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
-    query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
-    Map<Long, Map<String, Object>> customerAOV = commonUtils.executeQueryForDetails(query, Constants.CUSTOMER_ID );
+    Map<Long, Map<String, Object>> customerAOV = new HashMap<>();
+    try {
+      String query = NativeQueries.CUSTOMER_AOV_QUERY;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
+      query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
+
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.
+              executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+              .nonNull(etlResponse.body())) {
+        customerAOV = (Map<Long, Map<String, Object>>) etlResponse.body().get(Constants.RESPONSE_OBJECT);
+      }
+    } catch (Exception e) {
+      log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
+    }
     return customerAOV;
   }
 
   private Map<Long, Map<String, Object>> getOrdersForLastXMonth(Set<Long> customerIds, Long botRef, Integer Month){
-    String query = NativeQueries.ORDERS_FOR_X_MONTHS;
-    query = query.replace(Constants.BOT_REF, botRef.toString());
-    query = query.replace(QueryConstants.GAP, Month.toString());
-    query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
-    if (Month == 1) query = query.replace(QueryConstants.MONTHS, QueryConstants.MONTH);
-    query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
-    query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
-    Map<Long, Map<String, Object>> customerOrders = commonUtils.executeQueryForDetails(query, Constants.CUSTOMER_ID );
+    Map<Long, Map<String, Object>> customerOrders = new HashMap<>();
+    try {
+
+      String query = NativeQueries.ORDERS_FOR_X_MONTHS;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      query = query.replace(QueryConstants.GAP, Month.toString());
+      query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
+      if (Month == 1) query = query.replace(QueryConstants.MONTHS, QueryConstants.MONTH);
+      query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
+
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.
+              executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+              .nonNull(etlResponse.body())) {
+        customerOrders = (Map<Long, Map<String, Object>>) etlResponse.body().get(Constants.RESPONSE_OBJECT);
+      }
+    } catch (Exception e) {
+      log.error("Error while getting Orders For Last X Month for botRef: {}", botRef, e);
+    }
     return customerOrders;
   }
 

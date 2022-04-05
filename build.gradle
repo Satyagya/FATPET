@@ -111,6 +111,9 @@ dependencies {
     testCompile group: 'com.squareup.retrofit2', name: 'retrofit-mock', version:"${reftrofit_version}"
 //    compile("org.flywaydb:flyway-core:${flyway_version}")
 
+    compile(group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: "3.9.1")
+
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.engati.data.analytics.engine.service.impl;
 
 import com.engati.data.analytics.engine.Utils.CommonUtils;
+import com.engati.data.analytics.engine.Utils.EtlEngineRestUtility;
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.constants.constant.NativeQueries;
@@ -12,13 +13,16 @@ import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import retrofit2.Response;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,6 +31,9 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
   @Autowired
   private CommonUtils commonUtils;
+
+  @Autowired
+  private EtlEngineRestUtility etlEngineRestUtility;
 
   @Override
   public DataAnalyticsResponse<List<ProductVariantResponse>> getVariantsByUnitSales(Long botRef, ProductDiscoveryRequest productDiscoveryRequest) {
@@ -65,7 +72,21 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, QueryConstants.EMPTY_STRING);
         query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
       }
-      Map<Long, Map<String, Object>> productVariants =  commonUtils.executeQueryForDetails(query, Constants.VARIANT_ID);
+      Map<Long, Map<String, Object>> productVariants;
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, Constants.VARIANT_ID);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.
+              executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+              .nonNull(etlResponse.body())) {
+        productVariants = (Map<Long, Map<String, Object>>) etlResponse.body().get(Constants.RESPONSE_OBJECT);
+      } else {
+        response.setResponseObject(null);
+        response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILED);
+        return response;
+      }
+
       for (Map.Entry<Long, Map<String, Object>> productVariant : productVariants.entrySet()) {
         Map<String, Object> variantMap = productVariant.getValue();
         ProductVariantResponse productVariantResponse = new ProductVariantResponse();
@@ -114,7 +135,21 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       else
         query = query.replace(QueryConstants.PRODUCT_TYPE_BASE, QueryConstants.EMPTY_STRING);
 
-      Map<Long, Map<String, Object>> purchaseHistoryDetails = commonUtils.executeQueryForDetails(query, QueryConstants.LINE_ITEM_ID);
+      Map<Long, Map<String, Object>> purchaseHistoryDetails;
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, QueryConstants.LINE_ITEM_ID);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.
+              executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+              .nonNull(etlResponse.body())) {
+        purchaseHistoryDetails = (Map<Long, Map<String, Object>>) etlResponse.body().get(Constants.RESPONSE_OBJECT);
+      } else {
+        response.setResponseObject(null);
+        response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILED);
+        return response;
+      }
+
       for (Map.Entry<Long, Map<String, Object>> purchaseHistoryDetail : purchaseHistoryDetails.entrySet()) {
         Map<String, Object> purchaseHistoryEntry = purchaseHistoryDetail.getValue();
         OrderDetailsResponse orderDetailsResponse = new OrderDetailsResponse();
@@ -131,7 +166,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       response.setResponseObject(responseList);
       response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
     }catch (Exception e){
-      log.error("Exception encountered while fetching purchase history for botRef: ",purchaseHistoryRequest.getBotRef(), e);
+      log.error("Exception encountered while fetching purchase history for botRef: {}",purchaseHistoryRequest.getBotRef(), e);
       response.setResponseObject(null);
       response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
     }

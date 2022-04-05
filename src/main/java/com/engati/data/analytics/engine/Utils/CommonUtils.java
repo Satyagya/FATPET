@@ -1,6 +1,8 @@
 package com.engati.data.analytics.engine.Utils;
 
 import com.engati.data.analytics.engine.constants.constant.Constants;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import lombok.extern.apachecommons.CommonsLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,6 +16,7 @@ import java.util.*;
 public class CommonUtils {
 
   public static Connection connection;
+  public static final ObjectMapper MAPPER = new ObjectMapper();
 
   @PostConstruct
   public void getDuckDBConnection() {
@@ -73,6 +76,16 @@ public class CommonUtils {
     return querySet;
   }
 
-
+  public static String getStringValueFromJsonPath(Object object, String jsonPath) {
+    String value = null;
+    try {
+      String jsonString = MAPPER.writeValueAsString(object);
+      value = JsonPath.read(jsonString, jsonPath).toString();
+    } catch (Exception e) {
+      log.debug("Error while getting value from the jsonPath:{} with exception:{}", jsonPath,
+              e.getMessage());
+    }
+    return value;
+  }
 
 }
