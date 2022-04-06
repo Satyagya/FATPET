@@ -12,6 +12,7 @@ import com.engati.data.analytics.engine.model.request.PurchaseHistoryRequest;
 import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
   @Autowired
   private EtlEngineRestUtility etlEngineRestUtility;
+
+  public static final ObjectMapper MAPPER = new ObjectMapper();
 
   @Override
   public DataAnalyticsResponse<List<ProductVariantResponse>> getVariantsByUnitSales(Long botRef, ProductDiscoveryRequest productDiscoveryRequest) {
@@ -80,7 +83,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        productVariants = (Map<Long, Map<String, Object>>) etlResponse.body().get(Constants.RESPONSE_OBJECT);
+        productVariants = (Map<Long, Map<String, Object>>) MAPPER.readValue(
+                MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
       } else {
         response.setResponseObject(null);
         response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILED);
@@ -143,7 +147,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        purchaseHistoryDetails = (Map<Long, Map<String, Object>>) etlResponse.body().get(Constants.RESPONSE_OBJECT);
+        purchaseHistoryDetails = (Map<Long, Map<String, Object>>) MAPPER.readValue(
+                MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
       } else {
         response.setResponseObject(null);
         response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILED);

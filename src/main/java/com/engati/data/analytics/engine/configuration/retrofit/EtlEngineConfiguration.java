@@ -1,4 +1,4 @@
-package com.engati.data.analytics.configuration.retrofit;
+package com.engati.data.analytics.engine.configuration.retrofit;
 
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import lombok.Data;

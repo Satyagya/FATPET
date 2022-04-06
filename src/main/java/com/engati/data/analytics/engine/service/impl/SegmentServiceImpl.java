@@ -276,7 +276,8 @@ public class SegmentServiceImpl implements SegmentService {
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        customerAOV = (Map<Long, Map<String, Object>>) etlResponse.body().get(Constants.RESPONSE_OBJECT);
+        customerAOV = (Map<Long, Map<String, Object>>) MAPPER.readValue(
+                MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
       }
     } catch (Exception e) {
       log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
@@ -303,7 +304,8 @@ public class SegmentServiceImpl implements SegmentService {
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        customerOrders = (Map<Long, Map<String, Object>>) etlResponse.body().get(Constants.RESPONSE_OBJECT);
+        customerOrders = (Map<Long, Map<String, Object>>) MAPPER.readValue(
+                MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
       }
     } catch (Exception e) {
       log.error("Error while getting Orders For Last X Month for botRef: {}", botRef, e);
