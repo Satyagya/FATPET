@@ -12,6 +12,7 @@ import com.engati.data.analytics.engine.model.request.PurchaseHistoryRequest;
 import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
@@ -83,8 +84,9 @@ public class AnalyticsServiceImpl implements AnalyticsService {
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        productVariants = (Map<Long, Map<String, Object>>) MAPPER.readValue(
-                MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
+        productVariants = MAPPER.readValue(
+            MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
+            });
       } else {
         response.setResponseObject(null);
         response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILURE);
@@ -147,8 +149,9 @@ public class AnalyticsServiceImpl implements AnalyticsService {
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        purchaseHistoryDetails = (Map<Long, Map<String, Object>>) MAPPER.readValue(
-                MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
+        purchaseHistoryDetails = MAPPER.readValue(
+            MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
+            });
       } else {
         response.setResponseObject(null);
         response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILURE);
@@ -158,14 +161,14 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       for (Map.Entry<Long, Map<String, Object>> purchaseHistoryDetail : purchaseHistoryDetails.entrySet()) {
         Map<String, Object> purchaseHistoryEntry = purchaseHistoryDetail.getValue();
         OrderDetailsResponse orderDetailsResponse = new OrderDetailsResponse();
-        orderDetailsResponse.setOrderId((Long) purchaseHistoryEntry.get(QueryConstants.ORDER_ID));
-        orderDetailsResponse.setProductId((Long) purchaseHistoryEntry.get(QueryConstants.PRODUCT_ID));
-        orderDetailsResponse.setVariantId((Long) purchaseHistoryEntry.get(QueryConstants.VARIANT_ID));
-        orderDetailsResponse.setCustomerId((Long) purchaseHistoryEntry.get(QueryConstants.CUSTOMER_ID));
-        orderDetailsResponse.setCollectionId((Long) purchaseHistoryEntry.get(QueryConstants.COLLECTION_ID));
-        orderDetailsResponse.setBotRef((Long) purchaseHistoryEntry.get(QueryConstants.BOT_REF));
+        orderDetailsResponse.setOrderId(Long.valueOf(purchaseHistoryEntry.get(QueryConstants.ORDER_ID).toString()));
+        orderDetailsResponse.setProductId(Long.valueOf(purchaseHistoryEntry.get(QueryConstants.PRODUCT_ID).toString()));
+        orderDetailsResponse.setVariantId(Long.valueOf(purchaseHistoryEntry.get(QueryConstants.VARIANT_ID).toString()));
+        orderDetailsResponse.setCustomerId(Long.valueOf(purchaseHistoryEntry.get(QueryConstants.CUSTOMER_ID).toString()));
+        orderDetailsResponse.setCollectionId( Objects.nonNull(purchaseHistoryEntry.get(QueryConstants.COLLECTION_ID)) ? Double.valueOf(purchaseHistoryEntry.get(QueryConstants.COLLECTION_ID).toString()).longValue(): null);
+        orderDetailsResponse.setBotRef(Long.valueOf(purchaseHistoryEntry.get(QueryConstants.BOT_REF).toString()));
         orderDetailsResponse.setCreatedDate(String.valueOf(purchaseHistoryEntry.get(QueryConstants.CREATED_AT)));
-        orderDetailsResponse.setPrice((Double) purchaseHistoryEntry.get(QueryConstants.LINE_ITEM_PRICE));
+        orderDetailsResponse.setPrice(Double.valueOf(purchaseHistoryEntry.get(QueryConstants.LINE_ITEM_PRICE).toString()));
         responseList.add(orderDetailsResponse);
       }
       response.setResponseObject(responseList);
