@@ -8,13 +8,12 @@ import com.engati.data.analytics.engine.constants.constant.NativeQueries;
 import com.engati.data.analytics.engine.constants.constant.QueryConstants;
 import com.engati.data.analytics.engine.constants.enums.QueryOperators;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
-import com.engati.data.analytics.engine.entity.ShopifyCustomer;
-import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationConfigurationResponse;
+import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.engati.data.analytics.engine.repository.SegmentRepository;
-import com.engati.data.analytics.engine.service.SegmentService;
 import com.engati.data.analytics.engine.service.CustomerSegmentationConfigurationService;
-import com.fasterxml.jackson.core.JsonParser;
+import com.engati.data.analytics.engine.service.SegmentService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +21,11 @@ import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import retrofit2.Call;
 import retrofit2.Response;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,9 +55,9 @@ public class SegmentServiceImpl implements SegmentService {
     String storeAOV = null;
     storeAOV = getStoreAOV(botRef);
     Map<Long, Map<String, Object>> customerAOV = getCustomerAOV(customerList, botRef);
-    Map<Long, Map<String, Object>> ordersLastMonth = getOrdersForLastXMonth(customerList, botRef,1);
-    Map<Long, Map<String, Object>> ordersLast6Months = getOrdersForLastXMonth(customerList, botRef, 6);
-    Map<Long, Map<String, Object>> ordersLast12Months = getOrdersForLastXMonth(customerList, botRef, 12);
+    Map<Long, Map<String, Integer>> ordersLastMonth = getOrdersForLastXMonth(customerList, botRef,1);
+    Map<Long, Map<String, Integer>> ordersLast6Months = getOrdersForLastXMonth(customerList, botRef, 6);
+    Map<Long, Map<String, Integer>> ordersLast12Months = getOrdersForLastXMonth(customerList, botRef, 12);
     for (Long customerId : customerList) {
       CustomerSegmentationResponse customerSegmentationResponse = new CustomerSegmentationResponse();
       for (Map<Long, Object> row : customerDetails) {
@@ -69,19 +69,23 @@ public class SegmentServiceImpl implements SegmentService {
         continue;
       }
       customerSegmentationResponse.setStoreAOV(Double.valueOf(storeAOV));
+      try{
       customerSegmentationResponse.setCustomerAOV((Double) customerAOV.get(customerId).getOrDefault(QueryConstants.AOV, Constants.DEFAULT_AOV_VALUE));
+      }catch (NullPointerException e) {
+        customerSegmentationResponse.setCustomerAOV(Double.valueOf(Constants.DEFAULT_AOV_VALUE));
+      }
       try {
-        customerSegmentationResponse.setOrdersInLastOneMonth((Long) ordersLastMonth.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_1_MONTH, Constants.DEFAULT_ORDER_VALUE));
+        customerSegmentationResponse.setOrdersInLastOneMonth(ordersLastMonth.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_1_MONTH, Constants.DEFAULT_ORDER_VALUE));
       } catch (NullPointerException e) {
         customerSegmentationResponse.setOrdersInLastOneMonth(Constants.DEFAULT_ORDER_VALUE);
       }
       try {
-        customerSegmentationResponse.setOrdersInLastSixMonths((Long) ordersLast6Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_6_MONTHS, Constants.DEFAULT_ORDER_VALUE));
+        customerSegmentationResponse.setOrdersInLastSixMonths( ordersLast6Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_6_MONTHS, Constants.DEFAULT_ORDER_VALUE));
       } catch (NullPointerException e) {
         customerSegmentationResponse.setOrdersInLastSixMonths(Constants.DEFAULT_ORDER_VALUE);
       }
       try {
-        customerSegmentationResponse.setOrdersInLastTwelveMonths((Long) ordersLast12Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_12_MONTHS, Constants.DEFAULT_ORDER_VALUE));
+        customerSegmentationResponse.setOrdersInLastTwelveMonths( ordersLast12Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_12_MONTHS, Constants.DEFAULT_ORDER_VALUE));
       } catch (NullPointerException e) {
         customerSegmentationResponse.setOrdersInLastTwelveMonths(Constants.DEFAULT_ORDER_VALUE);
       }
@@ -230,7 +234,6 @@ public class SegmentServiceImpl implements SegmentService {
         recencyList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
                 get(Constants.CUSTOMER_ID)), JSONObject.class).values().
                 stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
-        System.out.println(recencyList);
       }
     } catch (Exception e) {
       log.error("Error while getting Recency Segment for:{}", configDetails, e);
@@ -280,8 +283,9 @@ public class SegmentServiceImpl implements SegmentService {
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        customerAOV = (Map<Long, Map<String, Object>>) MAPPER.readValue(
-                MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
+        customerAOV = MAPPER.readValue(
+            MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
+            });
       }
     } catch (Exception e) {
       log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
@@ -289,8 +293,8 @@ public class SegmentServiceImpl implements SegmentService {
     return customerAOV;
   }
 
-  private Map<Long, Map<String, Object>> getOrdersForLastXMonth(Set<Long> customerIds, Long botRef, Integer Month){
-    Map<Long, Map<String, Object>> customerOrders = new HashMap<>();
+  private Map<Long, Map<String, Integer>> getOrdersForLastXMonth(Set<Long> customerIds, Long botRef, Integer Month){
+    Map<Long, Map<String, Integer>> customerOrders = new HashMap<>();
     try {
 
       String query = NativeQueries.ORDERS_FOR_X_MONTHS;
@@ -308,8 +312,9 @@ public class SegmentServiceImpl implements SegmentService {
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        customerOrders = (Map<Long, Map<String, Object>>) MAPPER.readValue(
-                MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
+        customerOrders = MAPPER.readValue(
+            MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Integer>>>() {
+            });
       }
     } catch (Exception e) {
       log.error("Error while getting Orders For Last X Month for botRef: {}", botRef, e);

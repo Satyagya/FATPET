@@ -13,9 +13,8 @@ public class Constants {
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
   public static Long DEFAULT_CUSTOMER_ID = -1L;
-  public static Long DEFAULT_ORDER_VALUE = 0L;
+  public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;
-
 
   //  Generic Constants
   public static String BOT_REF = "botRef";

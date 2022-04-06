@@ -62,7 +62,6 @@ dependencies {
     compile("org.mariadb.jdbc:mariadb-java-client:${mariadb_version}")
     implementation "org.mariadb.jdbc:mariadb-java-client:${mariadb_version}"
     compile("net.logstash.logback:logstash-logback-encoder:${logback_encoder}")
-    implementation group: 'org.duckdb', name: 'duckdb_jdbc', version: '0.3.2'
 
     implementation("com.google.code.gson:gson:${gson_version}")
     compile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.17.Final'
@@ -91,6 +90,7 @@ dependencies {
 
 	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "${jackson_dataformat_version}"
 	implementation(group: 'org.asynchttpclient', name: 'async-http-client', version: "${asynchttpclient_version}")
+    compile(group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: "3.9.1")
 
     compile("com.nethum.common:error-handling-service:${error_handling_version}") {
         exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
@@ -111,7 +111,6 @@ dependencies {
     testCompile group: 'com.squareup.retrofit2', name: 'retrofit-mock', version:"${reftrofit_version}"
 //    compile("org.flywaydb:flyway-core:${flyway_version}")
 
-    compile(group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: "3.9.1")
 
 
 
