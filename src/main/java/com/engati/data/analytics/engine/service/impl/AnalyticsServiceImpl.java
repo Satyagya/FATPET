@@ -87,7 +87,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
       } else {
         response.setResponseObject(null);
-        response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILED);
+        response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILURE);
         return response;
       }
 
@@ -151,7 +151,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), Object.class);
       } else {
         response.setResponseObject(null);
-        response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILED);
+        response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILURE);
         return response;
       }
 
