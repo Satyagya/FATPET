@@ -53,11 +53,7 @@ public class SegmentServiceImpl implements SegmentService {
     List<Map<Long, Object>> customerDetails = segmentRepository.findByShopifyCustomerId(customerList);
 
     String storeAOV = null;
-    try {
-      storeAOV = getStoreAOV(botRef);
-    } catch (SQLException e) {
-      log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
-    }
+    storeAOV = getStoreAOV(botRef);
     Map<Long, Map<String, Object>> customerAOV = getCustomerAOV(customerList, botRef);
     Map<Long, Map<String, Object>> ordersLastMonth = getOrdersForLastXMonth(customerList, botRef,1);
     Map<Long, Map<String, Object>> ordersLast6Months = getOrdersForLastXMonth(customerList, botRef, 6);
@@ -244,20 +240,28 @@ public class SegmentServiceImpl implements SegmentService {
 
 
 
-  private String getStoreAOV(Long botRef) throws SQLException {
-    Statement statement = null;
-    ResultSet resultSet = null;
+  private String getStoreAOV(Long botRef) {
+    String storeAov = "0.0";
     try {
-      statement = commonUtils.connection.createStatement();
       String query = NativeQueries.STORE_AOV_QUERY;
       query = query.replace(Constants.BOT_REF, botRef.toString());
       log.info(query);
-      resultSet = statement.executeQuery(query);
-      resultSet.next();
-    } catch (SQLException e) {
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+              .nonNull(etlResponse.body())) {
+        String responseString = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
+                .get(Constants.RESPONSE_OBJECT).get(QueryConstants.STORE_AOV).toString();
+
+        storeAov = String.valueOf(
+                MAPPER.readValue(responseString, JSONObject.class).
+                        entrySet().stream().findFirst().get().getValue());
+      }
+    } catch (Exception e) {
      log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
     }
-    return String.valueOf(resultSet.getDouble(QueryConstants.STORE_AOV));
+    return storeAov;
   }
 
   private Map<Long, Map<String, Object>> getCustomerAOV(Set<Long> customerIds, Long botRef) {
