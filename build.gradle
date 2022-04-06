@@ -26,6 +26,14 @@ if (project.hasProperty('appVersion')) {
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        name 'nexus'
+        url "http://nexus.engati.ops:8081/repository/coviam-artifactory/"
+        credentials {
+            username repoUser
+            password repoPassword
+        }
+    }
 }
 
 apply plugin: 'java'
@@ -39,20 +47,29 @@ targetCompatibility = 1.8
 
 
 dependencies {
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.3'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.3'
+
+
     implementation "org.springframework.boot:spring-boot-starter-data-rest:${spring_boot_version}"
     compile("org.springframework.boot:spring-boot-starter-actuator:${spring_boot_version}")
+    compile("org.springframework.boot:spring-boot-starter-data-jpa:${spring_boot_version}")
     compile("net.logstash.logback:logstash-logback-encoder:${logback_version}")
+    compile group: 'net.java.openjfx.backport', name: 'openjfx-78-backport-compat', version: '1.8.0.1'
 
-    implementation group: 'in.zapr.druid', name: 'druidry', version: "${druidry_version}"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    compile("org.mariadb.jdbc:mariadb-java-client:${mariadb_version}")
+    implementation "org.mariadb.jdbc:mariadb-java-client:${mariadb_version}"
+    compile("net.logstash.logback:logstash-logback-encoder:${logback_encoder}")
 
     implementation("com.google.code.gson:gson:${gson_version}")
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.17.Final'
 
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: "${apache_commons_version}"
 
 	implementation("io.springfox:springfox-swagger2:${swagger_version}")
 	implementation("io.springfox:springfox-swagger-ui:${swagger_version}")
-
-	implementation("com.engati:data-analytics-sdk:${data_analytics_sdk}")
 
 	implementation("org.springframework.boot:spring-boot-starter-web:${spring_boot_version}")
 	implementation("org.projectlombok:lombok:${lombok_version}")
@@ -68,13 +85,41 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:${retrofit2_version}")
     implementation("commons-io:commons-io:${commons_io_version}")
 
+    compile("org.projectlombok:lombok:${lombok_version}")
+    annotationProcessor("org.projectlombok:lombok:${lombok_version}")
+
 	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "${jackson_dataformat_version}"
 	implementation(group: 'org.asynchttpclient', name: 'async-http-client', version: "${asynchttpclient_version}")
+    compile(group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: "3.9.1")
+
+    compile("com.nethum.common:error-handling-service:${error_handling_version}") {
+        exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
+        exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
+        exclude group: "com.fasterxml.jackson.core", module: "jackson-databind"
+    }
 
 	testImplementation group: 'junit', name: 'junit', version: '4.12'
 	testImplementation "org.springframework.boot:spring-boot-starter-test:${spring_boot_version}"
 	testImplementation("com.squareup.retrofit2:retrofit-mock:2.4.0")
 	testImplementation group: 'org.springframework', name: 'spring-mock', version: '2.0.8'
 
+    implementation group: 'com.zaxxer', name: 'HikariCP', version: '2.2.5'
+
+    compile "com.opencsv:opencsv:4.1"
+    testCompile group: 'junit', name: 'junit', version: "${junit_version}"
+    testCompile group: 'org.mockito', name: 'mockito-core', version: "${mockito_version}"
+    testCompile group: 'com.squareup.retrofit2', name: 'retrofit-mock', version:"${reftrofit_version}"
+//    compile("org.flywaydb:flyway-core:${flyway_version}")
+
+
+
+
 
 }
+
+configurations.all {
+    exclude group: "commons-logging", module: "commons-logging"
+    exclude group: "org.slf4j",  module: "slf4j-log4j12"
+    exclude group: "com.google.code.gson", module: "gson"
+}
+
