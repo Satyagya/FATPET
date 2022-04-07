@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -28,7 +28,7 @@ public class AnalyticsController {
   @Autowired
   private AnalyticsService analyticsService;
 
-  @GetMapping(value = ApiPathConstants.API_BASE_PATH_FOR_VARIANTS_BY_UNIT_SALES)
+  @PostMapping(value = ApiPathConstants.API_BASE_PATH_FOR_VARIANTS_BY_UNIT_SALES)
   public ResponseEntity<DataAnalyticsResponse<List<ProductVariantResponse>>> getVariantsByUnitSales(
       @RequestBody ProductDiscoveryRequest productDiscoveryRequest,
       @PathVariable(name = ApiPathConstants.BOTREF) Long botRef) {
@@ -37,7 +37,7 @@ public class AnalyticsController {
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
-  @GetMapping(value = ApiPathConstants.API_BASE_PATH_FOR_FETCHING_PURCHASE_HISTORY)
+  @PostMapping(value = ApiPathConstants.API_BASE_PATH_FOR_FETCHING_PURCHASE_HISTORY)
   public ResponseEntity<DataAnalyticsResponse<List<OrderDetailsResponse>>> getPurchaseHistory(
       @RequestBody PurchaseHistoryRequest purchaseHistoryRequest
   ){
