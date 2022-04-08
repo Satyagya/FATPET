@@ -59,7 +59,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
 
       } else if (productDiscoveryRequest.getProductTag() != null) {
-        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, "and product_tags in '%" + productDiscoveryRequest.getProductTag() + "%'");
+        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, "and product_tags like '%" + productDiscoveryRequest.getProductTag() + "%'");
         query = query.replace(QueryConstants.ADD_COLLECTION_DETAILS_TO_QUERY, QueryConstants.EMPTY_STRING);
         query = query.replace(QueryConstants.ADD_PRODUCT_TYPE_TO_QUERY, QueryConstants.EMPTY_STRING);
         query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
