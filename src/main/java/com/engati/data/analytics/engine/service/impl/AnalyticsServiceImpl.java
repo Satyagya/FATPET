@@ -80,6 +80,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       requestBody.put(Constants.KEY, Constants.VARIANT_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
@@ -145,6 +146,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       requestBody.put(Constants.KEY, QueryConstants.LINE_ITEM_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
