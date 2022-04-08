@@ -10,28 +10,28 @@ import lombok.*;
 @ToString(doNotUseGetters = true)
 public class CustomerSegmentationResponse {
 
-  @CsvBindByName(column = "CUSTOMER_NAME")
+  @CsvBindByName(column = "CUSTOMER NAME")
   private String customerName;
 
-  @CsvBindByName(column = "CUSTOMER_EMAIL")
+  @CsvBindByName(column = "CUSTOMER EMAIL")
   private String customerEmail;
 
-  @CsvBindByName(column = "CUSTOMER_PHONE")
+  @CsvBindByName(column = "CUSTOMER PHONE")
   private String customerPhone;
 
-  @CsvBindByName(column = "STORE_AOV")
+  @CsvBindByName(column = "STORE AOV")
   private Double storeAOV;
 
-  @CsvBindByName(column = "CUSTOMER_AOV")
+  @CsvBindByName(column = "CUSTOMER AOV")
   private Double customerAOV;
 
-  @CsvBindByName(column = "ORDERS_IN_LAST_ONE_MONTH")
+  @CsvBindByName(column = "ORDERS IN LAST ONE MONTH")
   private Integer ordersInLastOneMonth;
 
-  @CsvBindByName(column = "ORDERS_IN_LAST_SIX_MONTH")
+  @CsvBindByName(column = "ORDERS IN LAST SIX MONTH")
   private Integer ordersInLastSixMonths;
 
-  @CsvBindByName(column = "ORDERS_IN_LAST_TWELVE_MONTH")
+  @CsvBindByName(column = "ORDERS IN LAST TWELVE MONTH")
   private Integer ordersInLastTwelveMonths;
 
 }
