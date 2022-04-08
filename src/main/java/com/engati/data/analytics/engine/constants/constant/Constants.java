@@ -1,9 +1,13 @@
 package com.engati.data.analytics.engine.constants.constant;
 
+import java.util.Locale;
+
 public class Constants {
 
   public static final String RESPONSE_OBJECT = "response";
-  public static final String RESPONSE_OBJECT_FOR_EXECUTE_QUERY = "$.response.customer_id";
+  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/%s";
+  public static final String CSV_PATH_FORMAT = "/opt/engati/%s/%s.csv";
+
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
 //  public static String PAQUET_FILE_PATH = "/opt/engati/shopify-etl-engine/parquet_store";

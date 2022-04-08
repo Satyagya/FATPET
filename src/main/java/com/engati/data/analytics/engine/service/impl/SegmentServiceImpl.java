@@ -23,9 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -121,7 +118,10 @@ public class SegmentServiceImpl implements SegmentService {
     try {
       if (!CollectionUtils.isEmpty(resultSet)) {
         List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
-        response.setResponseObject(customerDetail);
+        String fileName = CommonUtils.createCsv(customerDetail, botRef, segmentName);
+        if (Objects.isNull(fileName)) {
+          response.setResponseStatusCode(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+        }
       } else {
         response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
       }
