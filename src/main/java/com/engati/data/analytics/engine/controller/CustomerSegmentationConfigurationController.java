@@ -44,8 +44,8 @@ public class CustomerSegmentationConfigurationController {
       @PathVariable(name = ApiPathConstants.CUSTOMERID) Long customerId,
       @PathVariable(name = ApiPathConstants.BOTREF) Long botRef,
       @PathVariable(name = ApiPathConstants.SEGMENT_NAME) String segmentName) {
-    log.info("Got call for updateSegmentConfig for customerId: {}, botRef: {}, segmentName: {}",
-        customerId, botRef, segmentName);
+    log.info("Got call for updateSegmentConfig for customerId: {}, botRef: {}, segmentName: {} and RequestBody",
+        customerId, botRef, segmentName, customerSegmentationConfigurationRequest);
     DataAnalyticsResponse<CustomerSegmentationConfiguration> response =
         customerSegmentationConfigurationService.updateConfigByBotRefAndSegment(customerId, botRef, segmentName, customerSegmentationConfigurationRequest);
     return new ResponseEntity<>(response, response.getStatusCode());

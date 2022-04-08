@@ -32,7 +32,7 @@ public class AnalyticsController {
   public ResponseEntity<DataAnalyticsResponse<List<ProductVariantResponse>>> getVariantsByUnitSales(
       @RequestBody ProductDiscoveryRequest productDiscoveryRequest,
       @PathVariable(name = ApiPathConstants.BOTREF) Long botRef) {
-    log.info("Got call for get variants by Unit Sales for botRef: {}", botRef);
+    log.info("Got call for get variants by Unit Sales for botRef: {}, with requestBody {}", botRef, productDiscoveryRequest);
     DataAnalyticsResponse<List<ProductVariantResponse>> response = analyticsService.getVariantsByUnitSales(botRef, productDiscoveryRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
@@ -41,7 +41,7 @@ public class AnalyticsController {
   public ResponseEntity<DataAnalyticsResponse<List<OrderDetailsResponse>>> getPurchaseHistory(
       @RequestBody PurchaseHistoryRequest purchaseHistoryRequest
   ){
-    log.info("Got call for fetching purchase History for botRef: {}, segmentName: {}", purchaseHistoryRequest.getBotRef());
+    log.info("Got call for fetching purchase History for botRef: {}, requestbody: {}", purchaseHistoryRequest.getBotRef(), purchaseHistoryRequest);
     DataAnalyticsResponse<List<OrderDetailsResponse>> response = analyticsService.getPurchaseHistory(purchaseHistoryRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }

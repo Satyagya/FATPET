@@ -86,8 +86,6 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
         customerSegmentationConfiguration.setBotRef(botRef);
         customerSegmentationConfiguration.setCustomerId(customerId);
         customerSegmentationConfiguration.setSegmentName(segmentName);
-////        if(customerSegmentationConfigurationRequest.getRecencyMetric() == "LAST_ORDER_DATE")
-//        customerSegmentationConfiguration.setRecencyMetric(RecencyMetric.valueOf(RecencyMetric.fromRecencyMetric(customerSegmentationConfigurationRequest.getRecencyMetric())));
         customerSegmentationConfiguration = customerSegmentationConfigurationRepository.save(customerSegmentationConfiguration);
         response.setResponseObject(customerSegmentationConfiguration);
         response.setResponseStatusCode(ResponseStatusCode.SUCCESS);

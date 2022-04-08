@@ -46,6 +46,7 @@ public class SegmentServiceImpl implements SegmentService {
   public static final ObjectMapper MAPPER = new ObjectMapper();
 
   private List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList, Long botRef) {
+    log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
     List<Map<Long, Object>> customerDetails = segmentRepository.findByShopifyCustomerId(customerList);
 
@@ -101,17 +102,17 @@ public class SegmentServiceImpl implements SegmentService {
     Set<Long> resultSet = null;
     Set<Long> recencySegment = null;
     if (configDetails.getResponseObject().getRecencyMetric() != null) {
-      log.info("Recency configurations found for the segmentName {}", segmentName);
+      log.info("Recency configurations found for botRef: {}, segmentName {}", botRef, segmentName);
       recencySegment = getRecencySegment(configDetails);
     }
     Set<Long> frequencySegment = null;
     if (configDetails.getResponseObject().getFrequencyMetric() != null) {
-      log.info("Frequency configurations found for the segmentName {}", segmentName);
+      log.info("Frequency configurations found for botRef: {}, segmentName {}", botRef, segmentName);
       frequencySegment = getFrequencySegment(configDetails);
     }
     Set<Long> monetarySegment = null;
     if (configDetails.getResponseObject().getMonetaryMetric() != null) {
-      log.info("Monetary configurations found for the segmentName {}", segmentName);
+      log.info("Monetary configurations found for botRef: {}, segmentName {}", botRef, segmentName);
       monetarySegment = getMonetarySegment(configDetails);
     }
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
@@ -251,6 +252,7 @@ public class SegmentServiceImpl implements SegmentService {
       log.info(query);
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
+      log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
@@ -279,6 +281,7 @@ public class SegmentServiceImpl implements SegmentService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
@@ -308,6 +311,7 @@ public class SegmentServiceImpl implements SegmentService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects

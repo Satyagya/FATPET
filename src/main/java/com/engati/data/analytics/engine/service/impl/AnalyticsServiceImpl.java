@@ -59,7 +59,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
 
       } else if (productDiscoveryRequest.getProductTag() != null) {
-        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, "and product_tags in '%" + productDiscoveryRequest.getProductTag() + "%'");
+        query = query.replace(QueryConstants.ADD_PRODUCT_TAG_TO_QUERY, "and product_tags like '%" + productDiscoveryRequest.getProductTag() + "%'");
         query = query.replace(QueryConstants.ADD_COLLECTION_DETAILS_TO_QUERY, QueryConstants.EMPTY_STRING);
         query = query.replace(QueryConstants.ADD_PRODUCT_TYPE_TO_QUERY, QueryConstants.EMPTY_STRING);
         query = query.replace(QueryConstants.ADD_PRODUCT_IDS_TO_QUERY, QueryConstants.EMPTY_STRING);
@@ -80,6 +80,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       requestBody.put(Constants.KEY, Constants.VARIANT_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
@@ -145,6 +146,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       requestBody.put(Constants.KEY, QueryConstants.LINE_ITEM_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.
               executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
