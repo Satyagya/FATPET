@@ -11,7 +11,8 @@ public enum ResponseStatusCode implements AppCode<ResponseStatusCode> {
   PROCESSING_ERROR(999, "PROCESSING_ERROR"),
   SUCCESS(1000, "SUCCESS"),
   EMPTY_SEGMENT(9999, "EMPTY_SEGMENT"),
-  DUCK_DB_QUERY_FAILURE(9998, "DUCK_DB_QUERY_FAILURE");
+  DUCK_DB_QUERY_FAILURE(9998, "DUCK_DB_QUERY_FAILURE"),
+  CSV_CREATION_EXCEPTION(9997,  "CSV_CREATION_EXCEPTION");
 
   private final int code;
   private final String desc;
