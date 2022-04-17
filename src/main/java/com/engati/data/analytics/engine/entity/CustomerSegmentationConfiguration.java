@@ -20,9 +20,6 @@ public class CustomerSegmentationConfiguration {
   @Column(name = "bot_ref")
   private Long botRef;
 
-  @Column(name = "customer_id")
-  private Long customerId;
-
   @Column(name = "segment_name")
   private String segmentName;
 

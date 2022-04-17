@@ -27,10 +27,10 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
   private CustomerSegmentationConfigurationRepository customerSegmentationConfigurationRepository;
 
   @Override
-  public DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> getConfigByBotRefAndSegment(Long customerId, Long botRef, String segmentName) {
+  public DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> getConfigByBotRefAndSegment(Long botRef, String segmentName) {
     DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> response = new DataAnalyticsResponse<>();
     CustomerSegmentationConfigurationResponse customerSegmentationConfigurationResponse = new CustomerSegmentationConfigurationResponse();
-    log.info("Trying to get config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
+    log.info("Trying to get config for botRef: {}, segment: {}", botRef, segmentName);
     try {
       if (StringUtils.isNotBlank(segmentName)){
         List<Long> botRefList = new ArrayList<>();
@@ -48,7 +48,6 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
         else {
           BeanUtils.copyProperties(customerSegmentationConfigurationResponse,configurationList.get(0));
           customerSegmentationConfigurationResponse.setBotRef(botRef);
-          customerSegmentationConfigurationResponse.setCustomerId(customerId);
         }
         response.setResponseObject(customerSegmentationConfigurationResponse);
         response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
@@ -58,14 +57,14 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
       }
     }catch (Exception e) {
       response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
-      log.info("Exception caught while getting config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName, e);
+      log.info("Exception caught while getting config for botRef: {}, segment: {}", botRef, segmentName, e);
     }
     return response;
   }
 
   @Override
   public DataAnalyticsResponse<CustomerSegmentationConfiguration> updateConfigByBotRefAndSegment
-      (Long customerId, Long botRef, String segmentName, CustomerSegmentationConfigurationRequest customerSegmentationConfigurationRequest) {
+      (Long botRef, String segmentName, CustomerSegmentationConfigurationRequest customerSegmentationConfigurationRequest) {
     DataAnalyticsResponse<CustomerSegmentationConfiguration> response = new DataAnalyticsResponse<>();
     try {
       if (StringUtils.isNotBlank(segmentName)){
@@ -84,7 +83,6 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
         BeanUtils.copyProperties(customerSegmentationConfiguration, customerSegmentationConfigurationRequest);
         customerSegmentationConfiguration.setId(configurationList.get(0).getId());
         customerSegmentationConfiguration.setBotRef(botRef);
-        customerSegmentationConfiguration.setCustomerId(customerId);
         customerSegmentationConfiguration.setSegmentName(segmentName);
         customerSegmentationConfiguration = customerSegmentationConfigurationRepository.save(customerSegmentationConfiguration);
         response.setResponseObject(customerSegmentationConfiguration);
@@ -92,11 +90,11 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
       }
       else {
         response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
-        log.error("No SegmentName for updating config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
+        log.error("No SegmentName for updating config for botRef: {}, segment: {}", botRef, segmentName);
       }
     } catch (Exception e) {
       response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
-      log.error("Exception caught while updating config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName, e);
+      log.error("Exception caught while updating config for botRef: {}, segment: {}", botRef, segmentName, e);
     }
     return response;
   }

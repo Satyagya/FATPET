@@ -93,12 +93,12 @@ public class SegmentServiceImpl implements SegmentService {
   }
 
   @Override
-  public DataAnalyticsResponse<List<CustomerSegmentationResponse>>  getCustomersForSegment(Long customerId, Long botRef, String segmentName) {
-    log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
+  public DataAnalyticsResponse<List<CustomerSegmentationResponse>>  getCustomersForSegment(Long botRef, String segmentName) {
+    log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, segment: {}", botRef, segmentName);
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
     response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
-    DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getConfigByBotRefAndSegment(customerId, botRef, segmentName);
-    log.info("Checking for Config values for the segment values for {} for botRef: {}, and customerId: {}", segmentName, botRef, customerId);
+    DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getConfigByBotRefAndSegment(botRef, segmentName);
+    log.info("Checking for Config values for the segment values for {} for botRef: {}", segmentName, botRef);
     Set<Long> resultSet = null;
     Set<Long> recencySegment = null;
     if (configDetails.getResponseObject().getRecencyMetric() != null) {
@@ -128,7 +128,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     } catch (Exception e) {
       response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
-      log.error("Exception caught while getting customer details for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName, e);
+      log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
     }
     return response;
   }

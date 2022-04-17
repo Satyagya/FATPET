@@ -10,7 +10,6 @@ import lombok.*;
 public class CustomerSegmentationConfigurationResponse {
 
   private Long botRef;
-  private Long customerId;
   private String segmentName;
   private String recencyMetric;
   private String recencyOperator;
