@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,14 +118,24 @@ public class SegmentServiceImpl implements SegmentService {
     }
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
     try {
-      if (!CollectionUtils.isEmpty(resultSet)) {
-        List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
-        String fileName = CommonUtils.createCsv(customerDetail, botRef, segmentName);
-        if (Objects.isNull(fileName)) {
-          response.setResponseStatusCode(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+      String fileName = getOutputFileName(botRef, segmentName);
+      if(Objects.nonNull(fileName)) {
+        if (!CollectionUtils.isEmpty(resultSet)) {
+          List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
+          if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
+            response.setResponseStatusCode(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+          }
+        } else {
+          File emptyFile = new File(fileName);
+          if (emptyFile.exists()) {
+            emptyFile.delete();
+          }
+          if(!emptyFile.createNewFile()) {
+            log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}",
+                    botRef, segmentName);
+          }
+          response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
         }
-      } else {
-        response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
       }
     } catch (Exception e) {
       response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
@@ -132,6 +143,18 @@ public class SegmentServiceImpl implements SegmentService {
     }
     return response;
   }
+
+  private String getOutputFileName(Long botRef, String segmentName) {
+    String csvBasePath = String.format(Constants.CSV_BASE_PATH_FORMAT, botRef);
+    String fileName = String.format(Constants.CSV_PATH_FORMAT, botRef, segmentName);
+    File file = new File(csvBasePath);
+    if(!file.exists() && !file.mkdirs()) {
+      log.error("Unable to create customer-segment directory for botRef: {} for segmentName: {}", botRef, segmentName);
+      return null;
+    }
+    return fileName;
+  }
+
   private Set<Long> getIntersectionForSegments(Set<Long> recencySet, Set<Long> frequencySet, Set<Long> monetarySet){
     List<Set<Long>> listSegment = new ArrayList<>();
     if(!CollectionUtils.isEmpty(recencySet))
