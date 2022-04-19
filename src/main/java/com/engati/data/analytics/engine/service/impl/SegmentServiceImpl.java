@@ -203,7 +203,7 @@ public class SegmentServiceImpl implements SegmentService {
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
         monetaryList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().
-                get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_NAME)), JSONObject.class).values().
+                get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), JSONObject.class).values().
                 stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
