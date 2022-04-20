@@ -5,8 +5,8 @@ import java.util.Locale;
 public class Constants {
 
   public static final String RESPONSE_OBJECT = "response";
-  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/%s";
-  public static final String CSV_PATH_FORMAT = "/opt/engati/%s/%s.csv";
+  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
+  public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
@@ -16,7 +16,6 @@ public class Constants {
 
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
-  public static Long DEFAULT_CUSTOMER_ID = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;
 
@@ -40,7 +39,8 @@ public class Constants {
   public static final String QUERY = "query";
   public static final String KEY = "key";
 
-
+  public static final String[] CUSTOMER_SEGMENT_HEADER = new String[]{"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
+          "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
 
 

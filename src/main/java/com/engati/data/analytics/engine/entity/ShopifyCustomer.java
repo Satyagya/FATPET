@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Data
 @Entity
-@Table(name = "shopify_customer_backup")
+@Table(name = "shopify_customer")
 public class ShopifyCustomer {
 
   @Id
