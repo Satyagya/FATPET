@@ -202,8 +202,8 @@ public class SegmentServiceImpl implements SegmentService {
               executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        monetaryList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().
-                get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), JSONObject.class).values().
+        monetaryList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().
+                get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).
                 stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
@@ -226,8 +226,8 @@ public class SegmentServiceImpl implements SegmentService {
               executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        frequencyList =  MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
-                get(Constants.CUSTOMER_ID)), JSONObject.class).values().
+        frequencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
+                get(Constants.CUSTOMER_ID)), ArrayList.class).
                 stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
@@ -255,8 +255,8 @@ public class SegmentServiceImpl implements SegmentService {
               executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        recencyList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
-                get(Constants.CUSTOMER_ID)), JSONObject.class).values().
+        recencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
+                get(Constants.CUSTOMER_ID)), ArrayList.class).
                 stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
@@ -283,8 +283,7 @@ public class SegmentServiceImpl implements SegmentService {
                 .get(Constants.RESPONSE_OBJECT).get(QueryConstants.STORE_AOV).toString();
 
         storeAov = String.valueOf(
-                MAPPER.readValue(responseString, JSONObject.class).
-                        entrySet().stream().findFirst().get().getValue());
+            MAPPER.readValue(responseString, ArrayList.class).stream().findFirst().get());
       }
     } catch (Exception e) {
      log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
