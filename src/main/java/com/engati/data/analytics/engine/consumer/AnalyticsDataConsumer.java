@@ -3,8 +3,10 @@ package com.engati.data.analytics.engine.consumer;
 import com.engati.data.analytics.engine.constants.constant.KafkaConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class AnalyticsDataConsumer {
 
   @KafkaListener(id = KafkaConstants.GROUP_ID_ANALYTICS_DATA_REQUEST,
