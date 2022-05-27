@@ -25,6 +25,8 @@ import retrofit2.Response;
 
 import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -54,7 +56,7 @@ public class SegmentServiceImpl implements SegmentService {
     String storeAOV = null;
     storeAOV = getStoreAOV(botRef);
     Map<Long, Map<String, Object>> customerAOV = getCustomerAOV(customerList, botRef);
-    Map<Long, Map<String, Integer>> ordersLastMonth = getOrdersForLastXMonth(customerList, botRef,1);
+    Map<Long, Map<String, Integer>> ordersLastMonth = getOrdersForLastXMonth(customerList, botRef, 1);
     Map<Long, Map<String, Integer>> ordersLast6Months = getOrdersForLastXMonth(customerList, botRef, 6);
     Map<Long, Map<String, Integer>> ordersLast12Months = getOrdersForLastXMonth(customerList, botRef, 12);
     for (Long customerId : customerList) {
@@ -68,9 +70,9 @@ public class SegmentServiceImpl implements SegmentService {
         continue;
       }
       customerSegmentationResponse.setStoreAOV(Double.valueOf(storeAOV));
-      try{
-      customerSegmentationResponse.setCustomerAOV((Double) customerAOV.get(customerId).getOrDefault(QueryConstants.AOV, Constants.DEFAULT_AOV_VALUE));
-      }catch (NullPointerException e) {
+      try {
+        customerSegmentationResponse.setCustomerAOV((Double) customerAOV.get(customerId).getOrDefault(QueryConstants.AOV, Constants.DEFAULT_AOV_VALUE));
+      } catch (NullPointerException e) {
         customerSegmentationResponse.setCustomerAOV(Double.valueOf(Constants.DEFAULT_AOV_VALUE));
       }
       try {
@@ -79,12 +81,12 @@ public class SegmentServiceImpl implements SegmentService {
         customerSegmentationResponse.setOrdersInLastOneMonth(Constants.DEFAULT_ORDER_VALUE);
       }
       try {
-        customerSegmentationResponse.setOrdersInLastSixMonths( ordersLast6Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_6_MONTHS, Constants.DEFAULT_ORDER_VALUE));
+        customerSegmentationResponse.setOrdersInLastSixMonths(ordersLast6Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_6_MONTHS, Constants.DEFAULT_ORDER_VALUE));
       } catch (NullPointerException e) {
         customerSegmentationResponse.setOrdersInLastSixMonths(Constants.DEFAULT_ORDER_VALUE);
       }
       try {
-        customerSegmentationResponse.setOrdersInLastTwelveMonths( ordersLast12Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_12_MONTHS, Constants.DEFAULT_ORDER_VALUE));
+        customerSegmentationResponse.setOrdersInLastTwelveMonths(ordersLast12Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_12_MONTHS, Constants.DEFAULT_ORDER_VALUE));
       } catch (NullPointerException e) {
         customerSegmentationResponse.setOrdersInLastTwelveMonths(Constants.DEFAULT_ORDER_VALUE);
       }
@@ -94,11 +96,11 @@ public class SegmentServiceImpl implements SegmentService {
   }
 
   @Override
-  public DataAnalyticsResponse<List<CustomerSegmentationResponse>>  getCustomersForSegment(Long botRef, String segmentName) {
+  public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForSystemSegment(Long botRef, String segmentName) {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, segment: {}", botRef, segmentName);
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
     response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
-    DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getConfigByBotRefAndSegment(botRef, segmentName);
+    DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getSystemSegmentConfigByBotRefAndSegment(botRef, segmentName);
     log.info("Checking for Config values for the segment values for {} for botRef: {}", segmentName, botRef);
     Set<Long> resultSet = null;
     Set<Long> recencySegment = null;
@@ -119,7 +121,7 @@ public class SegmentServiceImpl implements SegmentService {
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
     try {
       String fileName = getOutputFileName(botRef, segmentName);
-      if(Objects.nonNull(fileName)) {
+      if (Objects.nonNull(fileName)) {
         if (!CollectionUtils.isEmpty(resultSet)) {
           List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
           if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
@@ -130,9 +132,9 @@ public class SegmentServiceImpl implements SegmentService {
           if (emptyFile.exists()) {
             emptyFile.delete();
           }
-          if(!emptyFile.createNewFile()) {
+          if (!emptyFile.createNewFile()) {
             log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}",
-                    botRef, segmentName);
+                botRef, segmentName);
           }
           response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
         }
@@ -148,33 +150,32 @@ public class SegmentServiceImpl implements SegmentService {
     String csvBasePath = String.format(Constants.CSV_BASE_PATH_FORMAT, botRef);
     String fileName = String.format(Constants.CSV_PATH_FORMAT, botRef, segmentName);
     File file = new File(csvBasePath);
-    if(!file.exists() && !file.mkdirs()) {
+    if (!file.exists() && !file.mkdirs()) {
       log.error("Unable to create customer-segment directory for botRef: {} for segmentName: {}", botRef, segmentName);
       return null;
     }
     return fileName;
   }
 
-  private Set<Long> getIntersectionForSegments(Set<Long> recencySet, Set<Long> frequencySet, Set<Long> monetarySet){
+  private Set<Long> getIntersectionForSegments(Set<Long> recencySet, Set<Long> frequencySet, Set<Long> monetarySet) {
     List<Set<Long>> listSegment = new ArrayList<>();
-    if(!CollectionUtils.isEmpty(recencySet))
+    if (!CollectionUtils.isEmpty(recencySet))
       listSegment.add(recencySet);
-    if(!CollectionUtils.isEmpty(frequencySet))
+    if (!CollectionUtils.isEmpty(frequencySet))
       listSegment.add(frequencySet);
-    if(!CollectionUtils.isEmpty(monetarySet))
+    if (!CollectionUtils.isEmpty(monetarySet))
       listSegment.add(monetarySet);
 
     if (listSegment.size() == 0)
       return null;
     else if (listSegment.size() == 1)
       return listSegment.get(0);
-    else if (listSegment.size() == 2){
+    else if (listSegment.size() == 2) {
       Set<Long> resSet1 = listSegment.get(0);
       Set<Long> resSet2 = listSegment.get(1);
       resSet1.retainAll(resSet2);
       return resSet1;
-    }
-    else {
+    } else {
       Set<Long> resSet1 = listSegment.get(0);
       Set<Long> resSet2 = listSegment.get(1);
       Set<Long> resSet3 = listSegment.get(2);
@@ -184,7 +185,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
   }
 
-  private Set<Long> getMonetarySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails)  {
+  private Set<Long> getMonetarySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails) {
     Set<Long> monetaryList = new HashSet<>();
     try {
       String query = NativeQueries.MONETARY_QUERY;
@@ -199,12 +200,12 @@ public class SegmentServiceImpl implements SegmentService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       Response<JsonNode> etlResponse = etlEngineRestUtility.
-              executeQuery(requestBody).execute();
+          executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-              .nonNull(etlResponse.body())) {
+          .nonNull(etlResponse.body())) {
         monetaryList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().
                 get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).
-                stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
+            stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
       log.error("Exception while getting StoreAOV for botRef: {}", configDetails.getResponseObject().getBotRef().toString(), e);
@@ -223,12 +224,12 @@ public class SegmentServiceImpl implements SegmentService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       Response<JsonNode> etlResponse = etlEngineRestUtility.
-              executeQuery(requestBody).execute();
+          executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-              .nonNull(etlResponse.body())) {
+          .nonNull(etlResponse.body())) {
         frequencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
                 get(Constants.CUSTOMER_ID)), ArrayList.class).
-                stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
+            stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
       log.error("Error while getting Frequency Segment for: {}", configDetails, e);
@@ -236,7 +237,7 @@ public class SegmentServiceImpl implements SegmentService {
     return frequencyList;
   }
 
-  private Set<Long> getRecencySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails)  {
+  private Set<Long> getRecencySegment(DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails) {
     Set<Long> recencyList = new HashSet<>();
     try {
       String query = NativeQueries.RECENCY_QUERY;
@@ -252,19 +253,18 @@ public class SegmentServiceImpl implements SegmentService {
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
       Response<JsonNode> etlResponse = etlEngineRestUtility.
-              executeQuery(requestBody).execute();
+          executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-              .nonNull(etlResponse.body())) {
+          .nonNull(etlResponse.body())) {
         recencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
                 get(Constants.CUSTOMER_ID)), ArrayList.class).
-                stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
+            stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
       log.error("Error while getting Recency Segment for:{}", configDetails, e);
     }
     return recencyList;
   }
-
 
 
   private String getStoreAOV(Long botRef) {
@@ -278,15 +278,15 @@ public class SegmentServiceImpl implements SegmentService {
       log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-              .nonNull(etlResponse.body())) {
+          .nonNull(etlResponse.body())) {
         String responseString = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
-                .get(Constants.RESPONSE_OBJECT).get(QueryConstants.STORE_AOV).toString();
+            .get(Constants.RESPONSE_OBJECT).get(QueryConstants.STORE_AOV).toString();
 
         storeAov = String.valueOf(
             MAPPER.readValue(responseString, ArrayList.class).stream().findFirst().get());
       }
     } catch (Exception e) {
-     log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
+      log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
     }
     return storeAov;
   }
@@ -305,9 +305,9 @@ public class SegmentServiceImpl implements SegmentService {
       requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
       log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.
-              executeQueryDetails(requestBody).execute();
+          executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-              .nonNull(etlResponse.body())) {
+          .nonNull(etlResponse.body())) {
         customerAOV = MAPPER.readValue(
             MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
             });
@@ -318,7 +318,7 @@ public class SegmentServiceImpl implements SegmentService {
     return customerAOV;
   }
 
-  private Map<Long, Map<String, Integer>> getOrdersForLastXMonth(Set<Long> customerIds, Long botRef, Integer Month){
+  private Map<Long, Map<String, Integer>> getOrdersForLastXMonth(Set<Long> customerIds, Long botRef, Integer Month) {
     Map<Long, Map<String, Integer>> customerOrders = new HashMap<>();
     try {
 
@@ -335,9 +335,9 @@ public class SegmentServiceImpl implements SegmentService {
       requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
       log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.
-              executeQueryDetails(requestBody).execute();
+          executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-              .nonNull(etlResponse.body())) {
+          .nonNull(etlResponse.body())) {
         customerOrders = MAPPER.readValue(
             MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Integer>>>() {
             });
@@ -348,4 +348,50 @@ public class SegmentServiceImpl implements SegmentService {
     return customerOrders;
   }
 
+  @Override
+  public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForCustomSegment(Long botRef, String segmentCondition) {
+    log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, segmentCondition: {}", botRef, segmentCondition);
+    DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
+    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    Pattern segmentOperators = Pattern.compile("(?i)AND | OR ");
+    Matcher OperatorMatcher = segmentOperators.matcher(segmentCondition);
+    ArrayList<String> operators = new ArrayList<>();
+    while (OperatorMatcher.find()) {
+      operators.add(OperatorMatcher.group());
+    }
+    if (operators.size() > 4) {
+      response.setResponseObject(null);
+      response.setResponseStatusCode(ResponseStatusCode.OPERATORS_PERMISSIBLE_LIMITS_REACHED);
+    }
+    String[] operands = segmentCondition.split("(?i)AND | OR ");
+    String query = "";
+    for (String operand : operands) {
+      if (operand.contains("ORDERS")) {
+        String query_for_operand = generateQueryForOrdersInLastXMonths(operand, botRef);
+
+      } else if (operand.contains("AOV")) {
+
+
+      } else {
+        response.setResponseObject(null);
+        response.setResponseStatusCode(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
+      }
+    }
+    return null;
+  }
+
+  public String generateQueryForOrdersInLastXMonths(String operand, Long botRef) {
+    String query = NativeQueries.ORDERS_FOR_X_MONTH_WITH_FILTERS;
+    query = query.replace(Constants.BOT_REF, botRef.toString());
+    if (operand.contains("ONE")) {
+      query = query.replace(QueryConstants.GAP, "1");
+    } else if (operand.contains("SIX")) {
+      query = query.replace(QueryConstants.GAP, "6");
+    } else if (operand.contains("TWELVE")) {
+      query = query.replace(QueryConstants.GAP, "12");
+    } else {
+      return query ="";
+    }
+    return query;
+  }
 }

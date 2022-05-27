@@ -110,4 +110,12 @@ public class NativeQueries {
       "and collection in (collection_name) \n" +
       "and product_type in (productType)";
 
+  public static final String ORDERS_FOR_X_MONTH_WITH_FILTERS = "select * from\n" +
+      "(select customer_id, count(distinct order_id)as orders__last_gap_months\n" +
+      "from parquet_scan('\"+ Constants.PARQUET_FILE_PATH +\"/botRef/*.parquet') \n" +
+      "where cancelled_at like 'None'\n" +
+      "and created_date >= CURRENT_DATE - INTERVAL gap MONTH\n" +
+      "group by customer_id)as a\n" +
+      "where orders__last_gap_months > filter_value\n" ;
+
 }
