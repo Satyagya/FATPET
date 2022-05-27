@@ -12,11 +12,11 @@ public class AnalyticsDataConsumer {
   @KafkaListener(id = KafkaConstants.GROUP_ID_ANALYTICS_DATA_REQUEST,
                  topics = {"${topic.shopify.analytics}"},
                  containerFactory = KafkaConstants.CONTAINER_FACTORY)
-  public void sentimentIntentRequestConsumed(String payload) {
+  public void analyticsRequestConsumed(String payload) {
     try {
-      log.info("Payload received from sentiment intent topic is {}", payload);
+      log.info("Payload received from shopify analytics topic is {}", payload);
     } catch (Exception e) {
-      log.error("Error while consuming sentiment intent topic", e);
+      log.error("Error while consuming shopify analytics topic", e);
     }
   }
 
