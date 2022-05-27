@@ -24,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -368,7 +369,23 @@ public class SegmentServiceImpl implements SegmentService {
     for (String operand : operands) {
       if (operand.contains("ORDERS")) {
         String query_for_operand = generateQueryForOrdersInLastXMonths(operand, botRef);
-
+//        if (query_for_operand != null || !query_for_operand.isEmpty()) {
+//          JSONObject requestBody = new JSONObject();
+//          requestBody.put(Constants.QUERY, query);
+//          try {
+//            Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+//            if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
+//                .nonNull(etlResponse.body())) {
+//              Set<Long> operandList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
+//                      get(Constants.CUSTOMER_ID)), ArrayList.class).
+//                  stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
+//            }
+//          } catch (IOException e) {
+//            e.printStackTrace();
+//          }
+//        } else {
+//          return null;
+//        }
       } else if (operand.contains("AOV")) {
 
 
@@ -390,7 +407,7 @@ public class SegmentServiceImpl implements SegmentService {
     } else if (operand.contains("TWELVE")) {
       query = query.replace(QueryConstants.GAP, "12");
     } else {
-      return query ="";
+      return query = "";
     }
     return query;
   }
