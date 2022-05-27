@@ -1,0 +1,21 @@
+package com.engati.data.analytics.engine.consumer;
+
+import com.engati.data.analytics.engine.constants.constant.KafkaConstants;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+
+@Slf4j
+public class AnalyticsDataConsumer {
+
+  @KafkaListener(id = KafkaConstants.GROUP_ID_ANALYTICS_DATA_REQUEST,
+                 topics = {"${topic.shopify.analytics}"},
+                 containerFactory = KafkaConstants.CONTAINER_FACTORY)
+  public void sentimentIntentRequestConsumed(String payload) {
+    try {
+      log.info("Payload received from sentiment intent topic is {}", payload);
+    } catch (Exception e) {
+      log.error("Error while consuming sentiment intent topic", e);
+    }
+  }
+
+}

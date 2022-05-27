@@ -47,9 +47,11 @@ targetCompatibility = 1.8
 
 
 dependencies {
+    implementation 'org.springframework.kafka:spring-kafka:2.8.5'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.3'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.3'
+    compile(group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: "3.9.1")
 
 
     implementation "org.springframework.boot:spring-boot-starter-data-rest:${spring_boot_version}"
@@ -90,8 +92,6 @@ dependencies {
 
 	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "${jackson_dataformat_version}"
 	implementation(group: 'org.asynchttpclient', name: 'async-http-client', version: "${asynchttpclient_version}")
-    compile(group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: "3.9.1")
-
     compile("com.nethum.common:error-handling-service:${error_handling_version}") {
         exclude group: "com.fasterxml.jackson.core", module: "jackson-annotations"
         exclude group: "com.fasterxml.jackson.core", module: "jackson-core"
