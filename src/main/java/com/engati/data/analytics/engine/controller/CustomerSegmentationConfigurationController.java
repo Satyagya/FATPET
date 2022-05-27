@@ -29,25 +29,22 @@ public class CustomerSegmentationConfigurationController {
 
   @GetMapping(value = ApiPathConstants.API_BASE_PATH_FOR_SEGMENT_DETAILS)
   public ResponseEntity<DataAnalyticsResponse> getSegmentConfig(
-      @PathVariable(name = ApiPathConstants.CUSTOMERID) Long customerId,
       @PathVariable(name = ApiPathConstants.BOTREF) Long botRef,
       @PathVariable(name = ApiPathConstants.SEGMENT_NAME) String segmentName) {
-    log.info("Got call for getSegmentConfig for customerId: {}, botRef: {}, segmentName: {}", customerId, botRef, segmentName);
+    log.info("Got call for getSegmentConfig for botRef: {}, segmentName: {}", botRef, segmentName);
     DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> response =
-        customerSegmentationConfigurationService.getConfigByBotRefAndSegment(customerId, botRef, segmentName);
+        customerSegmentationConfigurationService.getConfigByBotRefAndSegment(botRef, segmentName);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
   @PostMapping(value = ApiPathConstants.API_BASE_PATH_FOR_SEGMENT_DETAILS)
   public ResponseEntity<DataAnalyticsResponse> updateSegmentConfig(
       @RequestBody CustomerSegmentationConfigurationRequest customerSegmentationConfigurationRequest,
-      @PathVariable(name = ApiPathConstants.CUSTOMERID) Long customerId,
       @PathVariable(name = ApiPathConstants.BOTREF) Long botRef,
       @PathVariable(name = ApiPathConstants.SEGMENT_NAME) String segmentName) {
-    log.info("Got call for updateSegmentConfig for customerId: {}, botRef: {}, segmentName: {} and RequestBody",
-        customerId, botRef, segmentName, customerSegmentationConfigurationRequest);
+    log.info("Got call for updateSegmentConfig for botRef: {}, segmentName: {} and RequestBody{}", botRef, segmentName, customerSegmentationConfigurationRequest);
     DataAnalyticsResponse<CustomerSegmentationConfiguration> response =
-        customerSegmentationConfigurationService.updateConfigByBotRefAndSegment(customerId, botRef, segmentName, customerSegmentationConfigurationRequest);
+        customerSegmentationConfigurationService.updateConfigByBotRefAndSegment(botRef, segmentName, customerSegmentationConfigurationRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 

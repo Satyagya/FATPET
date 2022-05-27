@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface SegmentService {
 
-    DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForSegment(Long customerId, Long botRef, String segmentName) ;
+    DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForSegment(Long botRef, String segmentName) ;
 
 }

@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class RetrofitConfiguration {
 
-    @Bean(name = Constants.RETROFIT_ETL_ENGINE_API)
+    @Bean(name = Constants.RETROFIT_DUCKDB_ENGINE_API)
     public Retrofit retrofitIntegrationHubApi(EtlEngineConfiguration etlEngineConfiguration,
-                                              @Qualifier(value = Constants.ETL_ENGINE_HTTP_CLIENT) OkHttpClient okHttpClient) {
+                                              @Qualifier(value = Constants.DUCKDB_ENGINE_HTTP_CLIENT) OkHttpClient okHttpClient) {
         Retrofit.Builder builder = constructRetrofitBuilder(okHttpClient);
         builder.baseUrl(etlEngineConfiguration.getUrl())
                 .addConverterFactory(JacksonConverterFactory.create(constructObjectMapper()))
@@ -32,13 +32,13 @@ public class RetrofitConfiguration {
         return builder.build();
     }
 
-    @Bean(name = Constants.RETROFIT_ETL_ENGINE_REST_SERVICE)
+    @Bean(name = Constants.RETROFIT_DUCKDB_ENGINE_REST_SERVICE)
     public EtlEngineRestUtility retrofitIntegrationHubRestService(
-            @Qualifier(value = Constants.RETROFIT_ETL_ENGINE_API) Retrofit retrofitIntegrationHubApi) {
+            @Qualifier(value = Constants.RETROFIT_DUCKDB_ENGINE_API) Retrofit retrofitIntegrationHubApi) {
         return retrofitIntegrationHubApi.create(EtlEngineRestUtility.class);
     }
 
-    @Bean(name = Constants.ETL_ENGINE_HTTP_CLIENT)
+    @Bean(name = Constants.DUCKDB_ENGINE_HTTP_CLIENT)
     public OkHttpClient okHttpIHClient(EtlEngineConfiguration etlEngineConfiguration) {
 
         return createHttpClient(etlEngineConfiguration.getLogLevel(),

@@ -24,11 +24,10 @@ public class SegmentController {
 
   @GetMapping(value = ApiPathConstants.GET_CUSTOMER_SEGMENT)
   public ResponseEntity<DataAnalyticsResponse> getCustomerSegment(
-      @PathVariable(name = ApiPathConstants.CUSTOMERID) Long customerId,
       @PathVariable(name = ApiPathConstants.BOTREF) Long botRef,
       @PathVariable(name = ApiPathConstants.SEGMENT_NAME) String segmentName ) {
-    log.info("Got call for getCustomerSegment for customerId: {}, botRef: {}, segmentName: {}", customerId, botRef, segmentName);
-      DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = segmentService.getCustomersForSegment(customerId, botRef, segmentName);
+    log.info("Got call for getCustomerSegment for botRef: {}, segmentName: {}", botRef, segmentName);
+      DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = segmentService.getCustomersForSegment(botRef, segmentName);
         return new ResponseEntity<>(response, response.getStatusCode());
   }
 

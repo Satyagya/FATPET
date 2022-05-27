@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,12 +94,12 @@ public class SegmentServiceImpl implements SegmentService {
   }
 
   @Override
-  public DataAnalyticsResponse<List<CustomerSegmentationResponse>>  getCustomersForSegment(Long customerId, Long botRef, String segmentName) {
-    log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName);
+  public DataAnalyticsResponse<List<CustomerSegmentationResponse>>  getCustomersForSegment(Long botRef, String segmentName) {
+    log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, segment: {}", botRef, segmentName);
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
     response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
-    DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getConfigByBotRefAndSegment(customerId, botRef, segmentName);
-    log.info("Checking for Config values for the segment values for {} for botRef: {}, and customerId: {}", segmentName, botRef, customerId);
+    DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getConfigByBotRefAndSegment(botRef, segmentName);
+    log.info("Checking for Config values for the segment values for {} for botRef: {}", segmentName, botRef);
     Set<Long> resultSet = null;
     Set<Long> recencySegment = null;
     if (configDetails.getResponseObject().getRecencyMetric() != null) {
@@ -117,21 +118,43 @@ public class SegmentServiceImpl implements SegmentService {
     }
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
     try {
-      if (!CollectionUtils.isEmpty(resultSet)) {
-        List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
-        String fileName = CommonUtils.createCsv(customerDetail, botRef, segmentName);
-        if (Objects.isNull(fileName)) {
-          response.setResponseStatusCode(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+      String fileName = getOutputFileName(botRef, segmentName);
+      if(Objects.nonNull(fileName)) {
+        if (!CollectionUtils.isEmpty(resultSet)) {
+          List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
+          if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
+            response.setResponseStatusCode(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+          }
+        } else {
+          File emptyFile = new File(fileName);
+          if (emptyFile.exists()) {
+            emptyFile.delete();
+          }
+          if(!emptyFile.createNewFile()) {
+            log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}",
+                    botRef, segmentName);
+          }
+          response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
         }
-      } else {
-        response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
       }
     } catch (Exception e) {
       response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
-      log.error("Exception caught while getting customer details for botRef: {}, customerId: {}, segment: {}", botRef, customerId, segmentName, e);
+      log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
     }
     return response;
   }
+
+  private String getOutputFileName(Long botRef, String segmentName) {
+    String csvBasePath = String.format(Constants.CSV_BASE_PATH_FORMAT, botRef);
+    String fileName = String.format(Constants.CSV_PATH_FORMAT, botRef, segmentName);
+    File file = new File(csvBasePath);
+    if(!file.exists() && !file.mkdirs()) {
+      log.error("Unable to create customer-segment directory for botRef: {} for segmentName: {}", botRef, segmentName);
+      return null;
+    }
+    return fileName;
+  }
+
   private Set<Long> getIntersectionForSegments(Set<Long> recencySet, Set<Long> frequencySet, Set<Long> monetarySet){
     List<Set<Long>> listSegment = new ArrayList<>();
     if(!CollectionUtils.isEmpty(recencySet))
@@ -179,8 +202,8 @@ public class SegmentServiceImpl implements SegmentService {
               executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        monetaryList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().
-                get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_NAME)), JSONObject.class).values().
+        monetaryList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().
+                get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).
                 stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
@@ -203,8 +226,8 @@ public class SegmentServiceImpl implements SegmentService {
               executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        frequencyList =  MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
-                get(Constants.CUSTOMER_ID)), JSONObject.class).values().
+        frequencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
+                get(Constants.CUSTOMER_ID)), ArrayList.class).
                 stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
@@ -232,8 +255,8 @@ public class SegmentServiceImpl implements SegmentService {
               executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
               .nonNull(etlResponse.body())) {
-        recencyList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
-                get(Constants.CUSTOMER_ID)), JSONObject.class).values().
+        recencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
+                get(Constants.CUSTOMER_ID)), ArrayList.class).
                 stream().map(x -> ((Number)x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
@@ -260,8 +283,7 @@ public class SegmentServiceImpl implements SegmentService {
                 .get(Constants.RESPONSE_OBJECT).get(QueryConstants.STORE_AOV).toString();
 
         storeAov = String.valueOf(
-                MAPPER.readValue(responseString, JSONObject.class).
-                        entrySet().stream().findFirst().get().getValue());
+            MAPPER.readValue(responseString, ArrayList.class).stream().findFirst().get());
       }
     } catch (Exception e) {
      log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);

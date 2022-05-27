@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = Constants.ETL_ENGINE_PREFIX)
+@ConfigurationProperties(prefix = Constants.DUCKDB_ENGINE_PREFIX)
 @Data
 public class EtlEngineConfiguration {
     private Integer connectTimeout;
