@@ -7,10 +7,12 @@ import com.engati.data.analytics.engine.model.response.CustomerSegmentationRespo
 import com.engati.data.analytics.engine.service.SegmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -30,10 +32,11 @@ public class SegmentController {
 
 
   @GetMapping(value = ApiPathConstants.GET_CUSTOM_SEGMENT)
-  public ResponseEntity<DataAnalyticsResponse> getCustomSegment(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody CustomSegmentRequest customSegmentRequest) {
-    log.info("Got call for getCustomerSegment for botRef: {}, segmentCondition: {}", botRef, customSegmentRequest.getSegmentCondition());
-    DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = segmentService.getCustomersForCustomSegment(botRef, customSegmentRequest.getSegmentCondition());
-    return new ResponseEntity<>(response, response.getStatusCode());
-  }
+  public ResponseEntity<Map<String, Object>> getCustomSegment(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody CustomSegmentRequest customSegmentRequest) {
+    log.info("Got call for getCustomerSegment for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
+    Map<String, Object> response = segmentService.getCustomersForCustomSegment(botRef, customSegmentRequest);
+    return new ResponseEntity<Map<String, Object>>(response, HttpStatus.valueOf(200));
 
+
+  }
 }

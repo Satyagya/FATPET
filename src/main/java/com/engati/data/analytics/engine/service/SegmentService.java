@@ -10,7 +10,7 @@ public interface SegmentService {
 
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForSystemSegment(Long botRef, String segmentName);
 
-    DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForCustomSegment(Long botRef, String segmentCondition);
+    Map<String, Object> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest);
 
 
 }

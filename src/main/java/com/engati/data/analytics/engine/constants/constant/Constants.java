@@ -14,7 +14,6 @@ public class Constants {
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-//  public static String PAQUET_FILE_PATH = "/opt/engati/shopify-etl-engine/parquet_store";
   public static String PARQUET_FILE_PATH = "/opt/engati/parquet_store";
 //  public static String PARQUET_FILE_PATH = "/Users/jaymehta/Desktop/PycharmProjects/shopify-etl-engine/parquet_store";
 

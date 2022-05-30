@@ -110,12 +110,24 @@ public class NativeQueries {
       "and collection in (collection_name) \n" +
       "and product_type in (productType)";
 
-  public static final String ORDERS_FOR_X_MONTH_WITH_FILTERS = "select * from\n" +
+  public static final String ORDERS_FOR_X_MONTH_WITH_FILTERS = "select customer_id from\n" +
       "(select customer_id, count(distinct order_id)as orders__last_gap_months\n" +
-      "from parquet_scan('\"+ Constants.PARQUET_FILE_PATH +\"/botRef/*.parquet') \n" +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet') \n" +
       "where cancelled_at like 'None'\n" +
       "and created_date >= CURRENT_DATE - INTERVAL gap MONTH\n" +
       "group by customer_id)as a\n" +
-      "where orders__last_gap_months > filter_value\n" ;
+      "where orders__last_gap_months operator value\n" ;
+
+  public static final String CUSTOMER_AOV_QUERY_WITH_FILTERS = "select customer_id from\n" +
+      "(select customer_id, round(AOV, 2)as AOV from\n" +
+      "(select customer_id, ((sum_total)*1.0/(number_of_orders))as AOV from\n" +
+      "(select customer_id, sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
+      "(select customer_id, order_id, cast(total_price as int) total_price\n" +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/*.parquet')\n" +
+      "where cancelled_at like 'None'\n" +
+      "and created_date >= CURRENT_DATE - INTERVAL gap MONTH\n" +
+      "group by customer_id, order_id, total_price)as a\n" +
+      "group by customer_id)as b)as c)\n" +
+      "where AOV operator value \n";
 
 }

@@ -8,6 +8,7 @@ import com.engati.data.analytics.engine.constants.constant.NativeQueries;
 import com.engati.data.analytics.engine.constants.constant.QueryConstants;
 import com.engati.data.analytics.engine.constants.enums.QueryOperators;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
+import com.engati.data.analytics.engine.model.request.CustomSegmentRequest;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationConfigurationResponse;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.engati.data.analytics.engine.repository.SegmentRepository;
@@ -24,7 +25,6 @@ import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -134,8 +134,7 @@ public class SegmentServiceImpl implements SegmentService {
             emptyFile.delete();
           }
           if (!emptyFile.createNewFile()) {
-            log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}",
-                botRef, segmentName);
+            log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
           }
           response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
         }
@@ -160,17 +159,12 @@ public class SegmentServiceImpl implements SegmentService {
 
   private Set<Long> getIntersectionForSegments(Set<Long> recencySet, Set<Long> frequencySet, Set<Long> monetarySet) {
     List<Set<Long>> listSegment = new ArrayList<>();
-    if (!CollectionUtils.isEmpty(recencySet))
-      listSegment.add(recencySet);
-    if (!CollectionUtils.isEmpty(frequencySet))
-      listSegment.add(frequencySet);
-    if (!CollectionUtils.isEmpty(monetarySet))
-      listSegment.add(monetarySet);
+    if (!CollectionUtils.isEmpty(recencySet)) listSegment.add(recencySet);
+    if (!CollectionUtils.isEmpty(frequencySet)) listSegment.add(frequencySet);
+    if (!CollectionUtils.isEmpty(monetarySet)) listSegment.add(monetarySet);
 
-    if (listSegment.size() == 0)
-      return null;
-    else if (listSegment.size() == 1)
-      return listSegment.get(0);
+    if (listSegment.size() == 0) return null;
+    else if (listSegment.size() == 1) return listSegment.get(0);
     else if (listSegment.size() == 2) {
       Set<Long> resSet1 = listSegment.get(0);
       Set<Long> resSet2 = listSegment.get(1);
@@ -200,13 +194,9 @@ public class SegmentServiceImpl implements SegmentService {
       query = query.replace(QueryConstants.VALUE, configDetails.getResponseObject().getMonetaryValue());
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
-      Response<JsonNode> etlResponse = etlEngineRestUtility.
-          executeQuery(requestBody).execute();
-      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-          .nonNull(etlResponse.body())) {
-        monetaryList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().
-                get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).
-            stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        monetaryList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
       log.error("Exception while getting StoreAOV for botRef: {}", configDetails.getResponseObject().getBotRef().toString(), e);
@@ -224,13 +214,9 @@ public class SegmentServiceImpl implements SegmentService {
       query = query.replace(QueryConstants.ORDERS_CONFIGURED, configDetails.getResponseObject().getFrequencyMetric().toString());
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
-      Response<JsonNode> etlResponse = etlEngineRestUtility.
-          executeQuery(requestBody).execute();
-      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-          .nonNull(etlResponse.body())) {
-        frequencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
-                get(Constants.CUSTOMER_ID)), ArrayList.class).
-            stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        frequencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
       log.error("Error while getting Frequency Segment for: {}", configDetails, e);
@@ -253,13 +239,9 @@ public class SegmentServiceImpl implements SegmentService {
       query = query.replace(QueryConstants.COLUMN_NAME, configDetails.getResponseObject().getRecencyMetric().toLowerCase(Locale.ROOT));
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
-      Response<JsonNode> etlResponse = etlEngineRestUtility.
-          executeQuery(requestBody).execute();
-      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-          .nonNull(etlResponse.body())) {
-        recencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
-                get(Constants.CUSTOMER_ID)), ArrayList.class).
-            stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        recencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
       log.error("Error while getting Recency Segment for:{}", configDetails, e);
@@ -278,13 +260,10 @@ public class SegmentServiceImpl implements SegmentService {
       requestBody.put(Constants.QUERY, query);
       log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
-      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-          .nonNull(etlResponse.body())) {
-        String responseString = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
-            .get(Constants.RESPONSE_OBJECT).get(QueryConstants.STORE_AOV).toString();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        String responseString = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class).get(Constants.RESPONSE_OBJECT).get(QueryConstants.STORE_AOV).toString();
 
-        storeAov = String.valueOf(
-            MAPPER.readValue(responseString, ArrayList.class).stream().findFirst().get());
+        storeAov = String.valueOf(MAPPER.readValue(responseString, ArrayList.class).stream().findFirst().get());
       }
     } catch (Exception e) {
       log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
@@ -305,13 +284,10 @@ public class SegmentServiceImpl implements SegmentService {
       requestBody.put(Constants.QUERY, query);
       requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
       log.debug("Request body for query to duckDB: {}", requestBody);
-      Response<JSONObject> etlResponse = etlEngineRestUtility.
-          executeQueryDetails(requestBody).execute();
-      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-          .nonNull(etlResponse.body())) {
-        customerAOV = MAPPER.readValue(
-            MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
-            });
+      Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        customerAOV = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
+        });
       }
     } catch (Exception e) {
       log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
@@ -335,13 +311,10 @@ public class SegmentServiceImpl implements SegmentService {
       requestBody.put(Constants.QUERY, query);
       requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
       log.debug("Request body for query to duckDB: {}", requestBody);
-      Response<JSONObject> etlResponse = etlEngineRestUtility.
-          executeQueryDetails(requestBody).execute();
-      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-          .nonNull(etlResponse.body())) {
-        customerOrders = MAPPER.readValue(
-            MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Integer>>>() {
-            });
+      Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        customerOrders = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Integer>>>() {
+        });
       }
     } catch (Exception e) {
       log.error("Error while getting Orders For Last X Month for botRef: {}", botRef, e);
@@ -350,55 +323,97 @@ public class SegmentServiceImpl implements SegmentService {
   }
 
   @Override
-  public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForCustomSegment(Long botRef, String segmentCondition) {
-    log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, segmentCondition: {}", botRef, segmentCondition);
+  public Map<String, Object> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest) {
+    log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
+    String segmentCondition = customSegmentRequest.getSegmentCondition();
+    String segmentName = customSegmentRequest.getSegmentName();
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
     response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
-    Pattern segmentOperators = Pattern.compile("(?i)AND | OR ");
+    Pattern segmentOperators = Pattern.compile("(?i) AND | OR ");
     Matcher OperatorMatcher = segmentOperators.matcher(segmentCondition);
     ArrayList<String> operators = new ArrayList<>();
+
     while (OperatorMatcher.find()) {
-      operators.add(OperatorMatcher.group());
+      operators.add(OperatorMatcher.group().trim());
     }
+
     if (operators.size() > 4) {
       response.setResponseObject(null);
       response.setResponseStatusCode(ResponseStatusCode.OPERATORS_PERMISSIBLE_LIMITS_REACHED);
     }
-    String[] operands = segmentCondition.split("(?i)AND | OR ");
-    String query = "";
-    for (String operand : operands) {
+
+    String[] operands = segmentCondition.split("(?i) AND | OR ");
+    Set<Long> small_query_parameter_set = new HashSet<Long>();
+    Long small_set_execution_time = 0L;
+    String query = segmentCondition;
+    String query_for_operand = "";
+    for (int index = 0; index < operands.length; index++) {
+      String operand = operands[index];
       if (operand.contains("ORDERS")) {
-        String query_for_operand = generateQueryForOrdersInLastXMonths(operand, botRef);
-//        if (query_for_operand != null || !query_for_operand.isEmpty()) {
-//          JSONObject requestBody = new JSONObject();
-//          requestBody.put(Constants.QUERY, query);
-//          try {
-//            Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
-//            if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects
-//                .nonNull(etlResponse.body())) {
-//              Set<Long> operandList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).
-//                      get(Constants.CUSTOMER_ID)), ArrayList.class).
-//                  stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
-//            }
-//          } catch (IOException e) {
-//            e.printStackTrace();
-//          }
-//        } else {
-//          return null;
-//        }
+        query_for_operand = generateQueryForOrdersInLastXMonthsWithFilters(operand, botRef);
       } else if (operand.contains("AOV")) {
-
-
+        query_for_operand = generateQueryForCustomerAOVWithFilters(operand, botRef);
       } else {
         response.setResponseObject(null);
         response.setResponseStatusCode(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
       }
+      log.info("Executing following query : " + query_for_operand);
+      query = query.replace(operand, query_for_operand);
+      Map<String, Object> parameter_response = getCustomerListForParameter(query_for_operand);
+      Set<Long> parameter_set = (Set<Long>) parameter_response.get("response");
+      small_set_execution_time += (Long) parameter_response.get("execution_time");
+      if (index == 0) {
+        small_query_parameter_set.addAll(parameter_set);
+      } else {
+        switch (operators.get(index - 1)) {
+          case "AND":
+            small_query_parameter_set.retainAll(parameter_set);
+            break;
+          case "OR":
+            small_query_parameter_set.addAll(parameter_set);
+            break;
+          default:
+            response.setResponseObject(null);
+            response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+        }
+      }
     }
-    return null;
+    query = query.replace("AND", "\nINTERSECT\n");
+    query = query.replace("OR", "\nUNION\n");
+    Map<String, Object> parameter_response = getCustomerListForParameter(query);
+    Set<Long> combined_query_parameter_set = (Set<Long>) parameter_response.get("response");
+    Long combined_set_execution_time = (Long) parameter_response.get("execution_time");
+    Map<String, Object> resultMap = new HashMap<>();
+    resultMap.put("small_set", small_query_parameter_set);
+    resultMap.put("small_set_execution_time", small_set_execution_time);
+    resultMap.put("combined_set", combined_query_parameter_set);
+    resultMap.put("combined_set_execution_time", combined_set_execution_time);
+    return resultMap;
   }
 
-  public String generateQueryForOrdersInLastXMonths(String operand, Long botRef) {
+  public Map<String, Object> getCustomerListForParameter(String parameter_query_definition) {
+    JSONObject requestBody = new JSONObject();
+    requestBody.put(Constants.QUERY, parameter_query_definition);
+    Set<Long> parameter_customer_set = null;
+    Map<String, Object> responseMap = new HashMap<>();
+    try {
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        parameter_customer_set = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
+        responseMap.put("execution_time", etlResponse.raw().receivedResponseAtMillis() - etlResponse.raw().sentRequestAtMillis());
+        responseMap.put("response", parameter_customer_set);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return responseMap;
+  }
+
+  public String generateQueryForOrdersInLastXMonthsWithFilters(String operand, Long botRef) {
     String query = NativeQueries.ORDERS_FOR_X_MONTH_WITH_FILTERS;
+    String[] operand_params = operand.split(" ");
+    query = query.replace(QueryConstants.OPERATOR, operand_params[1]);
+    query = query.replace(QueryConstants.VALUE, operand_params[2]);
     query = query.replace(Constants.BOT_REF, botRef.toString());
     if (operand.contains("ONE")) {
       query = query.replace(QueryConstants.GAP, "1");
@@ -409,6 +424,20 @@ public class SegmentServiceImpl implements SegmentService {
     } else {
       return query = "";
     }
+    return query;
+  }
+
+  public String generateQueryForCustomerAOVWithFilters(String operand, Long botRef) {
+    String query = NativeQueries.CUSTOMER_AOV_QUERY_WITH_FILTERS;
+    query = query.replace(Constants.BOT_REF, botRef.toString());
+    String[] operand_params = operand.split(" ");
+    query = query.replace(QueryConstants.OPERATOR, operand_params[1]);
+    if (operand_params[2] == "STORE_AOV") {
+      query = query.replace(QueryConstants.VALUE, getStoreAOV(botRef));
+    } else {
+      query = query.replace(QueryConstants.VALUE, operand_params[2]);
+    }
+    query = query.replace(QueryConstants.GAP, "3"); // gap is defaulted for AOV related queries to 3 months
     return query;
   }
 }
