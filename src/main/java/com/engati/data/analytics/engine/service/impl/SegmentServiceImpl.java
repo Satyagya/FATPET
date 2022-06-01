@@ -355,7 +355,6 @@ public class SegmentServiceImpl implements SegmentService {
         response.setResponseObject(null);
         response.setResponseStatusCode(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
       }
-      log.info("Executing following query : " + query_for_operand);
       query = query.replace(operand, query_for_operand);
     }
     query = query.replace("AND", "\nINTERSECT\n");
