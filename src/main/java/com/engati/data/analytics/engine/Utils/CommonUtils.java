@@ -3,6 +3,7 @@ package com.engati.data.analytics.engine.Utils;
 import com.engati.data.analytics.engine.configuration.csv.OrderedComparatorIgnoringCase;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.opencsv.bean.StatefulBeanToCsv;
@@ -17,6 +18,7 @@ import java.util.List;
 @Component
 public class CommonUtils {
 
+    public static final ObjectMapper MAPPER = new ObjectMapper();
     public static Boolean createCsv(List<CustomerSegmentationResponse> customerDetail, Long botRef,
                                    String segmentName, String fileName) {
         Boolean isCsvCreated = Boolean.TRUE;
