@@ -407,7 +407,7 @@ public class SegmentServiceImpl implements SegmentService {
             log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
           }
           response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
-          kafkaPayload.setStatus("FAILURE - CSV_CREATION_FAILURE");
+          kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
           kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         }
       }
@@ -418,6 +418,7 @@ public class SegmentServiceImpl implements SegmentService {
       kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
     }
     try {
+      log.info("Pushing to the response kafka topic, payload : {}", kafkaPayload);
       kafka.send(segmentResponseTopic, CommonUtils.MAPPER.writeValueAsString(kafkaPayload));
     } catch (JsonProcessingException e) {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
