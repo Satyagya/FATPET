@@ -9,6 +9,7 @@ public class KafkaConstants {
   public static final String SEGMENT_NAME = "segmentName";
   public static final String SEGMENT_CONDITION = "segmentCondition";
   public static final String SEGMENT_TYPE = "segmentType";
+  public static final String FILE_NAME = "fileName";
 
 
   private KafkaConstants() {}
