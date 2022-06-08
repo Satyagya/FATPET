@@ -338,10 +338,11 @@ public class SegmentServiceImpl implements SegmentService {
   public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest) {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
     String segmentCondition = customSegmentRequest.getSegmentCondition();
-    String segmentName = customSegmentRequest.getSegmentName();
+    String segmentName = customSegmentRequest.getFileName();
 
     KafkaPayloadForSegmentStatus kafkaPayload = new KafkaPayloadForSegmentStatus();
-    kafkaPayload.setSegmentName(segmentName);
+    kafkaPayload.setSegmentName(customSegmentRequest.getSegmentName());
+    kafkaPayload.setFileName(customSegmentRequest.getFileName());
     kafkaPayload.setBotRef(botRef);
 
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();

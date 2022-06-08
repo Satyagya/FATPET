@@ -27,4 +27,7 @@ public class CustomSegmentDTO {
   @JsonProperty(value = KafkaConstants.SEGMENT_TYPE)
   private String segmentType;
 
+  @JsonProperty(value = KafkaConstants.FILE_NAME)
+  private String fileName;
+
 }
