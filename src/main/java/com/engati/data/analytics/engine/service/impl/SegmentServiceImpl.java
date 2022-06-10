@@ -323,7 +323,7 @@ public class SegmentServiceImpl implements SegmentService {
   }
 
   @Override
-  public Map<String, Object> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest) {
+  public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest) {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
     String segmentCondition = customSegmentRequest.getSegmentCondition();
     String segmentName = customSegmentRequest.getSegmentName();
@@ -343,8 +343,6 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     String[] operands = segmentCondition.split("(?i) AND | OR ");
-    Set<Long> small_query_parameter_set = new HashSet<Long>();
-    Long small_set_execution_time = 0L;
     String query = segmentCondition;
     String query_for_operand = "";
     for (int index = 0; index < operands.length; index++) {
@@ -357,38 +355,38 @@ public class SegmentServiceImpl implements SegmentService {
         response.setResponseObject(null);
         response.setResponseStatusCode(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
       }
-      log.info("Executing following query : " + query_for_operand);
       query = query.replace(operand, query_for_operand);
-      Map<String, Object> parameter_response = getCustomerListForParameter(query_for_operand);
-      Set<Long> parameter_set = (Set<Long>) parameter_response.get("response");
-      small_set_execution_time += (Long) parameter_response.get("execution_time");
-      if (index == 0) {
-        small_query_parameter_set.addAll(parameter_set);
-      } else {
-        switch (operators.get(index - 1)) {
-          case "AND":
-            small_query_parameter_set.retainAll(parameter_set);
-            break;
-          case "OR":
-            small_query_parameter_set.addAll(parameter_set);
-            break;
-          default:
-            response.setResponseObject(null);
-            response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
-        }
-      }
     }
     query = query.replace("AND", "\nINTERSECT\n");
     query = query.replace("OR", "\nUNION\n");
     Map<String, Object> parameter_response = getCustomerListForParameter(query);
     Set<Long> combined_query_parameter_set = (Set<Long>) parameter_response.get("response");
     Long combined_set_execution_time = (Long) parameter_response.get("execution_time");
-    Map<String, Object> resultMap = new HashMap<>();
-    resultMap.put("small_set", small_query_parameter_set);
-    resultMap.put("small_set_execution_time", small_set_execution_time);
-    resultMap.put("combined_set", combined_query_parameter_set);
-    resultMap.put("combined_set_execution_time", combined_set_execution_time);
-    return resultMap;
+    log.info("Executed Query: {} in time: {}", query, combined_set_execution_time);
+    try {
+      String fileName = getOutputFileName(botRef, segmentName);
+      if (Objects.nonNull(fileName)) {
+        if (!CollectionUtils.isEmpty(combined_query_parameter_set)) {
+          List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(combined_query_parameter_set, botRef);
+          if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
+            response.setResponseStatusCode(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+          }
+        } else {
+          File emptyFile = new File(fileName);
+          if (emptyFile.exists()) {
+            emptyFile.delete();
+          }
+          if (!emptyFile.createNewFile()) {
+            log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
+          }
+          response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
+        }
+      }
+    } catch (Exception e) {
+      response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+      log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
+    }
+    return response;
   }
 
   public Map<String, Object> getCustomerListForParameter(String parameter_query_definition) {
