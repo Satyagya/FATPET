@@ -468,14 +468,19 @@ public class SegmentServiceImpl implements SegmentService {
     String query = NativeQueries.CUSTOMER_AOV_QUERY_WITH_FILTERS;
     query = query.replace(Constants.BOT_REF, botRef.toString());
     String[] operand_params = operand.split(" ");
-    query = query.replace(QueryConstants.OPERATOR, operand_params[1]);
-    if (operand_params[2] == "STORE_AOV") {
-      query = query.replace(QueryConstants.VALUE, getStoreAOV(botRef));
+    if (operand_params.length == 3) {
+      query = query.replace(QueryConstants.OPERATOR, operand_params[1]);
+      if (operand_params[2].compareTo("STORE_AOV") == 0) {
+        query = query.replace(QueryConstants.VALUE, getStoreAOV(botRef));
+      } else {
+        query = query.replace(QueryConstants.VALUE, operand_params[2]);
+      }
+      query = query.replace(QueryConstants.GAP, "3"); // gap is defaulted for AOV related queries to 3 months
+      return query;
     } else {
-      query = query.replace(QueryConstants.VALUE, operand_params[2]);
+      log.error("Error while generating query for Orders For CustomerAOV for botRef: {}", botRef);
+      return "";
     }
-    query = query.replace(QueryConstants.GAP, "3"); // gap is defaulted for AOV related queries to 3 months
-    return query;
   }
 }
 
