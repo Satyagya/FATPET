@@ -8,6 +8,8 @@ public class Constants {
   public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
   public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
 
+
+
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
   public static String PARQUET_FILE_PATH = "/opt/engati/parquet_store";
