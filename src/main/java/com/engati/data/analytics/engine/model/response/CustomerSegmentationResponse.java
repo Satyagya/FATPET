@@ -26,12 +26,12 @@ public class CustomerSegmentationResponse {
   private Double customerAOV;
 
   @CsvBindByName(column = "ORDERS IN LAST ONE MONTH")
-  private Integer ordersInLastOneMonth;
+  private Long ordersInLastOneMonth;
 
   @CsvBindByName(column = "ORDERS IN LAST SIX MONTH")
-  private Integer ordersInLastSixMonths;
+  private Long ordersInLastSixMonths;
 
   @CsvBindByName(column = "ORDERS IN LAST TWELVE MONTH")
-  private Integer ordersInLastTwelveMonths;
+  private Long ordersInLastTwelveMonths;
 
 }

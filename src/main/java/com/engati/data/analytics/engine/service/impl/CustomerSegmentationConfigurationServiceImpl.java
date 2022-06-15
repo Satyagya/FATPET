@@ -27,7 +27,7 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
   private CustomerSegmentationConfigurationRepository customerSegmentationConfigurationRepository;
 
   @Override
-  public DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> getConfigByBotRefAndSegment(Long botRef, String segmentName) {
+  public DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> getSystemSegmentConfigByBotRefAndSegment(Long botRef, String segmentName) {
     DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> response = new DataAnalyticsResponse<>();
     CustomerSegmentationConfigurationResponse customerSegmentationConfigurationResponse = new CustomerSegmentationConfigurationResponse();
     log.info("Trying to get config for botRef: {}, segment: {}", botRef, segmentName);
@@ -63,7 +63,7 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
   }
 
   @Override
-  public DataAnalyticsResponse<CustomerSegmentationConfiguration> updateConfigByBotRefAndSegment
+  public DataAnalyticsResponse<CustomerSegmentationConfiguration> updateSystemSegmentConfigByBotRefAndSegment
       (Long botRef, String segmentName, CustomerSegmentationConfigurationRequest customerSegmentationConfigurationRequest) {
     DataAnalyticsResponse<CustomerSegmentationConfiguration> response = new DataAnalyticsResponse<>();
     try {
