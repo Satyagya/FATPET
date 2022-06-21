@@ -27,6 +27,7 @@ public class Constants {
   public static String CUSTOMER_PHONE = "customer_phone";
   public static String VARIANT_ID = "variant_id";
   public static String PRODUCT_ID = "product_id";
+  public static String DATE_FORMAT = "yyyy-MM-dd";
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";

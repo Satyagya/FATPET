@@ -141,4 +141,8 @@ public class NativeQueries {
       "group by customer_id)as b)as c)\n" +
       "where AOV operator value \n";
 
+  public static final String GET_ENGAGED_USERS = "select count(distinct  user_id)as users\n"
+      + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/users_*.parquet')\n "
+      + "where created_date between date '_endDate_' - interval 'gap' day and date '_endDate_'";
+
 }

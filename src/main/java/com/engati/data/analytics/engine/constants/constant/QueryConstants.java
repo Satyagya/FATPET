@@ -50,6 +50,8 @@ public class QueryConstants {
   public static String BOT_REF = "bot_ref";
   public static String CREATED_AT = "created_at";
   public static String LINE_ITEM_PRICE = "line_item_price";
+  public static String END_DATE= "_endDate_";
+  public static String USERS = "users";
 
 
 
