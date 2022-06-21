@@ -13,9 +13,9 @@ import java.util.Set;
 @Repository("com.engati.broadcast.repository.SegmentsRepository")
 public interface SegmentRepository extends JpaRepository<ShopifyCustomer, Long> {
 
-  @Query(value = "select id as customer_id, customer_email, customer_phone,\n" +
-      "       concat(COALESCE(first_name, \"\") ,' ', COALESCE(last_name, \"\"))as customer_name\n" +
-      "from shopify_customer\n" +
-      "where id in :customerIds ", nativeQuery = true)
+  @Query(value = "select customer_id, customer_email, customer_phone,\n" +
+      "       concat(COALESCE(first_name, \"\") ,' ', COALESCE(last_name, \"\"))as customer_name " +
+      "from shopify_customer " +
+      "where customer_id in :customerIds ", nativeQuery = true)
   List<Map<Long, Object>> findByShopifyCustomerId(@Param("customerIds") Set<Long> customerIds);
 }

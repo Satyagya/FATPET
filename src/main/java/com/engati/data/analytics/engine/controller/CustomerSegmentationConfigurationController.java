@@ -28,23 +28,23 @@ public class CustomerSegmentationConfigurationController {
   private CustomerSegmentationConfigurationService customerSegmentationConfigurationService;
 
   @GetMapping(value = ApiPathConstants.API_BASE_PATH_FOR_SEGMENT_DETAILS)
-  public ResponseEntity<DataAnalyticsResponse> getSegmentConfig(
+  public ResponseEntity<DataAnalyticsResponse> getSystemSegmentConfig(
       @PathVariable(name = ApiPathConstants.BOTREF) Long botRef,
       @PathVariable(name = ApiPathConstants.SEGMENT_NAME) String segmentName) {
     log.info("Got call for getSegmentConfig for botRef: {}, segmentName: {}", botRef, segmentName);
     DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> response =
-        customerSegmentationConfigurationService.getConfigByBotRefAndSegment(botRef, segmentName);
+        customerSegmentationConfigurationService.getSystemSegmentConfigByBotRefAndSegment(botRef, segmentName);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
   @PostMapping(value = ApiPathConstants.API_BASE_PATH_FOR_SEGMENT_DETAILS)
-  public ResponseEntity<DataAnalyticsResponse> updateSegmentConfig(
+  public ResponseEntity<DataAnalyticsResponse> updateSystemSegmentConfig(
       @RequestBody CustomerSegmentationConfigurationRequest customerSegmentationConfigurationRequest,
       @PathVariable(name = ApiPathConstants.BOTREF) Long botRef,
       @PathVariable(name = ApiPathConstants.SEGMENT_NAME) String segmentName) {
     log.info("Got call for updateSegmentConfig for botRef: {}, segmentName: {} and RequestBody{}", botRef, segmentName, customerSegmentationConfigurationRequest);
     DataAnalyticsResponse<CustomerSegmentationConfiguration> response =
-        customerSegmentationConfigurationService.updateConfigByBotRefAndSegment(botRef, segmentName, customerSegmentationConfigurationRequest);
+        customerSegmentationConfigurationService.updateSystemSegmentConfigByBotRefAndSegment(botRef, segmentName, customerSegmentationConfigurationRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
