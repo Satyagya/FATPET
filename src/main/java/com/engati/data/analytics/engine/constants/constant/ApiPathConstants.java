@@ -12,10 +12,8 @@ public class ApiPathConstants {
   public static final String API_BASE_PATH_FOR_FETCHING_PURCHASE_HISTORY = "/getPurchaseHistory";
   public static final String GET_CUSTOM_SEGMENT = "/botRef/{botRef}/getCustomSegment";
   public static final String SEGMENT_CONDITION = "segmentCondition";
-
-
-
-
-
-
+  public static final String SHOPIFY_GOOGLE_ANALYTICS_INFO = "shopify_google_analytics_info";
+  public static final String SAVE_GA_CREDS = "shopify/dashboard/ga-creds";
+  public static final String AUTH_JSON = "authJson";
+  public static final String PROPERTY_ID = "propertyId";
 }
