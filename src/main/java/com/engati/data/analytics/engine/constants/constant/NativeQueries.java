@@ -143,6 +143,6 @@ public class NativeQueries {
 
   public static final String GET_ENGAGED_USERS = "select count(distinct  user_id)as users\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/users_*.parquet')\n "
-      + "where created_date between date '_endDate_' - interval 'gap' day and date '_endDate_'";
+      + "where created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
 }
