@@ -211,10 +211,10 @@ public class DashboardServiceImpl implements DashboardService {
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
           etlResponse.body())) {
-        List<Long> variantList = MAPPER.readValue(
-            etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.VARIANT_ID).toString(),
+        List<Long> productList = MAPPER.readValue(
+            etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.PRODUCT_ID).toString(),
             List.class);
-        response.setResponseObject(variantList);
+        response.setResponseObject(productList);
       }
     } catch (Exception e) {
       log.error("Error executing query :{} with botRef: {}", query, botRef, e);
@@ -232,14 +232,14 @@ public class DashboardServiceImpl implements DashboardService {
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
     String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
-    List<Long> variantList = null;
+    List<Long> productList = null;
     try {
-      variantList =
+      productList =
           dashboardRepository.getMostAbandonedProductsByBotRef(botRef, startDate, endDate);
     } catch (Exception e) {
       log.error("Error getting most abandonedProducts for botRef: {}", botRef, e);
     }
-    response.setResponseObject(variantList);
+    response.setResponseObject(productList);
     return response;
   }
 

@@ -27,10 +27,10 @@ public interface DashboardRepository  extends JpaRepository<ShopifyCustomer, Lon
   Long getAbandonedCheckoutsbyBotRefbyTimeRange(@Param("botRef") Long botRef, @Param("_date_") String date_, @Param("gap") Long gap);
 
 
-  @Query(value = "select variant_id from shopify_checkout_line_items\n"
+  @Query(value = "select product_id from shopify_checkout_line_items\n"
       + "where bot_ref = :botRef "
       + "and checkout_id in (select checkout_id from shopify_checkouts\n"
       + "    where date(created_at) between :_startdate_ and :_enddate_ )\n"
-      + "group by variant_id order by count(variant_id) desc limit 3\n", nativeQuery = true)
+      + "group by product_id order by count(product_id) desc limit 3\n", nativeQuery = true)
   List<Long> getMostAbandonedProductsByBotRef(@Param("botRef") Long botRef, @Param("_startdate_") String startdate, @Param("_enddate_") String enddate);
 }

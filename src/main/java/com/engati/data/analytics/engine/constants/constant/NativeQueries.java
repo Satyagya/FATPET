@@ -160,13 +160,13 @@ public class NativeQueries {
       + "and created_date between date '_date_' - interval 'gap' day and date '_date_'\n"
       + "group by order_id, total_price)as a)as b";
 
-  public static final String MOST_PURCHASED_PRODUCTS = "select variant_id\n"
+  public static final String MOST_PURCHASED_PRODUCTS = "select product_id\n"
       + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n"
       + "where cancelled_at like 'None'\n"
       + "and (is_test like 'nan' or is_test = 0)\n"
       + "and created_date between date '_startdate_' and date '_enddate_'\n"
-      + "group by variant_id\n"
-      + "order by count(variant_id) desc\n"
+      + "group by product_id\n"
+      + "order by count(product_id) desc\n"
       + "limit 3;";
 
 }
