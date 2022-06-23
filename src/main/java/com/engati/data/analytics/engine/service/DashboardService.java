@@ -17,7 +17,7 @@ public interface DashboardService {
 
   DataAnalyticsResponse<DashboardFlierResponse> getAbandonedCheckouts(Long botRef, DashboardRequest dashboardRequest);
 
-  DataAnalyticsResponse<List<Long>> getMostPurchasedProducts(Long botRef, DashboardRequest dashboardRequest);
+  DataAnalyticsResponse<List<DashboardProductResponse>> getMostPurchasedProducts(Long botRef, DashboardRequest dashboardRequest);
 
-  DataAnalyticsResponse<List<Long>> getMostAbandonedProducts(Long botRef, DashboardRequest dashboardRequest);
+  DataAnalyticsResponse<List<DashboardProductResponse>> getMostAbandonedProducts(Long botRef, DashboardRequest dashboardRequest);
 }

@@ -58,18 +58,18 @@ public class DashboardController {
   }
 
   @PostMapping(value = ApiPathConstants.MOST_PURCHASED_PRODUCTS)
-  public ResponseEntity<DataAnalyticsResponse<List<Long>>> getMostPurchasedProducts(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody
+  public ResponseEntity<DataAnalyticsResponse<List<DashboardProductResponse>>> getMostPurchasedProducts(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody
       DashboardRequest dashboardRequest) {
     log.info("Got call for getting most purchased products for botRef: {}, for timeRanges between {} and {}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
-    DataAnalyticsResponse<List<Long>> response = dashboardService.getMostPurchasedProducts(botRef, dashboardRequest);
+    DataAnalyticsResponse<List<DashboardProductResponse>> response = dashboardService.getMostPurchasedProducts(botRef, dashboardRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
   @PostMapping(value = ApiPathConstants.MOST_ABANDONED_PRODUCTS)
-  public ResponseEntity<DataAnalyticsResponse<List<Long>>> getMostAbandonedProducts(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody
+  public ResponseEntity<DataAnalyticsResponse<List<DashboardProductResponse>>> getMostAbandonedProducts(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody
       DashboardRequest dashboardRequest) {
     log.info("Got call for getting most purchased products for botRef: {}, for timeRanges between {} and {}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
-    DataAnalyticsResponse<List<Long>> response = dashboardService.getMostAbandonedProducts(botRef, dashboardRequest);
+    DataAnalyticsResponse<List<DashboardProductResponse>> response = dashboardService.getMostAbandonedProducts(botRef, dashboardRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 

@@ -1,6 +1,7 @@
 package com.engati.data.analytics.engine.service.impl;
 
 import com.engati.data.analytics.engine.Utils.EtlEngineRestUtility;
+import com.engati.data.analytics.engine.Utils.PdeRestUtility;
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.constants.constant.NativeQueries;
@@ -9,12 +10,14 @@ import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
 import com.engati.data.analytics.engine.model.request.DashboardRequest;
 import com.engati.data.analytics.engine.model.response.DashboardFlierResponse;
 import com.engati.data.analytics.engine.model.response.DashboardProductResponse;
+import com.engati.data.analytics.engine.model.response.PdeProductResponse;
 import com.engati.data.analytics.engine.repository.DashboardRepository;
 import com.engati.data.analytics.engine.service.DashboardService;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
@@ -26,10 +29,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import static com.engati.data.analytics.engine.Utils.CommonUtils.MAPPER;
 import static java.lang.Double.parseDouble;
+import static java.util.Comparator.comparingInt;
+import static java.util.Comparator.comparingLong;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 
 
 @Slf4j
@@ -41,6 +49,9 @@ public class DashboardServiceImpl implements DashboardService {
 
   @Autowired
   private DashboardRepository dashboardRepository;
+
+  @Autowired
+  private PdeRestUtility pdeRestUtility;
 
   @Override
   public DataAnalyticsResponse<DashboardFlierResponse> getEngagedUsers(Long botRef,
@@ -191,12 +202,12 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
-  public DataAnalyticsResponse<List<Long>> getMostPurchasedProducts(Long botRef,
+  public DataAnalyticsResponse<List<DashboardProductResponse>> getMostPurchasedProducts(Long botRef,
       DashboardRequest dashboardRequest) {
     log.info(
         "Request received for getting most purchased Products for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
-    DataAnalyticsResponse<List<Long>> response = new DataAnalyticsResponse<>();
+    DataAnalyticsResponse<List<DashboardProductResponse>> response = new DataAnalyticsResponse<>();
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
     String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
@@ -207,6 +218,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     JSONObject requestBody = new JSONObject();
     requestBody.put(Constants.QUERY, query);
+    List<DashboardProductResponse> dashboardProductResponseList;
     try {
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
@@ -214,7 +226,15 @@ public class DashboardServiceImpl implements DashboardService {
         List<Long> productList = MAPPER.readValue(
             etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.PRODUCT_ID).toString(),
             List.class);
-        response.setResponseObject(productList);
+
+        dashboardProductResponseList = getProductDetails(productList, botRef);
+
+        if (Objects.isNull(dashboardProductResponseList)) {
+          response.setResponseStatusCode(ResponseStatusCode.NO_PRODUCTS_FOUND);
+        } else {
+          response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+          response.setResponseObject(dashboardProductResponseList);
+        }
       }
     } catch (Exception e) {
       log.error("Error executing query :{} with botRef: {}", query, botRef, e);
@@ -223,23 +243,34 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
-  public DataAnalyticsResponse<List<Long>> getMostAbandonedProducts(Long botRef,
+  public DataAnalyticsResponse<List<DashboardProductResponse>> getMostAbandonedProducts(Long botRef,
       DashboardRequest dashboardRequest) {
     log.info(
         "Request received for getting most purchased Products for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
-    DataAnalyticsResponse<List<Long>> response = new DataAnalyticsResponse<>();
+    DataAnalyticsResponse<List<DashboardProductResponse>> response = new DataAnalyticsResponse<>();
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
     String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
     List<Long> productList = null;
+    List<DashboardProductResponse> dashboardProductResponseList;
     try {
       productList =
           dashboardRepository.getMostAbandonedProductsByBotRef(botRef, startDate, endDate);
+
+      dashboardProductResponseList = getProductDetails(productList, botRef);
+
+      if (Objects.isNull(dashboardProductResponseList)) {
+        response.setResponseStatusCode(ResponseStatusCode.NO_PRODUCTS_FOUND);
+      } else {
+        response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+        response.setResponseObject(dashboardProductResponseList);
+      }
+
     } catch (Exception e) {
       log.error("Error getting most abandonedProducts for botRef: {}", botRef, e);
     }
-    response.setResponseObject(productList);
+
     return response;
   }
 
@@ -276,6 +307,44 @@ public class DashboardServiceImpl implements DashboardService {
       log.error("Error executing query :{} with botRef: {}", query, botRef, e);
     }
     return value;
+  }
+
+  private List<DashboardProductResponse> getProductDetails(List<Long> productList,
+      Long botRef) {
+    List<DashboardProductResponse> dashboardProductResponseList = new ArrayList<>();
+    try {
+      JSONObject pdeRequestBody =
+          MAPPER.readValue(String.format(Constants.productDetailsRequest, productList.toString()),
+              JSONObject.class);
+      Response<JsonNode> productDetailsResponse =
+          pdeRestUtility.getProductDetails(botRef, "daeDomain", pdeRequestBody).execute();
+
+      if (Objects.nonNull(productDetailsResponse) && productDetailsResponse.isSuccessful()
+          && Objects.nonNull(productDetailsResponse.body())) {
+
+        JSONArray productDetailsArray = MAPPER.readValue(
+            MAPPER.readValue(MAPPER.writeValueAsString(productDetailsResponse.body()),
+                JsonNode.class).get(Constants.RESPONSE).toString(), JSONArray.class);
+
+        for (Object product : productDetailsArray) {
+          PdeProductResponse pdeProductResponse =
+              MAPPER.readValue(MAPPER.writeValueAsString(product), PdeProductResponse.class);
+          DashboardProductResponse dashboardProductResponse = new DashboardProductResponse();
+          BeanUtils.copyProperties(pdeProductResponse, dashboardProductResponse);
+          dashboardProductResponseList.add(dashboardProductResponse);
+        }
+
+      } else {
+        return null;
+      }
+    } catch (Exception e) {
+      log.error("Error while getting Product Details from PDE for BotRef: {}", botRef);
+      return null;
+    }
+
+    return dashboardProductResponseList.stream().collect(collectingAndThen(toCollection(
+            () -> new TreeSet<>(comparingLong(DashboardProductResponse::getPRODUCT_productId))),
+        ArrayList::new));
   }
 
 }
