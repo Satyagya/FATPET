@@ -13,6 +13,11 @@ public class ApiPathConstants {
   public static final String GET_CUSTOM_SEGMENT = "/botRef/{botRef}/getCustomSegment";
   public static final String SEGMENT_CONDITION = "segmentCondition";
   public static final String ENGAGED_USERS ="/{botRef}/getEngagedUsers";
+  public static final String ORDER_COUNT ="/{botRef}/getOrderCount";
+  public static final String GET_AOV = "/{botRef}/getAOV";
+  public static final String GET_ABANDONED_CHECKOUTS = "/{botRef}/getAbandonedCheckouts";
+  public static final String MOST_PURCHASED_PRODUCTS = "/{botRef}/mostPurchasedProducts";
+  public static final String MOST_ABANDONED_PRODUCTS = "/{botRef}/mostAbandonedProducts";
 
 
 }

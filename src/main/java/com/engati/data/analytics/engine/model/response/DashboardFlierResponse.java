@@ -9,5 +9,6 @@ public class DashboardFlierResponse {
 
   private Double presentValue;
   private Double percentageChange;
+  private String currency;
 
 }

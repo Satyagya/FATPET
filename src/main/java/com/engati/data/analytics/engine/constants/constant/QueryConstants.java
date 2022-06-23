@@ -52,6 +52,10 @@ public class QueryConstants {
   public static String LINE_ITEM_PRICE = "line_item_price";
   public static String DATE= "_date_";
   public static String USERS = "users";
+  public static String ORDERS = "orders";
+  public static String START_DATE = "_startdate_";
+  public static String END_DATE = "_enddate_";
+
 
 
 
