@@ -171,8 +171,30 @@ public class NativeQueries {
 
   public static final String BOT_QUERIES_COUNTS = "select created_date, sum(queries_asked_count)as queries_asked,"
       + " sum(queries_unanswered_count)as queries_unanswered "
-      + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/interactions_*.parquet')"
-      + "where created_date between date '_startdate_' and date '_enddate_'\n"
+      + " from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/interactions_*.parquet')"
+      + " where created_date between date '_startdate_' and date '_enddate_'\n"
       + " group by created_date";
+
+  public static final String BOT_QUERIES_COUNTS_AGGREGATED = "select min(created_date)as created_date, "
+      + " ceil(avg(queries_asked_count))as queries_asked,"
+      + " ceil(avg(queries_unanswered_count))as queries_unanswered "
+      + " from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/interactions_*.parquet')"
+      + " where created_date between date '_startdate_' and date '_enddate_'\n"
+      + " group by created_date";
+
+  public static final String GET_ENGAGED_USERS_BY_PLATFORM = "select count(distinct  user_id)as users, platform\n"
+      + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/users_*.parquet')\n "
+      + "where created_date between date '_date_' - interval 'gap' day and date '_date_'\n"
+      + "group by platform ";
+
+  public static final String GET_CONVERSATION_INTENT = "select sum(intent_count)as users, intent_label\n"
+      + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/intents_*.parquet')\n "
+      + "where created_date between date '_date_' - interval 'gap' day and date '_date_'\n"
+      + "group by intent_label ";
+
+  public static final String GET_CONVERSATION_SENTIMENT = "select sum(sentiment_count)as users, sentiment_label\n"
+      + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/sentiments_*.parquet')\n "
+      + "where created_date between date '_date_' - interval 'gap' day and date '_date_'\n"
+      + "group by sentiment_label ";
 
 }

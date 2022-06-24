@@ -8,7 +8,7 @@ import lombok.Data;
 public class DashboardGraphResponse {
 
   private String date;
-  private Long queriesAsked;
-  private Long queriesUnanswered;
+  private Double queriesAsked;
+  private Double queriesUnanswered;
 
 }
