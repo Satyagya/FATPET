@@ -116,4 +116,11 @@ public class DashboardController {
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
+  @PostMapping(value = ApiPathConstants.LAST_UPDATED_ON)
+  public ResponseEntity<DataAnalyticsResponse> getLastUpdatedOnForDashboard(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef){
+    log.info("Got call for getting Last Updated On for botRef: {}", botRef);
+    DataAnalyticsResponse<String> response = dashboardService.getLastUpdatedOn(botRef);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
 }

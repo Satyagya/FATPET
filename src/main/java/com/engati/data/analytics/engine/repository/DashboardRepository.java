@@ -7,8 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Repository("com.engati.broadcast.repository.DashboardRepository")
 public interface DashboardRepository  extends JpaRepository<ShopifyCustomer, Long> {
@@ -33,4 +31,9 @@ public interface DashboardRepository  extends JpaRepository<ShopifyCustomer, Lon
       + "    where date(created_at) between :_startdate_ and :_enddate_ )\n"
       + "group by product_id order by count(product_id) desc limit 3\n", nativeQuery = true)
   List<Long> getMostAbandonedProductsByBotRef(@Param("botRef") Long botRef, @Param("_startdate_") String startdate, @Param("_enddate_") String enddate);
+
+
+  @Query(value = "select min(end_time)as last_updated_on from scheduler_jobstore\n"
+      + "where bot_ref = :botRef", nativeQuery = true)
+  String getLastUpdatedOn(@Param("botRef") Long botRef);
 }

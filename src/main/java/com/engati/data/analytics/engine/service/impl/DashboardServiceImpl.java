@@ -87,7 +87,7 @@ public class DashboardServiceImpl implements DashboardService {
     percentageChange = percentageChange(presentValue, pastValue);
     response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
         .percentageChange(percentageChange).currency(currency).build());
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
 
@@ -123,7 +123,7 @@ public class DashboardServiceImpl implements DashboardService {
     percentageChange = percentageChange(presentValue, pastValue);
     response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
         .percentageChange(percentageChange).currency(currency).build());
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
 
@@ -166,7 +166,7 @@ public class DashboardServiceImpl implements DashboardService {
     percentageChange = percentageChange(presentValue, pastValue);
     response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
         .percentageChange(percentageChange).currency(currency).build());
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
 
@@ -205,7 +205,7 @@ public class DashboardServiceImpl implements DashboardService {
     percentageChange = percentageChange(presentValue, pastValue);
     response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
         .percentageChange(percentageChange).currency(currency).build());
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
 
@@ -238,9 +238,9 @@ public class DashboardServiceImpl implements DashboardService {
         dashboardProductResponseList = getProductDetails(productList, botRef);
 
         if (Objects.isNull(dashboardProductResponseList)) {
-          response.setResponseStatusCode(ResponseStatusCode.NO_PRODUCTS_FOUND);
+          response.setStatus(ResponseStatusCode.NO_PRODUCTS_FOUND);
         } else {
-          response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+          response.setStatus(ResponseStatusCode.SUCCESS);
           response.setResponseObject(dashboardProductResponseList);
         }
       }
@@ -269,9 +269,9 @@ public class DashboardServiceImpl implements DashboardService {
       dashboardProductResponseList = getProductDetails(productList, botRef);
 
       if (Objects.isNull(dashboardProductResponseList)) {
-        response.setResponseStatusCode(ResponseStatusCode.NO_PRODUCTS_FOUND);
+        response.setStatus(ResponseStatusCode.NO_PRODUCTS_FOUND);
       } else {
-        response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+        response.setStatus(ResponseStatusCode.SUCCESS);
         response.setResponseObject(dashboardProductResponseList);
       }
 
@@ -328,15 +328,15 @@ public class DashboardServiceImpl implements DashboardService {
           }
         } else {
           dashboardGraphResponseList = null;
-          response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+          response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
           log.error("Error executing query :{} with botRef: {}", query, botRef);
         }
         response.setResponseObject(dashboardGraphResponseList);
-        response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+        response.setStatus(ResponseStatusCode.SUCCESS);
       } catch (Exception e) {
         dashboardGraphResponseList = null;
         response.setResponseObject(dashboardGraphResponseList);
-        response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+        response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
         log.error("Error executing query :{} with botRef: {}", query, botRef, e);
       }
     } else {
@@ -369,15 +369,15 @@ public class DashboardServiceImpl implements DashboardService {
           }
         } else {
           dashboardGraphResponseList = null;
-          response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+          response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
           log.error("Error executing query :{} with botRef: {}", query, botRef);
         }
         response.setResponseObject(dashboardGraphResponseList);
-        response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+        response.setStatus(ResponseStatusCode.SUCCESS);
       } catch (Exception e) {
         dashboardGraphResponseList = null;
         response.setResponseObject(dashboardGraphResponseList);
-        response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+        response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
         log.error("Error executing query :{} with botRef: {}", query, botRef, e);
       }
     }
@@ -475,7 +475,7 @@ public class DashboardServiceImpl implements DashboardService {
         query_params,
         QueryConstants.USERS, QueryConstants.PLATFORM, botRef);
     response.setResponseObject(dashboardChartResponse);
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
 
@@ -499,7 +499,7 @@ public class DashboardServiceImpl implements DashboardService {
         query_params,
         QueryConstants.USERS, QueryConstants.INTENT_LABEL, botRef);
     response.setResponseObject(dashboardChartResponse);
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
 
@@ -521,7 +521,23 @@ public class DashboardServiceImpl implements DashboardService {
     DashboardChartResponse dashboardChartResponse = executeQueryForDashboardChart(NativeQueries.GET_CONVERSATION_SENTIMENT,
         query_params, QueryConstants.USERS, QueryConstants.SENTIMENT_LABEL, botRef);
     response.setResponseObject(dashboardChartResponse);
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  @Override
+  public DataAnalyticsResponse<String> getLastUpdatedOn(Long botRef) {
+    log.info("Request received for getting Last Updated On for botRef: {}", botRef);
+    DataAnalyticsResponse<String> response = new DataAnalyticsResponse<>();
+    String lastUpdatedOn = "";
+    try {
+      lastUpdatedOn = dashboardRepository.getLastUpdatedOn(botRef);
+    } catch (Exception e) {
+      log.error("Error getting LastUpdatedOn from the DB");
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+    }
+    response.setResponseObject(lastUpdatedOn);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
 

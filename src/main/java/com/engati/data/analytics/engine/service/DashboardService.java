@@ -30,4 +30,6 @@ public interface DashboardService {
   DataAnalyticsResponse<DashboardChartResponse> getConversationIntentBreakdown(Long botRef, DashboardRequest dashboardRequest);
 
   DataAnalyticsResponse<DashboardChartResponse> getConversationSentimentBreakdown(Long botRef, DashboardRequest dashboardRequest);
+
+  DataAnalyticsResponse<String> getLastUpdatedOn(Long botRef);
 }

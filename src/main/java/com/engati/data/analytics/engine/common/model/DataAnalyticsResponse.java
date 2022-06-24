@@ -17,7 +17,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class DataAnalyticsResponse<T> implements Serializable {
   private T responseObject;
-  private ResponseStatusCode responseStatusCode;
+  private ResponseStatusCode status;
   private HttpStatus statusCode;
 
   public DataAnalyticsResponse() {
@@ -31,12 +31,12 @@ public class DataAnalyticsResponse<T> implements Serializable {
 
   public DataAnalyticsResponse(T responseObject, ResponseStatusCode status) {
     this.responseObject = responseObject;
-    this.responseStatusCode = status;
+    this.status = status;
     this.statusCode = HttpStatus.OK;
   }
 
   public DataAnalyticsResponse(ResponseStatusCode status) {
-    this.responseStatusCode = status;
+    this.status = status;
     this.statusCode = HttpStatus.OK;
   }
 }

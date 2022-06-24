@@ -22,6 +22,7 @@ public class ApiPathConstants {
   public static final String ENGAGED_USERS_PER_PLATFORM ="{botRef}/getEngagedUsersPerPlatform";
   public static final String CONVERSATION_INTENT = "{botRef}/getConversationIntentBreakdown";
   public static final String CONVERSATION_SENTIMENT = "{botRef}/getConversationSentimentBreakdown";
+  public static final String LAST_UPDATED_ON = "{botRef}/lastUpdatedOn";
 
 
 }
