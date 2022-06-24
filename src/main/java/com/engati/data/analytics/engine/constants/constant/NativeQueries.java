@@ -169,4 +169,10 @@ public class NativeQueries {
       + "order by count(product_id) desc\n"
       + "limit 3;";
 
+  public static final String BOT_QUERIES_COUNTS = "select created_date, sum(queries_asked_count)as queries_asked,"
+      + " sum(queries_unanswered_count)as queries_unanswered "
+      + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/interactions_*.parquet')"
+      + "where created_date between date '_startdate_' and date '_enddate_'\n"
+      + " group by created_date";
+
 }

@@ -9,6 +9,7 @@ import com.engati.data.analytics.engine.constants.constant.QueryConstants;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
 import com.engati.data.analytics.engine.model.request.DashboardRequest;
 import com.engati.data.analytics.engine.model.response.DashboardFlierResponse;
+import com.engati.data.analytics.engine.model.response.DashboardGraphResponse;
 import com.engati.data.analytics.engine.model.response.DashboardProductResponse;
 import com.engati.data.analytics.engine.model.response.PdeProductResponse;
 import com.engati.data.analytics.engine.repository.DashboardRepository;
@@ -26,6 +27,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -274,6 +276,61 @@ public class DashboardServiceImpl implements DashboardService {
     return response;
   }
 
+  @Override
+  public DataAnalyticsResponse<List<DashboardGraphResponse>> getBotQueriesChart(Long botRef,
+      DashboardRequest dashboardRequest) {
+    log.info(
+        "Request received for getting botQueries Chart for botRef: {} for timeRanges between {} and "
+            + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<List<DashboardGraphResponse>> response = new DataAnalyticsResponse<>();
+    List<DashboardGraphResponse> dashboardGraphResponses = new ArrayList<>();
+    DashboardGraphResponse dashboardGraphResponse = new DashboardGraphResponse();
+    long diffInMillies = Math.abs(
+        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+    String startDate = formatter.format(dashboardRequest.getStartTime());
+    String endDate = formatter.format(dashboardRequest.getEndTime());
+
+    if (gap <= 20) {
+      String query = NativeQueries.BOT_QUERIES_COUNTS;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      query = query.replace(QueryConstants.START_DATE, startDate);
+      query = query.replace(QueryConstants.END_DATE, endDate);
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      List<DashboardProductResponse> dashboardProductResponseList;
+      try {
+        Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+        if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+            etlResponse.body())) {
+          JSONObject queryResponse = MAPPER.readValue(MAPPER.writeValueAsString(
+              MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
+                  .get(Constants.RESPONSE_OBJECT)), JSONObject.class);
+          ArrayList responseContent = (ArrayList) queryResponse.get(Constants.CREATED_DATE);
+          int dataPoints = responseContent.size();
+          for (int i=0; i<dataPoints; i++){
+
+          }
+
+          for (Object key : queryResponse.keySet()){
+            String keyStr = (String)key;
+            Object keyvalue = queryResponse.get(keyStr);
+          }
+
+          } else {
+            response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+          }
+        } catch (Exception e) {
+        log.error("Error executing query :{} with botRef: {}", query, botRef, e);
+      }
+    }
+    else {
+
+    }
+    return null;
+  }
+
   public double percentageChange(double final_value, double initial_value) {
     double value = 0.0;
     if (initial_value == (double) 0) {
@@ -333,7 +390,6 @@ public class DashboardServiceImpl implements DashboardService {
           BeanUtils.copyProperties(pdeProductResponse, dashboardProductResponse);
           dashboardProductResponseList.add(dashboardProductResponse);
         }
-
       } else {
         return null;
       }
@@ -341,7 +397,6 @@ public class DashboardServiceImpl implements DashboardService {
       log.error("Error while getting Product Details from PDE for BotRef: {}", botRef);
       return null;
     }
-
     return dashboardProductResponseList.stream().collect(collectingAndThen(toCollection(
             () -> new TreeSet<>(comparingLong(DashboardProductResponse::getPRODUCT_productId))),
         ArrayList::new));

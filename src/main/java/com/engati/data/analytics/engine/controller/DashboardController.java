@@ -4,6 +4,7 @@ import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
 import com.engati.data.analytics.engine.constants.constant.ApiPathConstants;
 import com.engati.data.analytics.engine.model.request.DashboardRequest;
 import com.engati.data.analytics.engine.model.response.DashboardFlierResponse;
+import com.engati.data.analytics.engine.model.response.DashboardGraphResponse;
 import com.engati.data.analytics.engine.model.response.DashboardProductResponse;
 import com.engati.data.analytics.engine.service.DashboardService;
 import lombok.extern.slf4j.Slf4j;
@@ -72,5 +73,14 @@ public class DashboardController {
     DataAnalyticsResponse<List<DashboardProductResponse>> response = dashboardService.getMostAbandonedProducts(botRef, dashboardRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
+
+  @PostMapping(value = ApiPathConstants.BOT_QUERIES_CHART)
+  public ResponseEntity<DataAnalyticsResponse<List<DashboardGraphResponse>>> getBotQueriesChart(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody
+      DashboardRequest dashboardRequest) {
+    log.info("Got call for getting botQueries Chart for botRef: {}, for timeRanges between {} and {}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<List<DashboardGraphResponse>> response = dashboardService.getBotQueriesChart(botRef, dashboardRequest);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
 
 }

@@ -18,6 +18,7 @@ public class ApiPathConstants {
   public static final String GET_ABANDONED_CHECKOUTS = "/{botRef}/getAbandonedCheckouts";
   public static final String MOST_PURCHASED_PRODUCTS = "/{botRef}/mostPurchasedProducts";
   public static final String MOST_ABANDONED_PRODUCTS = "/{botRef}/mostAbandonedProducts";
+  public static final String BOT_QUERIES_CHART = "/{botRef}/botQueriesChart";
 
 
 }

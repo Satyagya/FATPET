@@ -6,4 +6,9 @@ import lombok.Data;
 @Builder
 @Data
 public class DashboardGraphResponse {
+
+  private String date;
+  private Long queriesAsked;
+  private Long queriesUnanswered;
+
 }
