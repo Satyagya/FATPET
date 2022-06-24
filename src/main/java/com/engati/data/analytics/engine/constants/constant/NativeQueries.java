@@ -190,13 +190,13 @@ public class NativeQueries {
   public static final String GET_CONVERSATION_INTENT = "select sum(intent_count)as users, intent_label\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/intents_*.parquet')\n "
       + "where created_date between date '_date_' - interval 'gap' day and date '_date_'\n"
-      + "and intent_label is not 'None' "
+      + "and intent_label not like 'None' "
       + "group by intent_label ";
 
   public static final String GET_CONVERSATION_SENTIMENT = "select sum(sentiment_count)as users, sentiment_label\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/sentiments_*.parquet')\n "
       + "where created_date between date '_date_' - interval 'gap' day and date '_date_'\n"
-      + "and sentiment_label is not 'None'"
+      + "and sentiment_label not like 'None'"
       + "group by sentiment_label ";
 
 }
