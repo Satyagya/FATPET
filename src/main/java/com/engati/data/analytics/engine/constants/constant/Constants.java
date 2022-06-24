@@ -36,6 +36,9 @@ public class Constants {
   public static String PRODUCT_ID = "product_id";
   public static String DATE_FORMAT = "yyyy-MM-dd";
   public static String CREATED_DATE = "created_date";
+  public static String QUERIES_ASKED = "queries_asked";
+  public static String QUERIES_UNANSWERED= "queries_unanswered";
+
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";

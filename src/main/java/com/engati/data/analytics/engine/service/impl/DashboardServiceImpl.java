@@ -280,11 +280,11 @@ public class DashboardServiceImpl implements DashboardService {
   public DataAnalyticsResponse<List<DashboardGraphResponse>> getBotQueriesChart(Long botRef,
       DashboardRequest dashboardRequest) {
     log.info(
-        "Request received for getting botQueries Chart for botRef: {} for timeRanges between {} and "
-            + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+        "Request received for getting botQueries Chart for botRef: {} for timeRanges between {} "
+            + "and " + "{}", botRef, dashboardRequest.getStartTime(),
+        dashboardRequest.getEndTime());
     DataAnalyticsResponse<List<DashboardGraphResponse>> response = new DataAnalyticsResponse<>();
-    List<DashboardGraphResponse> dashboardGraphResponses = new ArrayList<>();
-    DashboardGraphResponse dashboardGraphResponse = new DashboardGraphResponse();
+    List<DashboardGraphResponse> dashboardGraphResponseList = new ArrayList<>();
     long diffInMillies = Math.abs(
         dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
     long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
@@ -299,7 +299,6 @@ public class DashboardServiceImpl implements DashboardService {
       query = query.replace(QueryConstants.END_DATE, endDate);
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
-      List<DashboardProductResponse> dashboardProductResponseList;
       try {
         Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
         if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
@@ -307,28 +306,76 @@ public class DashboardServiceImpl implements DashboardService {
           JSONObject queryResponse = MAPPER.readValue(MAPPER.writeValueAsString(
               MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
                   .get(Constants.RESPONSE_OBJECT)), JSONObject.class);
-          ArrayList responseContent = (ArrayList) queryResponse.get(Constants.CREATED_DATE);
-          int dataPoints = responseContent.size();
-          for (int i=0; i<dataPoints; i++){
-
+          ArrayList queryResponseDate = (ArrayList) queryResponse.get(Constants.CREATED_DATE);
+          ArrayList queryResponseQueriesAsked =
+              (ArrayList) queryResponse.get(Constants.QUERIES_ASKED);
+          ArrayList queryResponseQueriesUnanswered =
+              (ArrayList) queryResponse.get(Constants.QUERIES_UNANSWERED);
+          int dataPoints = queryResponseDate.size();
+          for (int i = 0; i < dataPoints; i++) {
+            DashboardGraphResponse dashboardGraphResponse =
+                DashboardGraphResponse.builder().date(queryResponseDate.get(i).toString())
+                    .queriesAsked(Double.valueOf(queryResponseQueriesAsked.get(i).toString()))
+                    .queriesUnanswered(
+                        Double.valueOf(queryResponseQueriesUnanswered.get(i).toString())).build();
+            dashboardGraphResponseList.add(dashboardGraphResponse);
           }
-
-          for (Object key : queryResponse.keySet()){
-            String keyStr = (String)key;
-            Object keyvalue = queryResponse.get(keyStr);
+        } else {
+          dashboardGraphResponseList = null;
+          response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+          log.error("Error executing query :{} with botRef: {}", query, botRef);
+        }
+        response.setResponseObject(dashboardGraphResponseList);
+        response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+      } catch (Exception e) {
+        dashboardGraphResponseList = null;
+        response.setResponseObject(dashboardGraphResponseList);
+        response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+        log.error("Error executing query :{} with botRef: {}", query, botRef, e);
+      }
+    } else {
+      String query = NativeQueries.BOT_QUERIES_COUNTS_AGGREGATED;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      query = query.replace(QueryConstants.START_DATE, startDate);
+      query = query.replace(QueryConstants.END_DATE, endDate);
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      try {
+        Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+        if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+            etlResponse.body())) {
+          JSONObject queryResponse = MAPPER.readValue(MAPPER.writeValueAsString(
+              MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
+                  .get(Constants.RESPONSE_OBJECT)), JSONObject.class);
+          ArrayList queryResponseDate = (ArrayList) queryResponse.get(Constants.CREATED_DATE);
+          ArrayList queryResponseQueriesAsked =
+              (ArrayList) queryResponse.get(Constants.QUERIES_ASKED);
+          ArrayList queryResponseQueriesUnanswered =
+              (ArrayList) queryResponse.get(Constants.QUERIES_UNANSWERED);
+          int dataPoints = queryResponseDate.size();
+          for (int i = 0; i < dataPoints; i++) {
+            DashboardGraphResponse dashboardGraphResponse =
+                DashboardGraphResponse.builder().date(queryResponseDate.get(i).toString())
+                    .queriesAsked(Double.valueOf(queryResponseQueriesAsked.get(i).toString()))
+                    .queriesUnanswered(
+                        Double.valueOf(queryResponseQueriesUnanswered.get(i).toString())).build();
+            dashboardGraphResponseList.add(dashboardGraphResponse);
           }
-
-          } else {
-            response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
-          }
-        } catch (Exception e) {
+        } else {
+          dashboardGraphResponseList = null;
+          response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+          log.error("Error executing query :{} with botRef: {}", query, botRef);
+        }
+        response.setResponseObject(dashboardGraphResponseList);
+        response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+      } catch (Exception e) {
+        dashboardGraphResponseList = null;
+        response.setResponseObject(dashboardGraphResponseList);
+        response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
         log.error("Error executing query :{} with botRef: {}", query, botRef, e);
       }
     }
-    else {
-
-    }
-    return null;
+    return response;
   }
 
   public double percentageChange(double final_value, double initial_value) {

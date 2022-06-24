@@ -175,4 +175,11 @@ public class NativeQueries {
       + "where created_date between date '_startdate_' and date '_enddate_'\n"
       + " group by created_date";
 
+  public static final String BOT_QUERIES_COUNTS_AGGREGATED = "select min(created_date)as created_date, "
+      + " ceil(avg(queries_asked_count))as queries_asked,"
+      + " ceil(avg(queries_unanswered_count))as queries_unanswered "
+      + " from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/interactions_*.parquet')"
+      + " where created_date between date '_startdate_' and date '_enddate_'\n"
+      + " group by created_date";
+
 }
