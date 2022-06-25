@@ -10,9 +10,8 @@ import retrofit2.http.Path;
 
 public interface PdeRestUtility {
 
-  String PDE_EXECUTE_QUERY = Constants.PDE_EXECUTE_QUERY;
 
-  @POST(value = PDE_EXECUTE_QUERY)
+  @POST(value = Constants.PDE_EXECUTE_QUERY)
   Call<JsonNode> getProductDetails(@Path(Constants.BOTREF) Long botRef, @Path(Constants.DOMAIN) String domain,
       @Body JSONObject requestBody);
 
