@@ -112,7 +112,7 @@ public class SegmentServiceImpl implements SegmentService {
   public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForSystemSegment(Long botRef, String segmentName) {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, segment: {}", botRef, segmentName);
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getSystemSegmentConfigByBotRefAndSegment(botRef, segmentName);
     log.info("Checking for Config values for the segment values for {} for botRef: {}", segmentName, botRef);
     Set<Long> resultSet = null;
@@ -138,7 +138,7 @@ public class SegmentServiceImpl implements SegmentService {
         if (!CollectionUtils.isEmpty(resultSet)) {
           List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
           if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
-            response.setResponseStatusCode(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+            response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
           }
         } else {
           File emptyFile = new File(fileName);
@@ -148,11 +148,11 @@ public class SegmentServiceImpl implements SegmentService {
           if (!emptyFile.createNewFile()) {
             log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
           }
-          response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
+          response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
         }
       }
     } catch (Exception e) {
-      response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
     }
     return response;
@@ -346,7 +346,7 @@ public class SegmentServiceImpl implements SegmentService {
     kafkaPayload.setBotRef(botRef);
 
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
-    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    response.setStatus(ResponseStatusCode.SUCCESS);
     Pattern segmentOperators = Pattern.compile("(?i) AND | OR ");
     Matcher OperatorMatcher = segmentOperators.matcher(segmentCondition);
     ArrayList<String> operators = new ArrayList<>();
@@ -357,7 +357,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     if (operators.size() > 4) {
       response.setResponseObject(null);
-      response.setResponseStatusCode(ResponseStatusCode.OPERATORS_PERMISSIBLE_LIMITS_REACHED);
+      response.setStatus(ResponseStatusCode.OPERATORS_PERMISSIBLE_LIMITS_REACHED);
       kafkaPayload.setStatus("FAILURE - EXCEEDED_OPERATOR_LIMITS");
       kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
       kafka.send(segmentResponseTopic, kafkaPayload.toString());
@@ -375,7 +375,7 @@ public class SegmentServiceImpl implements SegmentService {
         query_for_operand = generateQueryForCustomerAOVWithFilters(operand, botRef);
       } else {
         response.setResponseObject(null);
-        response.setResponseStatusCode(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
+        response.setStatus(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
         kafkaPayload.setStatus("FAILURE - INVALID_ATTRIBUTES");
         kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
       }
@@ -395,7 +395,7 @@ public class SegmentServiceImpl implements SegmentService {
         if (!CollectionUtils.isEmpty(combined_query_parameter_set)) {
           List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(combined_query_parameter_set, botRef);
           if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
-            response.setResponseStatusCode(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+            response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
             kafkaPayload.setStatus("FAILURE - CSV_CREATION_FAILURE");
             kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
           }
@@ -407,13 +407,13 @@ public class SegmentServiceImpl implements SegmentService {
           if (!emptyFile.createNewFile()) {
             log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
           }
-          response.setResponseStatusCode(ResponseStatusCode.EMPTY_SEGMENT);
+          response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
           kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
           kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         }
       }
     } catch (Exception e) {
-      response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
       kafkaPayload.setStatus("FAILURE - PROCESSING ERROR");
       kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));

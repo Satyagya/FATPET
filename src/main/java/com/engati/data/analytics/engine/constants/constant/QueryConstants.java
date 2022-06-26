@@ -50,6 +50,17 @@ public class QueryConstants {
   public static String BOT_REF = "bot_ref";
   public static String CREATED_AT = "created_at";
   public static String LINE_ITEM_PRICE = "line_item_price";
+  public static String DATE= "_date_";
+  public static String USERS = "users";
+  public static String ORDERS = "orders";
+  public static String START_DATE = "_startdate_";
+  public static String END_DATE = "_enddate_";
+  public static String PLATFORM = "platform";
+  public static String INTENT_LABEL = "intent_label";
+  public static String SENTIMENT_LABEL = "sentiment_label";
+  public static String INTENT_COUNT_SUM = "intent_count_sum";
+  public static String SENTIMENT_COUNT_SUM = "sentiment_count_sum";
+
 
 
 
