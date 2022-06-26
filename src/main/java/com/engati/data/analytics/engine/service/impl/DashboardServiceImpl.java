@@ -461,15 +461,12 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting Engaged Users for platforms for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(
-        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
     String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
     Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
-    query_params.put(QueryConstants.DATE, endDate);
+    query_params.put(QueryConstants.START_DATE, startDate);
+    query_params.put(QueryConstants.END_DATE, endDate);
     query_params.put(Constants.BOT_REF, botRef.toString());
     DashboardChartResponse dashboardChartResponse = executeQueryForDashboardChart(NativeQueries.GET_ENGAGED_USERS_BY_PLATFORM,
         query_params,
@@ -486,18 +483,16 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting conversations intents breakdown for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(
-        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+    String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
     Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
-    query_params.put(QueryConstants.DATE, endDate);
+    query_params.put(QueryConstants.START_DATE, startDate);
+    query_params.put(QueryConstants.END_DATE, endDate);
     query_params.put(Constants.BOT_REF, botRef.toString());
     DashboardChartResponse dashboardChartResponse = executeQueryForDashboardChart(NativeQueries.GET_CONVERSATION_INTENT,
         query_params,
-        QueryConstants.USERS, QueryConstants.INTENT_LABEL, botRef);
+        QueryConstants.INTENT_COUNT_SUM, QueryConstants.INTENT_LABEL, botRef);
     response.setResponseObject(dashboardChartResponse);
     response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
@@ -510,16 +505,15 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting conversations sentiment breakdown for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+    String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
     Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
-    query_params.put(QueryConstants.DATE, endDate);
+    query_params.put(QueryConstants.START_DATE, startDate);
+    query_params.put(QueryConstants.END_DATE, endDate);
     query_params.put(Constants.BOT_REF, botRef.toString());
     DashboardChartResponse dashboardChartResponse = executeQueryForDashboardChart(NativeQueries.GET_CONVERSATION_SENTIMENT,
-        query_params, QueryConstants.USERS, QueryConstants.SENTIMENT_LABEL, botRef);
+        query_params, QueryConstants.SENTIMENT_COUNT_SUM, QueryConstants.SENTIMENT_LABEL, botRef);
     response.setResponseObject(dashboardChartResponse);
     response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
