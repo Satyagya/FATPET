@@ -461,14 +461,10 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting Engaged Users for platforms for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(
-        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
     String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
     Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
     query_params.put(QueryConstants.START_DATE, startDate);
     query_params.put(QueryConstants.END_DATE, endDate);
     query_params.put(Constants.BOT_REF, botRef.toString());
@@ -487,14 +483,10 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting conversations intents breakdown for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(
-        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
     String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
     Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
     query_params.put(QueryConstants.START_DATE, startDate);
     query_params.put(QueryConstants.END_DATE, endDate);
     query_params.put(Constants.BOT_REF, botRef.toString());
@@ -513,13 +505,10 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting conversations sentiment breakdown for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
     String startDate = formatter.format(dashboardRequest.getStartTime());
     String endDate = formatter.format(dashboardRequest.getEndTime());
     Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
     query_params.put(QueryConstants.START_DATE, startDate);
     query_params.put(QueryConstants.END_DATE, endDate);
     query_params.put(Constants.BOT_REF, botRef.toString());
