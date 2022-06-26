@@ -3,6 +3,7 @@ package com.engati.data.analytics.engine.controller;
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
 import com.engati.data.analytics.engine.constants.constant.ApiPathConstants;
 import com.engati.data.analytics.engine.model.request.DashboardRequest;
+import com.engati.data.analytics.engine.model.response.DashboardChartResponse;
 import com.engati.data.analytics.engine.model.response.DashboardFlierResponse;
 import com.engati.data.analytics.engine.model.response.DashboardGraphResponse;
 import com.engati.data.analytics.engine.model.response.DashboardProductResponse;
@@ -79,6 +80,39 @@ public class DashboardController {
       DashboardRequest dashboardRequest) {
     log.info("Got call for getting botQueries Chart for botRef: {}, for timeRanges between {} and {}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<List<DashboardGraphResponse>> response = dashboardService.getBotQueriesChart(botRef, dashboardRequest);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
+  @PostMapping(value = ApiPathConstants.ENGAGED_USERS_PER_PLATFORM)
+  public ResponseEntity<DataAnalyticsResponse> getEngagedUsersPerPlatform(@PathVariable(name =
+      ApiPathConstants.BOTREF) Long botRef, @RequestBody
+      DashboardRequest dashboardRequest) {
+    log.info("Got call for getting engaged users for botRef: {}, for timeRanges between {} and {} by platform", botRef,
+        dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardChartResponse> response = dashboardService.getEngagedUsersPerPlatform(botRef,
+        dashboardRequest);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
+  @PostMapping(value = ApiPathConstants.CONVERSATION_INTENT)
+  public ResponseEntity<DataAnalyticsResponse> getConversationIntentBreakdown(@PathVariable(name =
+      ApiPathConstants.BOTREF) Long botRef, @RequestBody
+      DashboardRequest dashboardRequest) {
+    log.info("Got call for getting conversations intents percentage for botRef: {}, for timeRanges between {} and {} ",
+        botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardChartResponse> response = dashboardService.getConversationIntentBreakdown(botRef,
+        dashboardRequest);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
+  @PostMapping(value = ApiPathConstants.CONVERSATION_SENTIMENT)
+  public ResponseEntity<DataAnalyticsResponse> getConversationSentimentBreakdown(@PathVariable(name =
+      ApiPathConstants.BOTREF) Long botRef, @RequestBody
+      DashboardRequest dashboardRequest) {
+    log.info("Got call for getting conversations intents percentage for botRef: {}, for timeRanges between {} and {} ",
+        botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardChartResponse> response = dashboardService.getConversationSentimentBreakdown(botRef,
+        dashboardRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 

@@ -55,6 +55,9 @@ public class QueryConstants {
   public static String ORDERS = "orders";
   public static String START_DATE = "_startdate_";
   public static String END_DATE = "_enddate_";
+  public static String PLATFORM = "platform";
+  public static String INTENT_LABEL = "intent_label";
+  public static String SENTIMENT_LABEL = "sentiment_label";
 
 
 

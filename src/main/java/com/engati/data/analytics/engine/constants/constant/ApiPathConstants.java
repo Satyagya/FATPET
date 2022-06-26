@@ -19,6 +19,9 @@ public class ApiPathConstants {
   public static final String MOST_PURCHASED_PRODUCTS = "/{botRef}/mostPurchasedProducts";
   public static final String MOST_ABANDONED_PRODUCTS = "/{botRef}/mostAbandonedProducts";
   public static final String BOT_QUERIES_CHART = "/{botRef}/botQueriesChart";
+  public static final String ENGAGED_USERS_PER_PLATFORM ="{botRef}/getEngagedUsersPerPlatform";
+  public static final String CONVERSATION_INTENT = "{botRef}/getConversationIntentBreakdown";
+  public static final String CONVERSATION_SENTIMENT = "{botRef}/getConversationSentimentBreakdown";
 
 
 }

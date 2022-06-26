@@ -8,6 +8,7 @@ import com.engati.data.analytics.engine.constants.constant.NativeQueries;
 import com.engati.data.analytics.engine.constants.constant.QueryConstants;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
 import com.engati.data.analytics.engine.model.request.DashboardRequest;
+import com.engati.data.analytics.engine.model.response.DashboardChartResponse;
 import com.engati.data.analytics.engine.model.response.DashboardFlierResponse;
 import com.engati.data.analytics.engine.model.response.DashboardGraphResponse;
 import com.engati.data.analytics.engine.model.response.DashboardProductResponse;
@@ -447,6 +448,118 @@ public class DashboardServiceImpl implements DashboardService {
     return dashboardProductResponseList.stream().collect(collectingAndThen(toCollection(
             () -> new TreeSet<>(comparingLong(DashboardProductResponse::getPRODUCT_productId))),
         ArrayList::new));
+  }
+
+  @Override
+  public DataAnalyticsResponse<DashboardChartResponse> getEngagedUsersPerPlatform(Long botRef,
+      DashboardRequest dashboardRequest) {
+    log.info(
+        "Request received for getting Engaged Users for platforms for botRef: {} for timeRanges between {} and "
+            + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
+    long diffInMillies = Math.abs(
+        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+    String startDate = formatter.format(dashboardRequest.getStartTime());
+    String endDate = formatter.format(dashboardRequest.getEndTime());
+    Map<String, String> query_params = new HashMap<>();
+    query_params.put(QueryConstants.GAP, String.valueOf(gap));
+    query_params.put(QueryConstants.DATE, endDate);
+    query_params.put(Constants.BOT_REF, botRef.toString());
+    DashboardChartResponse dashboardChartResponse = executeQueryForDashboardChart(NativeQueries.GET_ENGAGED_USERS_BY_PLATFORM,
+        query_params,
+        QueryConstants.USERS, QueryConstants.PLATFORM, botRef);
+    response.setResponseObject(dashboardChartResponse);
+    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  @Override
+  public DataAnalyticsResponse<DashboardChartResponse> getConversationIntentBreakdown(Long botRef,
+      DashboardRequest dashboardRequest) {
+    log.info(
+        "Request received for getting conversations intents breakdown for botRef: {} for timeRanges between {} and "
+            + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
+    long diffInMillies = Math.abs(
+        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+    String endDate = formatter.format(dashboardRequest.getEndTime());
+    Map<String, String> query_params = new HashMap<>();
+    query_params.put(QueryConstants.GAP, String.valueOf(gap));
+    query_params.put(QueryConstants.DATE, endDate);
+    query_params.put(Constants.BOT_REF, botRef.toString());
+    DashboardChartResponse dashboardChartResponse = executeQueryForDashboardChart(NativeQueries.GET_CONVERSATION_INTENT,
+        query_params,
+        QueryConstants.USERS, QueryConstants.INTENT_LABEL, botRef);
+    response.setResponseObject(dashboardChartResponse);
+    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  @Override
+  public DataAnalyticsResponse<DashboardChartResponse> getConversationSentimentBreakdown(Long botRef,
+      DashboardRequest dashboardRequest) {
+    log.info(
+        "Request received for getting conversations sentiment breakdown for botRef: {} for timeRanges between {} and "
+            + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardChartResponse> response = new DataAnalyticsResponse<>();
+    long diffInMillies = Math.abs(dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+    String endDate = formatter.format(dashboardRequest.getEndTime());
+    Map<String, String> query_params = new HashMap<>();
+    query_params.put(QueryConstants.GAP, String.valueOf(gap));
+    query_params.put(QueryConstants.DATE, endDate);
+    query_params.put(Constants.BOT_REF, botRef.toString());
+    DashboardChartResponse dashboardChartResponse = executeQueryForDashboardChart(NativeQueries.GET_CONVERSATION_SENTIMENT,
+        query_params, QueryConstants.USERS, QueryConstants.SENTIMENT_LABEL, botRef);
+    response.setResponseObject(dashboardChartResponse);
+    response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  private DashboardChartResponse executeQueryForDashboardChart(String query, Map<String, String> query_params,
+      String metric_name,String filterBy, Long botRef) {
+    for (Map.Entry<String, String> query_param : query_params.entrySet()) {
+      query = query.replace(query_param.getKey(), query_param.getValue());
+    }
+    DashboardChartResponse dashboardChartResponse = null;
+    List<Integer> countPerMetric = new ArrayList<>();
+    List<String> metrics = new ArrayList<>();
+    JSONObject requestBody = new JSONObject();
+    requestBody.put(Constants.QUERY, query);
+    log.debug("Request body for query to duckDB: {}", requestBody);
+    try {
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+          etlResponse.body())) {
+        countPerMetric = MAPPER.readValue(MAPPER.readValue(etlResponse.body().toString(), JsonNode.class)
+            .get(Constants.RESPONSE_OBJECT).get(metric_name)
+            .toString(), ArrayList.class);
+        metrics = MAPPER.readValue(MAPPER.readValue(etlResponse.body().toString(), JsonNode.class)
+            .get(Constants.RESPONSE_OBJECT).get(filterBy)
+            .toString(), ArrayList.class);
+        dashboardChartResponse = getDashBoardChartResponse(countPerMetric, metrics);
+      }
+    } catch (Exception e) {
+      log.error("Error executing query :{} with botRef: {}", query, botRef, e);
+    }
+    return dashboardChartResponse;
+  }
+
+  DashboardChartResponse getDashBoardChartResponse(List<Integer> countPerMetric, List<String> metricList){
+    long totalCount = countPerMetric.stream()
+        .mapToLong(Integer::longValue)
+        .sum();
+    Map<String,Long> metricPercentMap = new HashMap<>();
+    for (int metricIndex = 0; metricIndex < countPerMetric.size(); metricIndex++) {
+      long percent = countPerMetric.get(metricIndex)*100/totalCount ;
+      metricPercentMap.put(metricList.get(metricIndex), percent);
+    }
+    return DashboardChartResponse.builder().metricPercentage(metricPercentMap).build();
   }
 
 }
