@@ -7,7 +7,14 @@ public class Constants {
   public static final String RESPONSE_OBJECT = "response";
   public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
   public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
-
+  public static final String PDE_PREFIX = "pde";
+  public static final String RETROFIT_PDE_API = "retrofitPDEApi";
+  public static final String PDE_CLIENT = "pdeHttpClient";
+  public static final String RETROFIT_PDE_SERVICE = "retrofitPDERestService";
+  public static final String PDE_EXECUTE_QUERY = "/v1/discovery/query/dynamic/bot/{botRef}/domain/{domain}";
+  public static final String BOTREF = "botRef";
+  public static final String DOMAIN = "domain";
+  public static final String RESPONSE = "responseObject";
 
 
   //  DuckDB Connection URL
@@ -27,6 +34,11 @@ public class Constants {
   public static String CUSTOMER_PHONE = "customer_phone";
   public static String VARIANT_ID = "variant_id";
   public static String PRODUCT_ID = "product_id";
+  public static String DATE_FORMAT = "yyyy-MM-dd";
+  public static String CREATED_DATE = "created_date";
+  public static String QUERIES_ASKED = "queries_asked";
+  public static String QUERIES_UNANSWERED= "queries_unanswered";
+
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";
@@ -43,5 +55,15 @@ public class Constants {
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
 
+  public static final String productDetailsRequest = "{\n" + "    \"entities\": [ \n"
+      + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
+      + "        {\n" + "            \"isOrCondition\": false,\n"
+      + "            \"fieldName\": \"PRODUCT_productId\",\n" + "            \"value\": null,\n"
+      + "            \"values\": %s,\n"
+      + "            \"condition\": \"IN\"\n" + "        }\n" + "    ],\n" + "    \"fields\": [\n"
+      + "        \"PRODUCT_productId\",\n" + "        \"PRODUCT_title\",\n"
+      + "        \"IMAGE_url\"\n" + "    ],\n" + "    \"customSort\": [\n" + "        {\n"
+      + "            \"name\": \"PRODUCT_productId\",\n" + "            \"isAsc\": true\n"
+      + "        }\n" + "    ],\n" + "    \"pageNumber\": 1,\n" + "    \"pageSize\": 10\n" + "}";
 
 }
