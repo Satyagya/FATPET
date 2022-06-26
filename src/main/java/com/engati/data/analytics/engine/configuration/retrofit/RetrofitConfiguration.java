@@ -22,77 +22,76 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnClass(Retrofit.class)
 @Slf4j
 public class RetrofitConfiguration {
+  @Bean(name = Constants.RETROFIT_DUCKDB_ENGINE_API)
+  public Retrofit retrofitIntegrationHubApi(EtlEngineConfiguration etlEngineConfiguration,
+      @Qualifier(value = Constants.DUCKDB_ENGINE_HTTP_CLIENT) OkHttpClient okHttpClient) {
+    Retrofit.Builder builder = constructRetrofitBuilder(okHttpClient);
+    builder.baseUrl(etlEngineConfiguration.getUrl())
+        .addConverterFactory(JacksonConverterFactory.create(constructObjectMapper()))
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+    return builder.build();
+  }
 
-    @Bean(name = Constants.RETROFIT_DUCKDB_ENGINE_API)
-    public Retrofit retrofitIntegrationHubApi(EtlEngineConfiguration etlEngineConfiguration,
-                                              @Qualifier(value = Constants.DUCKDB_ENGINE_HTTP_CLIENT) OkHttpClient okHttpClient) {
-        Retrofit.Builder builder = constructRetrofitBuilder(okHttpClient);
-        builder.baseUrl(etlEngineConfiguration.getUrl())
-                .addConverterFactory(JacksonConverterFactory.create(constructObjectMapper()))
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
-        return builder.build();
-    }
+  @Bean(name = Constants.RETROFIT_DUCKDB_ENGINE_REST_SERVICE)
+  public EtlEngineRestUtility retrofitIntegrationHubRestService(
+      @Qualifier(value = Constants.RETROFIT_DUCKDB_ENGINE_API) Retrofit retrofitIntegrationHubApi) {
+    return retrofitIntegrationHubApi.create(EtlEngineRestUtility.class);
+  }
 
-    @Bean(name = Constants.RETROFIT_DUCKDB_ENGINE_REST_SERVICE)
-    public EtlEngineRestUtility retrofitIntegrationHubRestService(
-            @Qualifier(value = Constants.RETROFIT_DUCKDB_ENGINE_API) Retrofit retrofitIntegrationHubApi) {
-        return retrofitIntegrationHubApi.create(EtlEngineRestUtility.class);
-    }
+  @Bean(name = Constants.DUCKDB_ENGINE_HTTP_CLIENT)
+  public OkHttpClient okHttpIHClient(EtlEngineConfiguration etlEngineConfiguration) {
 
-    @Bean(name = Constants.DUCKDB_ENGINE_HTTP_CLIENT)
-    public OkHttpClient okHttpIHClient(EtlEngineConfiguration etlEngineConfiguration) {
+    return createHttpClient(etlEngineConfiguration.getLogLevel(),
+        etlEngineConfiguration.getConnectTimeout(),
+        etlEngineConfiguration.getReadTimeout());
+  }
 
-        return createHttpClient(etlEngineConfiguration.getLogLevel(),
-                etlEngineConfiguration.getConnectTimeout(),
-                etlEngineConfiguration.getReadTimeout());
-    }
+  @Bean(name = Constants.RETROFIT_PDE_API)
+  public Retrofit retrofitDAEApi(ProductDiscoveryEngineConfiguration daeConfiguration,
+      @Qualifier(value = Constants.PDE_CLIENT) OkHttpClient okHttpClient) {
+    Retrofit.Builder builder = constructRetrofitBuilder(okHttpClient);
+    builder.baseUrl(daeConfiguration.getUrl())
+        .addConverterFactory(JacksonConverterFactory.create(constructObjectMapper()))
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+    return builder.build();
+  }
 
-    @Bean(name = Constants.RETROFIT_PDE_API)
-    public Retrofit retrofitDAEApi(ProductDiscoveryEngineConfiguration daeConfiguration,
-        @Qualifier(value = Constants.PDE_CLIENT) OkHttpClient okHttpClient) {
-        Retrofit.Builder builder = constructRetrofitBuilder(okHttpClient);
-        builder.baseUrl(daeConfiguration.getUrl())
-            .addConverterFactory(JacksonConverterFactory.create(constructObjectMapper()))
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
-        return builder.build();
-    }
+  @Bean(name = Constants.RETROFIT_PDE_SERVICE)
+  public PdeRestUtility retrofitDAEService(
+      @Qualifier(value = Constants.RETROFIT_PDE_API) Retrofit retrofitDAEApi) {
+    return retrofitDAEApi.create(PdeRestUtility.class);
+  }
 
-    @Bean(name = Constants.RETROFIT_PDE_SERVICE)
-    public PdeRestUtility retrofitDAEService(
-        @Qualifier(value = Constants.RETROFIT_PDE_API) Retrofit retrofitDAEApi) {
-        return retrofitDAEApi.create(PdeRestUtility.class);
-    }
+  @Bean(name = Constants.PDE_CLIENT)
+  public OkHttpClient okHttpDAEClient(ProductDiscoveryEngineConfiguration productDiscoveryEngineConfiguration) {
+    return createHttpClient(productDiscoveryEngineConfiguration.getLogLevel(), productDiscoveryEngineConfiguration.getConnectTimeout(),
+        productDiscoveryEngineConfiguration.getReadTimeout());
+  }
 
-    @Bean(name = Constants.PDE_CLIENT)
-    public OkHttpClient okHttpDAEClient(ProductDiscoveryEngineConfiguration productDiscoveryEngineConfiguration) {
-        return createHttpClient(productDiscoveryEngineConfiguration.getLogLevel(), productDiscoveryEngineConfiguration.getConnectTimeout(),
-            productDiscoveryEngineConfiguration.getReadTimeout());
-    }
+  private OkHttpClient createHttpClient(String logLevel, Integer connectTimeout,
+      Integer readTimeout) {
+    HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(log::debug);
 
-    private OkHttpClient createHttpClient(String logLevel, Integer connectTimeout,
-                                          Integer readTimeout) {
-        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(log::debug);
+    httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.valueOf(logLevel));
+    OkHttpClient.Builder builder = new OkHttpClient.Builder().addInterceptor(httpLoggingInterceptor)
+        .connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
+        .readTimeout(readTimeout, TimeUnit.MILLISECONDS)
+        .writeTimeout(readTimeout, TimeUnit.MILLISECONDS);
+    builder.addInterceptor(chain -> chain.proceed(chain.request().newBuilder().build()));
 
-        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.valueOf(logLevel));
-        OkHttpClient.Builder builder = new OkHttpClient.Builder().addInterceptor(httpLoggingInterceptor)
-                .connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
-                .readTimeout(readTimeout, TimeUnit.MILLISECONDS)
-                .writeTimeout(readTimeout, TimeUnit.MILLISECONDS);
-        builder.addInterceptor(chain -> chain.proceed(chain.request().newBuilder().build()));
+    return builder.build();
+  }
 
-        return builder.build();
-    }
-
-    private Retrofit.Builder constructRetrofitBuilder(OkHttpClient okHttpClient) {
-        Retrofit.Builder builder = new Retrofit.Builder();
-        builder.client(okHttpClient);
-        return builder;
-    }
+  private Retrofit.Builder constructRetrofitBuilder(OkHttpClient okHttpClient) {
+    Retrofit.Builder builder = new Retrofit.Builder();
+    builder.client(okHttpClient);
+    return builder;
+  }
 
 
-    private ObjectMapper constructObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(JsonParser.Feature.ALLOW_MISSING_VALUES, true);
-        return objectMapper;
-    }
+  private ObjectMapper constructObjectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(JsonParser.Feature.ALLOW_MISSING_VALUES, true);
+    return objectMapper;
+  }
 }
