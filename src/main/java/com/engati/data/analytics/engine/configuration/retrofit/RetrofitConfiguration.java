@@ -1,7 +1,6 @@
 package com.engati.data.analytics.engine.configuration.retrofit;
 
 import com.engati.data.analytics.engine.Utils.EtlEngineRestUtility;
-import com.engati.data.analytics.engine.Utils.PdeRestUtility;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,28 +44,6 @@ public class RetrofitConfiguration {
         return createHttpClient(etlEngineConfiguration.getLogLevel(),
                 etlEngineConfiguration.getConnectTimeout(),
                 etlEngineConfiguration.getReadTimeout());
-    }
-
-    @Bean(name = Constants.RETROFIT_PDE_API)
-    public Retrofit retrofitDAEApi(ProductDiscoveryEngineConfiguration daeConfiguration,
-        @Qualifier(value = Constants.PDE_CLIENT) OkHttpClient okHttpClient) {
-        Retrofit.Builder builder = constructRetrofitBuilder(okHttpClient);
-        builder.baseUrl(daeConfiguration.getUrl())
-            .addConverterFactory(JacksonConverterFactory.create(constructObjectMapper()))
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
-        return builder.build();
-    }
-
-    @Bean(name = Constants.RETROFIT_PDE_SERVICE)
-    public PdeRestUtility retrofitDAEService(
-        @Qualifier(value = Constants.RETROFIT_PDE_API) Retrofit retrofitDAEApi) {
-        return retrofitDAEApi.create(PdeRestUtility.class);
-    }
-
-    @Bean(name = Constants.PDE_CLIENT)
-    public OkHttpClient okHttpDAEClient(ProductDiscoveryEngineConfiguration productDiscoveryEngineConfiguration) {
-        return createHttpClient(productDiscoveryEngineConfiguration.getLogLevel(), productDiscoveryEngineConfiguration.getConnectTimeout(),
-            productDiscoveryEngineConfiguration.getReadTimeout());
     }
 
     private OkHttpClient createHttpClient(String logLevel, Integer connectTimeout,
