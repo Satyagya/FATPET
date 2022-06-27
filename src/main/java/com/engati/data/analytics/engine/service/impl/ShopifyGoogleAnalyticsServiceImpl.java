@@ -47,12 +47,12 @@ public class ShopifyGoogleAnalyticsServiceImpl implements ShopifyGoogleAnalytics
                   .credentials(jsonObject.toJSONString()).propertyId(propertyId).build();
           log.info("Storing GA Creds into db for botRef {}", botRef);
           shopifyGoogleAnalyticsInfoRepository.save(shopifyGoogleAnalyticsInfo);
-          response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+          response.setStatus(ResponseStatusCode.SUCCESS);
         } else {
-          response.setResponseStatusCode(ResponseStatusCode.INVALID_AUTH_JSON_FILE);
+          response.setStatus(ResponseStatusCode.INVALID_AUTH_JSON_FILE);
         }
       } else {
-        response.setResponseStatusCode(ResponseStatusCode.INVALID_FILE_TYPE);
+        response.setStatus(ResponseStatusCode.INVALID_FILE_TYPE);
       }
     } catch (ParseException e) {
       log.error("Error while processing the file for botRef {}", botRef, e);
