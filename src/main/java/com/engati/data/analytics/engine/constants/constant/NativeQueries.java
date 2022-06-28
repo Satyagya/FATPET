@@ -43,7 +43,7 @@ public class NativeQueries {
        "and created_date >= CURRENT_DATE - INTERVAL 12 MONTH\n" +
        "group by order_id, total_price)as a)as b";
 
-   public static String CUSTOMER_AOV_QUERY = "select customer_id, round(AOV,2)as AOV from \n" +
+   public static String CUSTOMER_AOV_QUERY = "select customer_id, coalesce(round(AOV,2),0)as AOV from \n" +
        "(select customer_id, ((sum_total)*1.0/(number_of_orders))as AOV from\n" +
        "(select customer_id, sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
        "(select customer_id, order_id, cast(total_price as float) total_price\n" +
@@ -141,17 +141,17 @@ public class NativeQueries {
       "group by customer_id)as b)as c)\n" +
       "where AOV operator value \n";
 
-  public static final String GET_ENGAGED_USERS = "select count(distinct  user_id)as users\n"
+  public static final String GET_ENGAGED_USERS = "select coalesce(count(distinct  user_id), 0)as users\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/users_*.parquet')\n "
       + "where created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
-  public static final String GET_ORDER_COUNTS = "select count(distinct  order_id)as orders\n"
+  public static final String GET_ORDER_COUNTS = "select coalesce(count(distinct  order_id), 0)as orders\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n "
       + "where created_date between date '_date_' - interval 'gap' day and date '_date_'"
       + "and cancelled_at like 'None'"
       + "and (is_test like 'nan' or is_test = 0)";
 
-  public static final String GET_AOV = "select round(sum_total*1.0/number_of_orders, 2)as AOV from\n"
+  public static final String GET_AOV = "select coalesce(round(sum_total*1.0/number_of_orders, 2), 0)as AOV from\n"
       + "(select sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n"
       + "(select order_id, cast(total_price as float) total_price from\n"
       + "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n"
