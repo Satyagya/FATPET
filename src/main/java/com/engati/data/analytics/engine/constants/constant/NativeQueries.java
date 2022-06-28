@@ -34,7 +34,7 @@ public class NativeQueries {
        "group by customer_id)as b)as c\n" +
        "where metric operator value";
 
-   public static String STORE_AOV_QUERY = "select round(sum_total*1.0/number_of_orders, 2)as STORE_AOV from\n" +
+   public static String STORE_AOV_QUERY = "select coalesce(round(sum_total*1.0/number_of_orders, 2), 0)as STORE_AOV from\n" +
        "(select sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
        "(select order_id, cast(total_price as float) total_price from\n" +
        " parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet') " +
