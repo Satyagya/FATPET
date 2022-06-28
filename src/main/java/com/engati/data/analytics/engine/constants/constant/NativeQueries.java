@@ -129,7 +129,7 @@ public class NativeQueries {
       "where orders__last_gap_months operator value\n" ;
 
   public static final String CUSTOMER_AOV_QUERY_WITH_FILTERS = "select customer_id from\n" +
-      "(select customer_id, round(AOV, 2)as AOV from\n" +
+      "(select customer_id, coalesce(round(AOV, 2), 0)as AOV from\n" +
       "(select customer_id, ((sum_total)*1.0/(number_of_orders))as AOV from\n" +
       "(select customer_id, sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
       "(select customer_id, order_id, cast(total_price as float) total_price\n" +
