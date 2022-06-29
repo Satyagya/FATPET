@@ -59,6 +59,22 @@ public class DashboardController {
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
+  @PostMapping(value = ApiPathConstants.GET_TRANSACTIONS_VIA_ENGATI)
+  public ResponseEntity<DataAnalyticsResponse> getTransactionsFromEngati(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody
+      DashboardRequest dashboardRequest) {
+    log.info("Got call for getting Transactions from Engati for botRef: {}, for timeRanges between {} and {}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardFlierResponse> response = dashboardService.getTransactionsFromEngati(botRef, dashboardRequest);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
+  @PostMapping(value = ApiPathConstants.GET_TRANSACTION_REVENUE_VIA_ENGATI)
+  public ResponseEntity<DataAnalyticsResponse> getTransactionRevenueFromEngati(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody
+      DashboardRequest dashboardRequest) {
+    log.info("Got call for getting TransactionRevenue from Engati for botRef: {}, for timeRanges between {} and {}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardFlierResponse> response = dashboardService.getTransactionRevenueFromEngati(botRef, dashboardRequest);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
   @PostMapping(value = ApiPathConstants.MOST_PURCHASED_PRODUCTS)
   public ResponseEntity<DataAnalyticsResponse<List<DashboardProductResponse>>> getMostPurchasedProducts(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody
       DashboardRequest dashboardRequest) {

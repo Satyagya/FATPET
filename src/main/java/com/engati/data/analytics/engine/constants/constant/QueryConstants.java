@@ -60,7 +60,8 @@ public class QueryConstants {
   public static String SENTIMENT_LABEL = "sentiment_label";
   public static String INTENT_COUNT_SUM = "intent_count_sum";
   public static String SENTIMENT_COUNT_SUM = "sentiment_count_sum";
-
+  public static String TRANSACTIONS = "transactions";
+  public static String TRANSACTION_REVENUE = "transaction_revenue";
 
 
 

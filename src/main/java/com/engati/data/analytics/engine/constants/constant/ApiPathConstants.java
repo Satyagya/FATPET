@@ -16,6 +16,8 @@ public class ApiPathConstants {
   public static final String ORDER_COUNT ="/{botRef}/getOrderCount";
   public static final String GET_AOV = "/{botRef}/getAOV";
   public static final String GET_ABANDONED_CHECKOUTS = "/{botRef}/getAbandonedCheckouts";
+  public static final String GET_TRANSACTIONS_VIA_ENGATI = "/{botRef}/getTransactionsFromEngati";
+  public static final String GET_TRANSACTION_REVENUE_VIA_ENGATI = "/{botRef}/getTransactionRevenueFromEngati";
   public static final String MOST_PURCHASED_PRODUCTS = "/{botRef}/mostPurchasedProducts";
   public static final String MOST_ABANDONED_PRODUCTS = "/{botRef}/mostAbandonedProducts";
   public static final String BOT_QUERIES_CHART = "/{botRef}/botQueriesChart";
