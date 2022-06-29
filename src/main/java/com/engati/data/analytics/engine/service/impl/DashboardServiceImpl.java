@@ -530,7 +530,7 @@ public class DashboardServiceImpl implements DashboardService {
       log.error("Error getting LastUpdatedOn from the DB");
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
     }
-    response.setResponseObject(lastUpdatedOn);
+    response.setResponseObject((lastUpdatedOn+"+0000").replace(" ","T"));
     response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
