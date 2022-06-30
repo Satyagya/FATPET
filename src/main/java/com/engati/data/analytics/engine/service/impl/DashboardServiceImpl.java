@@ -210,6 +210,87 @@ public class DashboardServiceImpl implements DashboardService {
   }
 
   @Override
+  public DataAnalyticsResponse<DashboardFlierResponse> getTransactionsFromEngati(Long botRef,
+      DashboardRequest dashboardRequest) {
+    log.info(
+        "Request received for getting Transactions from Engati for botRef: {} for timeRanges between "
+            + "{} and " + "{}", botRef, dashboardRequest.getStartTime(),
+        dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardFlierResponse> response = new DataAnalyticsResponse<>();
+    long diffInMillies = Math.abs(
+        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+    String startDate = formatter.format(dashboardRequest.getStartTime());
+    String endDate = formatter.format(dashboardRequest.getEndTime());
+    double presentValue = 0.0;
+    double percentageChange = 0.0;
+    double pastValue = 0.0;
+    String currency = "";
+
+    Map<String, String> query_params = new HashMap<>();
+    query_params.put(QueryConstants.GAP, String.valueOf(gap));
+    query_params.put(QueryConstants.DATE, endDate);
+    query_params.put(Constants.BOT_REF, botRef.toString());
+    presentValue = executeQueryForDashboardFlier(NativeQueries.GET_TRANSACTIONS_FROM_ENGATI, query_params,
+        QueryConstants.TRANSACTIONS, botRef);
+
+    query_params.put(QueryConstants.DATE, startDate);
+    pastValue = executeQueryForDashboardFlier(NativeQueries.GET_TRANSACTIONS_FROM_ENGATI, query_params,
+        QueryConstants.TRANSACTIONS, botRef);
+
+    percentageChange = percentageChange(presentValue, pastValue);
+    response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
+        .percentageChange(percentageChange).currency(currency).build());
+    response.setStatus(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  @Override
+  public DataAnalyticsResponse<DashboardFlierResponse> getTransactionRevenueFromEngati(Long botRef,
+      DashboardRequest dashboardRequest) {
+    log.info(
+        "Request received for getting Transaction Revenue from Engati for botRef: {} for timeRanges between "
+            + "{} and " + "{}", botRef, dashboardRequest.getStartTime(),
+        dashboardRequest.getEndTime());
+    DataAnalyticsResponse<DashboardFlierResponse> response = new DataAnalyticsResponse<>();
+    long diffInMillies = Math.abs(
+        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+    String startDate = formatter.format(dashboardRequest.getStartTime());
+    String endDate = formatter.format(dashboardRequest.getEndTime());
+    double presentValue = 0.0;
+    double percentageChange = 0.0;
+    double pastValue = 0.0;
+    String currency;
+
+    try {
+      currency = dashboardRepository.findCurrencyByBotRef(botRef);
+    } catch (Exception e) {
+      log.error("Error getting currency for botRef: {}", botRef, e);
+      currency = "";
+    }
+
+    Map<String, String> query_params = new HashMap<>();
+    query_params.put(QueryConstants.GAP, String.valueOf(gap));
+    query_params.put(QueryConstants.DATE, endDate);
+    query_params.put(Constants.BOT_REF, botRef.toString());
+    presentValue = executeQueryForDashboardFlier(NativeQueries.GET_TRANSACTION_REVENUE_FROM_ENGATI, query_params,
+        QueryConstants.TRANSACTION_REVENUE, botRef);
+
+    query_params.put(QueryConstants.DATE, startDate);
+    pastValue = executeQueryForDashboardFlier(NativeQueries.GET_TRANSACTION_REVENUE_FROM_ENGATI, query_params,
+        QueryConstants.TRANSACTION_REVENUE, botRef);
+
+    percentageChange = percentageChange(presentValue, pastValue);
+    response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
+        .percentageChange(percentageChange).currency(currency).build());
+    response.setStatus(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  @Override
   public DataAnalyticsResponse<List<DashboardProductResponse>> getMostPurchasedProducts(Long botRef,
       DashboardRequest dashboardRequest) {
     log.info("Request received for getting most purchased Products for botRef: {} for timeRanges "

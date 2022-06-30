@@ -19,6 +19,10 @@ public interface DashboardService {
 
   DataAnalyticsResponse<DashboardFlierResponse> getAbandonedCheckouts(Long botRef, DashboardRequest dashboardRequest);
 
+  DataAnalyticsResponse<DashboardFlierResponse> getTransactionsFromEngati(Long botRef, DashboardRequest dashboardRequest);
+
+  DataAnalyticsResponse<DashboardFlierResponse> getTransactionRevenueFromEngati(Long botRef, DashboardRequest dashboardRequest);
+
   DataAnalyticsResponse<List<DashboardProductResponse>> getMostPurchasedProducts(Long botRef, DashboardRequest dashboardRequest);
 
   DataAnalyticsResponse<List<DashboardProductResponse>> getMostAbandonedProducts(Long botRef, DashboardRequest dashboardRequest);
@@ -32,4 +36,5 @@ public interface DashboardService {
   DataAnalyticsResponse<DashboardChartResponse> getConversationSentimentBreakdown(Long botRef, DashboardRequest dashboardRequest);
 
   DataAnalyticsResponse<String> getLastUpdatedOn(Long botRef);
+
 }
