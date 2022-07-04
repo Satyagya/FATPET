@@ -2,6 +2,7 @@ package com.engati.data.analytics.engine.Utils;
 
 import com.engati.data.analytics.engine.configuration.csv.OrderedComparatorIgnoringCase;
 import com.engati.data.analytics.engine.constants.constant.Constants;
+import com.engati.data.analytics.engine.constants.constant.TableConstants;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
@@ -9,6 +10,7 @@ import com.opencsv.bean.HeaderColumnNameMappingStrategy;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,12 +49,19 @@ public class CommonUtils {
         return isCsvCreated;
     }
 
-    public static File convertMultiPartToFile(MultipartFile file) throws IOException {
-        File convFile = new File(file.getOriginalFilename());
-        FileOutputStream fos = new FileOutputStream(convFile);
-        fos.write(file.getBytes());
-        fos.close();
-        return convFile;
+    public static JSONObject removeUnnecessaryKeys(JSONObject jsonObject) {
+        jsonObject.remove(TableConstants.AUTH_URI);
+        jsonObject.remove(TableConstants.TOKEN_URI);
+        jsonObject.remove(TableConstants.AUTH_PROVIDER_CERT_URL);
+        jsonObject.remove(TableConstants.CLIENT_CERT_URL);
+        return jsonObject;
+    }
+
+    public static Boolean validateAuthJsonFile(JSONObject jsonObject) {
+        return jsonObject.containsKey(TableConstants.TYPE) && jsonObject.containsKey(
+            TableConstants.PROJECT_ID) && jsonObject.containsKey(TableConstants.PRIVATE_KEY_ID)
+            && jsonObject.containsKey(TableConstants.PRIVATE_KEY) && jsonObject.containsKey(
+            TableConstants.CLIENT_EMAIL) && jsonObject.containsKey(TableConstants.CLIENT_ID);
     }
 
 }

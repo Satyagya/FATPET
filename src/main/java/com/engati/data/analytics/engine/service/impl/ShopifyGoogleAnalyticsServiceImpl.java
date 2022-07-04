@@ -15,8 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Objects;
 
 @Service("com.engati.data.analytics.engine.service.ShopifyGoogleAnalyticsService")
@@ -37,11 +38,11 @@ public class ShopifyGoogleAnalyticsServiceImpl implements ShopifyGoogleAnalytics
       if (Objects.equals(authJson.getContentType(), TableConstants.JSON_FILE_TYPE)) {
         log.info("Processing request to store GA Creds for botRef {}", botRef);
         JSONParser parser = new JSONParser();
-        File authFile = CommonUtils.convertMultiPartToFile(authJson);
-        JSONObject jsonObject =
-            removeUnnecessaryKeys((JSONObject) parser.parse(new FileReader(authFile)));
-        authFile.delete();
-        if (validateAuthJsonFile(jsonObject)) {
+        InputStream inputStream = authJson.getInputStream();
+        JSONObject jsonObject = CommonUtils.removeUnnecessaryKeys(
+            (JSONObject) parser.parse(new BufferedReader(new InputStreamReader(inputStream))));
+        inputStream.close();
+        if (CommonUtils.validateAuthJsonFile(jsonObject)) {
           ShopifyGoogleAnalyticsInfo shopifyGoogleAnalyticsInfo =
               ShopifyGoogleAnalyticsInfo.builder().botRef(botRef)
                   .credentials(jsonObject.toJSONString()).propertyId(propertyId).build();
@@ -60,21 +61,6 @@ public class ShopifyGoogleAnalyticsServiceImpl implements ShopifyGoogleAnalytics
       log.error("Error while processing the request for botRef {}", botRef, e);
     }
     return response;
-  }
-
-  private JSONObject removeUnnecessaryKeys(JSONObject jsonObject) {
-    jsonObject.remove(TableConstants.AUTH_URI);
-    jsonObject.remove(TableConstants.TOKEN_URI);
-    jsonObject.remove(TableConstants.AUTH_PROVIDER_CERT_URL);
-    jsonObject.remove(TableConstants.CLIENT_CERT_URL);
-    return jsonObject;
-  }
-
-  private Boolean validateAuthJsonFile(JSONObject jsonObject) {
-    return jsonObject.containsKey(TableConstants.TYPE) && jsonObject.containsKey(
-        TableConstants.PROJECT_ID) && jsonObject.containsKey(TableConstants.PRIVATE_KEY_ID)
-        && jsonObject.containsKey(TableConstants.PRIVATE_KEY) && jsonObject.containsKey(
-        TableConstants.CLIENT_EMAIL) && jsonObject.containsKey(TableConstants.CLIENT_ID);
   }
 
 }
