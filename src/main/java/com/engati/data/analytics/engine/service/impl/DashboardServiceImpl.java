@@ -25,9 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -610,6 +612,10 @@ public class DashboardServiceImpl implements DashboardService {
     } catch (Exception e) {
       log.error("Error getting LastUpdatedOn from the DB");
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+    }
+    if (lastUpdatedOn == null){
+      Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+      lastUpdatedOn = Constants.TIME_FORMAT.format(timestamp);
     }
     response.setResponseObject((lastUpdatedOn+"+0000").replace(" ","T"));
     response.setStatus(ResponseStatusCode.SUCCESS);
