@@ -90,7 +90,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             });
       } else {
         response.setResponseObject(null);
-        response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILURE);
+        response.setStatus(ResponseStatusCode.DUCK_DB_QUERY_FAILURE);
         return response;
       }
 
@@ -102,11 +102,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         responseList.add(productVariantResponse);
       }
       response.setResponseObject(responseList);
-      response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+      response.setStatus(ResponseStatusCode.SUCCESS);
     }catch (Exception e) {
       log.error("Exception encountered while fetching variants by Unit Sales for botRef: {}",botRef, e);
       response.setResponseObject(null);
-      response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
     }
     return response;
   }
@@ -156,7 +156,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             });
       } else {
         response.setResponseObject(null);
-        response.setResponseStatusCode(ResponseStatusCode.DUCK_DB_QUERY_FAILURE);
+        response.setStatus(ResponseStatusCode.DUCK_DB_QUERY_FAILURE);
         return response;
       }
 
@@ -174,11 +174,11 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         responseList.add(orderDetailsResponse);
       }
       response.setResponseObject(responseList);
-      response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+      response.setStatus(ResponseStatusCode.SUCCESS);
     }catch (Exception e){
       log.error("Exception encountered while fetching purchase history for botRef: {}",purchaseHistoryRequest.getBotRef(), e);
       response.setResponseObject(null);
-      response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
     }
     return response;
   }

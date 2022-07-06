@@ -50,13 +50,13 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
           customerSegmentationConfigurationResponse.setBotRef(botRef);
         }
         response.setResponseObject(customerSegmentationConfigurationResponse);
-        response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+        response.setStatus(ResponseStatusCode.SUCCESS);
      }
       else {
-        response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+        response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       }
     }catch (Exception e) {
-      response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.info("Exception caught while getting config for botRef: {}, segment: {}", botRef, segmentName, e);
     }
     return response;
@@ -86,14 +86,14 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
         customerSegmentationConfiguration.setSegmentName(segmentName);
         customerSegmentationConfiguration = customerSegmentationConfigurationRepository.save(customerSegmentationConfiguration);
         response.setResponseObject(customerSegmentationConfiguration);
-        response.setResponseStatusCode(ResponseStatusCode.SUCCESS);
+        response.setStatus(ResponseStatusCode.SUCCESS);
       }
       else {
-        response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+        response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
         log.error("No SegmentName for updating config for botRef: {}, segment: {}", botRef, segmentName);
       }
     } catch (Exception e) {
-      response.setResponseStatusCode(ResponseStatusCode.PROCESSING_ERROR);
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while updating config for botRef: {}, segment: {}", botRef, segmentName, e);
     }
     return response;
