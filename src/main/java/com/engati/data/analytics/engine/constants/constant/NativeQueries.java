@@ -173,14 +173,16 @@ public class NativeQueries {
       + " sum(queries_unanswered_count)as queries_unanswered "
       + " from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/interactions_*.parquet')"
       + " where created_date between date '_startdate_' and date '_enddate_'\n"
-      + " group by created_date";
+      + " group by created_date"
+      + " order by created_date";
 
-  public static final String BOT_QUERIES_COUNTS_AGGREGATED = "select min(created_date)as created_date, "
+  public static final String BOT_QUERIES_COUNTS_AGGREGATED = "select strftime(date_trunc('week', created_date), '%Y-%m-%d')as created_date, "
       + " ceil(avg(queries_asked_count))as queries_asked,"
       + " ceil(avg(queries_unanswered_count))as queries_unanswered "
       + " from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/interactions_*.parquet')"
       + " where created_date between date '_startdate_' and date '_enddate_'\n"
-      + " group by created_date";
+      + " group by created_date"
+      + " order by created_date";
 
   public static final String GET_ENGAGED_USERS_BY_PLATFORM = "select count(distinct  user_id)as users, platform\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/users_*.parquet')\n "
