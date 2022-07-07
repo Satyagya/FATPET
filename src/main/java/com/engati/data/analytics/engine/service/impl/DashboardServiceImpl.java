@@ -1,6 +1,5 @@
 package com.engati.data.analytics.engine.service.impl;
 
-import ch.qos.logback.access.jetty.RequestLogRegistry;
 import com.engati.data.analytics.engine.Utils.EtlEngineRestUtility;
 import com.engati.data.analytics.engine.Utils.PdeRestUtility;
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
@@ -25,8 +24,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +36,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.engati.data.analytics.engine.Utils.CommonUtils.MAPPER;
 import static java.lang.Double.parseDouble;
@@ -393,19 +397,31 @@ public class DashboardServiceImpl implements DashboardService {
           JSONObject queryResponse = MAPPER.readValue(MAPPER.writeValueAsString(
               MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
                   .get(Constants.RESPONSE_OBJECT)), JSONObject.class);
+          ArrayList<String> queryRequestDate =
+              (ArrayList<String>) getDatesBetweenRange(startDate, endDate);
           ArrayList queryResponseDate = (ArrayList) queryResponse.get(Constants.CREATED_DATE);
           ArrayList queryResponseQueriesAsked =
               (ArrayList) queryResponse.get(Constants.QUERIES_ASKED);
           ArrayList queryResponseQueriesUnanswered =
               (ArrayList) queryResponse.get(Constants.QUERIES_UNANSWERED);
-          int dataPoints = queryResponseDate.size();
+          int dataPoints = queryRequestDate.size();
           for (int i = 0; i < dataPoints; i++) {
-            DashboardGraphResponse dashboardGraphResponse =
-                DashboardGraphResponse.builder().date(queryResponseDate.get(i).toString())
-                    .queriesAsked(Double.valueOf(queryResponseQueriesAsked.get(i).toString()))
-                    .queriesUnanswered(
-                        Double.valueOf(queryResponseQueriesUnanswered.get(i).toString())).build();
-            dashboardGraphResponseList.add(dashboardGraphResponse);
+            int responseIndex = queryResponseDate.indexOf(queryRequestDate.get(i));
+            if (responseIndex == -1) {
+              DashboardGraphResponse dashboardGraphResponse =
+                  DashboardGraphResponse.builder().date(queryRequestDate.get(i))
+                      .queriesAsked((double) 0).queriesUnanswered((double) 0).build();
+              dashboardGraphResponseList.add(dashboardGraphResponse);
+            } else {
+              DashboardGraphResponse dashboardGraphResponse = DashboardGraphResponse.builder()
+                  .date(queryResponseDate.get(responseIndex).toString()).queriesAsked(
+                      Double.valueOf(queryResponseQueriesAsked.get(responseIndex).toString()))
+                  .queriesUnanswered(
+                      Double.valueOf(queryResponseQueriesUnanswered.get(responseIndex).toString()))
+                  .build();
+              dashboardGraphResponseList.add(dashboardGraphResponse);
+            }
+
           }
         } else {
           dashboardGraphResponseList = null;
@@ -611,6 +627,10 @@ public class DashboardServiceImpl implements DashboardService {
       log.error("Error getting LastUpdatedOn from the DB");
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
     }
+    if (lastUpdatedOn == null){
+      Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+      lastUpdatedOn = Constants.TIME_FORMAT.format(timestamp);
+    }
     response.setResponseObject((lastUpdatedOn+"+0000").replace(" ","T"));
     response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
@@ -657,5 +677,14 @@ public class DashboardServiceImpl implements DashboardService {
     return DashboardChartResponse.builder().metricPercentage(metricPercentMap).build();
   }
 
+  public static List<String> getDatesBetweenRange(String startDate, String endDate) {
+
+    LocalDate startLocalDate = LocalDate.parse(startDate);
+    LocalDate endLocalDate = LocalDate.parse(endDate);
+    long numOfDaysBetween = ChronoUnit.DAYS.between(startLocalDate, endLocalDate) + 1;
+    return IntStream.iterate(0, i -> i + 1).limit(numOfDaysBetween)
+        .mapToObj(i -> startLocalDate.plusDays(i).toString()).collect(Collectors.toList());
+
+  }
 }
 
