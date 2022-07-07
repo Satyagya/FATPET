@@ -398,7 +398,7 @@ public class DashboardServiceImpl implements DashboardService {
               MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
                   .get(Constants.RESPONSE_OBJECT)), JSONObject.class);
           ArrayList<String> queryRequestDate =
-              (ArrayList<String>) getDatesBetweenTwoDates(startDate, endDate);
+              (ArrayList<String>) getDatesBetweenRange(startDate, endDate);
           ArrayList queryResponseDate = (ArrayList) queryResponse.get(Constants.CREATED_DATE);
           ArrayList queryResponseQueriesAsked =
               (ArrayList) queryResponse.get(Constants.QUERIES_ASKED);
@@ -677,7 +677,7 @@ public class DashboardServiceImpl implements DashboardService {
     return DashboardChartResponse.builder().metricPercentage(metricPercentMap).build();
   }
 
-  public static List<String> getDatesBetweenTwoDates(String startDate, String endDate) {
+  public static List<String> getDatesBetweenRange(String startDate, String endDate) {
 
     LocalDate startLocalDate = LocalDate.parse(startDate);
     LocalDate endLocalDate = LocalDate.parse(endDate);
