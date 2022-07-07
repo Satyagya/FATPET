@@ -1,5 +1,6 @@
 package com.engati.data.analytics.engine.constants.constant;
 
+import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class Constants {
@@ -25,6 +26,7 @@ public class Constants {
   public static Long DEFAULT_BOTREF = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;
+  public static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   //  Generic Constants
   public static String BOT_REF = "botRef";
