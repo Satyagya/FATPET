@@ -20,7 +20,7 @@ public class Constants {
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-  public static String PARQUET_FILE_PATH = "/Users/bhanurekhamusuluri/Downloads/parquet_store";
+  public static String PARQUET_FILE_PATH = "/opt/engati/parquet_store";
 
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
