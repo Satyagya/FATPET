@@ -23,13 +23,14 @@ public class ShopifyGoogleAnalyticsController {
   private ShopifyGoogleAnalyticsService shopifyGoogleAnalyticsService;
 
   @PostMapping(ApiPathConstants.SAVE_GA_CREDS)
-  public ResponseEntity<DataAnalyticsResponse<String>> uploadGACreds(
-      @RequestParam(ApiPathConstants.AUTH_JSON) @NonNull MultipartFile authJson,
+  public ResponseEntity<DataAnalyticsResponse<String>> uploadDeleteGACreds(
+      @RequestParam(ApiPathConstants.AUTH_JSON) MultipartFile authJson,
       @RequestParam(ApiPathConstants.BOTREF) @NonNull Integer botRef,
-      @RequestParam(ApiPathConstants.PROPERTY_ID) @NonNull Integer propertyId) {
-    log.info("Received request for saving ga creds for botref {}", botRef);
+      @RequestParam(ApiPathConstants.PROPERTY_ID) Integer propertyId) {
+    log.info("Received request for updating ga creds for botref {}", botRef);
     return new ResponseEntity<>(
-        shopifyGoogleAnalyticsService.storeGACreds(authJson, botRef, propertyId), HttpStatus.OK);
+        shopifyGoogleAnalyticsService.uploadDeleteGACreds(authJson, botRef, propertyId),
+        HttpStatus.OK);
   }
 
 }

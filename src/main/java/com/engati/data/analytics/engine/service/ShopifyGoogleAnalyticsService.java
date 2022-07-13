@@ -13,6 +13,6 @@ public interface ShopifyGoogleAnalyticsService {
    * @param propertyId
    * @return DataAnalyticsResponse
    */
-  DataAnalyticsResponse<String> storeGACreds(MultipartFile authJson, Integer botRef,
+  DataAnalyticsResponse<String> uploadDeleteGACreds(MultipartFile authJson, Integer botRef,
       Integer propertyId);
 }

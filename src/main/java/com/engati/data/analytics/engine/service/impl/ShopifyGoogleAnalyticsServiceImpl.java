@@ -28,32 +28,39 @@ public class ShopifyGoogleAnalyticsServiceImpl implements ShopifyGoogleAnalytics
   private ShopifyGoogleAnalyticsInfoRepository shopifyGoogleAnalyticsInfoRepository;
 
   @Override
-  public DataAnalyticsResponse<String> storeGACreds(MultipartFile authJson, Integer botRef,
+  public DataAnalyticsResponse<String> uploadDeleteGACreds(MultipartFile authJson, Integer botRef,
       Integer propertyId) {
 
     DataAnalyticsResponse<String> response =
         new DataAnalyticsResponse<>(ResponseStatusCode.PROCESSING_ERROR);
 
     try {
-      if (Objects.equals(authJson.getContentType(), TableConstants.JSON_FILE_TYPE)) {
-        log.info("Processing request to store GA Creds for botRef {}", botRef);
-        JSONParser parser = new JSONParser();
-        InputStream inputStream = authJson.getInputStream();
-        JSONObject jsonObject = CommonUtils.removeUnnecessaryKeys(
-            (JSONObject) parser.parse(new BufferedReader(new InputStreamReader(inputStream))));
-        inputStream.close();
-        if (CommonUtils.validateAuthJsonFile(jsonObject)) {
-          ShopifyGoogleAnalyticsInfo shopifyGoogleAnalyticsInfo =
-              ShopifyGoogleAnalyticsInfo.builder().botRef(botRef)
-                  .credentials(jsonObject.toJSONString()).propertyId(propertyId).build();
-          log.info("Storing GA Creds into db for botRef {}", botRef);
-          shopifyGoogleAnalyticsInfoRepository.save(shopifyGoogleAnalyticsInfo);
-          response.setStatus(ResponseStatusCode.SUCCESS);
-        } else {
-          response.setStatus(ResponseStatusCode.INVALID_AUTH_JSON_FILE);
-        }
+      if (Objects.equals(authJson.getContentType(), null)) {
+        log.info("Received request to delete ga creds for botRef {}", botRef);
+        shopifyGoogleAnalyticsInfoRepository.deleteByBotRef(botRef);
+        response.setStatus(ResponseStatusCode.SUCCESS);
       } else {
-        response.setStatus(ResponseStatusCode.INVALID_FILE_TYPE);
+        if (Objects.equals(authJson.getContentType(), TableConstants.JSON_FILE_TYPE)
+            && Objects.nonNull(propertyId)) {
+          log.info("Processing request to store GA Creds for botRef {}", botRef);
+          JSONParser parser = new JSONParser();
+          InputStream inputStream = authJson.getInputStream();
+          JSONObject jsonObject = CommonUtils.removeUnnecessaryKeys(
+              (JSONObject) parser.parse(new BufferedReader(new InputStreamReader(inputStream))));
+          inputStream.close();
+          if (CommonUtils.validateAuthJsonFile(jsonObject)) {
+            ShopifyGoogleAnalyticsInfo shopifyGoogleAnalyticsInfo =
+                ShopifyGoogleAnalyticsInfo.builder().botRef(botRef)
+                    .credentials(jsonObject.toJSONString()).propertyId(propertyId).build();
+            log.info("Storing GA Creds into db for botRef {}", botRef);
+            shopifyGoogleAnalyticsInfoRepository.save(shopifyGoogleAnalyticsInfo);
+            response.setStatus(ResponseStatusCode.SUCCESS);
+          } else {
+            response.setStatus(ResponseStatusCode.INVALID_AUTH_JSON_FILE);
+          }
+        } else {
+          response.setStatus(ResponseStatusCode.INVALID_FILE_TYPE_OR_PROPERTY_ID);
+        }
       }
     } catch (ParseException e) {
       log.error("Error while processing the file for botRef {}", botRef, e);
