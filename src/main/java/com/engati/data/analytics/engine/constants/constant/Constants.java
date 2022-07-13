@@ -20,7 +20,7 @@ public class Constants {
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-  public static String PARQUET_FILE_PATH = "/opt/engati/parquet_store";
+  public static String PARQUET_FILE_PATH = "/Users/bhanurekhamusuluri/Downloads/parquet_store";
 
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
@@ -67,5 +67,9 @@ public class Constants {
       + "        \"IMAGE_url\"\n" + "    ],\n" + "    \"customSort\": [\n" + "        {\n"
       + "            \"name\": \"PRODUCT_productId\",\n" + "            \"isAsc\": true\n"
       + "        }\n" + "    ],\n" + "    \"pageNumber\": 1,\n" + "    \"pageSize\": 10\n" + "}";
+
+  public static final String[] INTENT_LIST = new String[]{"ORDER_ENQUIRY", "PURCHASE_ENQUIRY", "RETURN_AND_EXCHANGE",
+                                                          "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};
+  public static final String[] SENTIMENT_LIST = new String[]{"Positive", "Negative", "Neutral"};
 
 }

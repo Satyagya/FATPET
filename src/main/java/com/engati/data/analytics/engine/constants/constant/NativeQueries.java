@@ -192,7 +192,8 @@ public class NativeQueries {
   public static final String GET_CONVERSATION_INTENT = "select sum(intent_count)as intent_count_sum, intent_label\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/intents_*.parquet')\n "
       + "where created_date between date '_startdate_' and date '_enddate_'\n"
-      + "and intent_label not like 'None' "
+      + "and intent_label not like 'None' and intent_label in ['ORDER_ENQUIRY', 'PURCHASE_ENQUIRY', "
+    + "'RETURN_AND_EXCHANGE', 'PRICE_ENQUIRY', 'OUT_OF_STOCK_ENQUIRY']"
       + "group by intent_label ";
 
   public static final String GET_CONVERSATION_SENTIMENT = "select sum(sentiment_count)as sentiment_count_sum, "
