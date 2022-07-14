@@ -28,7 +28,7 @@ public class ShopifyGoogleAnalyticsServiceImpl implements ShopifyGoogleAnalytics
   private ShopifyGoogleAnalyticsInfoRepository shopifyGoogleAnalyticsInfoRepository;
 
   @Override
-  public DataAnalyticsResponse<String> uploadDeleteGACreds(MultipartFile authJson, Integer botRef,
+  public DataAnalyticsResponse<String> manageGACreds(MultipartFile authJson, Integer botRef,
       Integer propertyId) {
 
     DataAnalyticsResponse<String> response =
