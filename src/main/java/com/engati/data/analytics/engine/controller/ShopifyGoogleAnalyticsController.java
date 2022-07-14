@@ -23,7 +23,7 @@ public class ShopifyGoogleAnalyticsController {
   @Autowired
   private ShopifyGoogleAnalyticsService shopifyGoogleAnalyticsService;
 
-  @RequestMapping(name = ApiPathConstants.MANAGE_GA_CREDS, method = {RequestMethod.POST,
+  @RequestMapping(value = ApiPathConstants.MANAGE_GA_CREDS, method = {RequestMethod.POST,
       RequestMethod.DELETE})
   public ResponseEntity<DataAnalyticsResponse<String>> manageGACreds(
       @RequestParam(ApiPathConstants.AUTH_JSON) MultipartFile authJson,
