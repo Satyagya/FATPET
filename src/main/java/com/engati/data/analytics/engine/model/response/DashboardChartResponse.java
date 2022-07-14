@@ -8,6 +8,6 @@ import lombok.Data;
 @Data
 public class DashboardChartResponse {
 
-  private Map<String, Long> metricPercentage;
+  private Map<String, Double> metricPercentage;
 
 }

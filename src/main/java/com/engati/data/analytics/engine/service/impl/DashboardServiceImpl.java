@@ -681,13 +681,13 @@ public class DashboardServiceImpl implements DashboardService {
     long totalCount = countPerMetric.stream()
         .mapToLong(Integer::longValue)
         .sum();
-    Map<String,Long> metricPercentMap = new HashMap<>();
+    Map<String,Double> metricPercentMap = new HashMap<>();
     for (String metric : allMetrics) {
       if (metricList.contains(metric)) {
-        long percent = Math.round(countPerMetric.get(metricList.indexOf(metric)) * 100.0 / totalCount);
+        double percent = Math.round(countPerMetric.get(metricList.indexOf(metric)) * 100.0 / (double) totalCount);
         metricPercentMap.put(metric, percent);
       } else {
-        metricPercentMap.put(metric, 0L);
+        metricPercentMap.put(metric, 0D);
       }
     }
     return DashboardChartResponse.builder().metricPercentage(metricPercentMap).build();
