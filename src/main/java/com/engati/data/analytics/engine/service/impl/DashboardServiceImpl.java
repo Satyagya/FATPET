@@ -26,6 +26,7 @@ import retrofit2.Response;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -672,7 +673,7 @@ public class DashboardServiceImpl implements DashboardService {
     if (Objects.equals(metric_name, QueryConstants.USERS)) {
       allMetrics = metricList;
     }
-    else if (Objects.equals(metric_name, QueryConstants.INTENT_LABEL)) {
+    else if (Objects.equals(metric_name, QueryConstants.INTENT_COUNT_SUM)) {
       allMetrics = Arrays.asList(Constants.INTENT_LIST);
     }
     else {
@@ -681,13 +682,14 @@ public class DashboardServiceImpl implements DashboardService {
     long totalCount = countPerMetric.stream()
         .mapToLong(Integer::longValue)
         .sum();
-    Map<String,Double> metricPercentMap = new HashMap<>();
+    Map<String,String> metricPercentMap = new HashMap<>();
+    DecimalFormat df = new DecimalFormat("0.00");
     for (String metric : allMetrics) {
       if (metricList.contains(metric)) {
-        double percent = Math.round(countPerMetric.get(metricList.indexOf(metric)) * 100.0 / (double) totalCount);
-        metricPercentMap.put(metric, percent);
+        double percent = countPerMetric.get(metricList.indexOf(metric)) * 100.0 / totalCount;
+        metricPercentMap.put(metric, df.format(percent));
       } else {
-        metricPercentMap.put(metric, 0D);
+        metricPercentMap.put(metric, "0");
       }
     }
     return DashboardChartResponse.builder().metricPercentage(metricPercentMap).build();
