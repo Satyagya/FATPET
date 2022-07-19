@@ -35,8 +35,8 @@ public class CustomerSegmentationResponse implements Comparable<CustomerSegmenta
   private Long ordersInLastTwelveMonths;
 
   @Override
-  public int compareTo(CustomerSegmentationResponse e) {
-    return this.getCustomerAOV().compareTo(e.getCustomerAOV());
+  public int compareTo(CustomerSegmentationResponse customerSegmentationResponse) {
+    return this.getCustomerAOV().compareTo(customerSegmentationResponse.getCustomerAOV());
   }
 
 }
