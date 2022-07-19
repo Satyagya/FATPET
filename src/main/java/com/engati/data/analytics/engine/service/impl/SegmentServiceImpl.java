@@ -104,6 +104,7 @@ public class SegmentServiceImpl implements SegmentService {
         customerSegmentationResponse.setOrdersInLastTwelveMonths(Long.valueOf(Constants.DEFAULT_ORDER_VALUE));
       }
       customerSegmentationResponseList.add(customerSegmentationResponse);
+      customerSegmentationResponseList.sort(Collections.reverseOrder());
     }
     return customerSegmentationResponseList;
   }
