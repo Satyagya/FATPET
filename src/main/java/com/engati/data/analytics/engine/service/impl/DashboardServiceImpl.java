@@ -26,10 +26,12 @@ import retrofit2.Response;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -657,7 +659,7 @@ public class DashboardServiceImpl implements DashboardService {
         metrics = MAPPER.readValue(MAPPER.readValue(etlResponse.body().toString(), JsonNode.class)
             .get(Constants.RESPONSE_OBJECT).get(filterBy)
             .toString(), ArrayList.class);
-        dashboardChartResponse = getDashBoardChartResponse(countPerMetric, metrics);
+        dashboardChartResponse = getDashBoardChartResponse(countPerMetric, metrics, metric_name);
       }
     } catch (Exception e) {
       log.error("Error executing query :{} with botRef: {}", query, botRef, e);
@@ -665,14 +667,30 @@ public class DashboardServiceImpl implements DashboardService {
     return dashboardChartResponse;
   }
 
-  DashboardChartResponse getDashBoardChartResponse(List<Integer> countPerMetric, List<String> metricList){
+  DashboardChartResponse getDashBoardChartResponse(List<Integer> countPerMetric, List<String> metricList,
+    String metric_name){
+    List<String> allMetrics;
+    if (Objects.equals(metric_name, QueryConstants.USERS)) {
+      allMetrics = metricList;
+    }
+    else if (Objects.equals(metric_name, QueryConstants.INTENT_COUNT_SUM)) {
+      allMetrics = Arrays.asList(Constants.INTENT_LIST);
+    }
+    else {
+      allMetrics = Arrays.asList(Constants.SENTIMENT_LIST);
+    }
     long totalCount = countPerMetric.stream()
         .mapToLong(Integer::longValue)
         .sum();
-    Map<String,Long> metricPercentMap = new HashMap<>();
-    for (int metricIndex = 0; metricIndex < countPerMetric.size(); metricIndex++) {
-      long percent = countPerMetric.get(metricIndex)*100/totalCount ;
-      metricPercentMap.put(metricList.get(metricIndex), percent);
+    Map<String,String> metricPercentMap = new HashMap<>();
+    DecimalFormat df = new DecimalFormat("0.00");
+    for (String metric : allMetrics) {
+      if (metricList.contains(metric)) {
+        double percent = countPerMetric.get(metricList.indexOf(metric)) * 100.0 / totalCount;
+        metricPercentMap.put(metric, df.format(percent));
+      } else {
+        metricPercentMap.put(metric, "0");
+      }
     }
     return DashboardChartResponse.builder().metricPercentage(metricPercentMap).build();
   }

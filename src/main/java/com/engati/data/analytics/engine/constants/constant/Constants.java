@@ -68,4 +68,8 @@ public class Constants {
       + "            \"name\": \"PRODUCT_productId\",\n" + "            \"isAsc\": true\n"
       + "        }\n" + "    ],\n" + "    \"pageNumber\": 1,\n" + "    \"pageSize\": 10\n" + "}";
 
+  public static final String[] INTENT_LIST = new String[]{"ORDER_ENQUIRY", "PURCHASE_ENQUIRY", "RETURN_AND_EXCHANGE",
+                                                          "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};
+  public static final String[] SENTIMENT_LIST = new String[]{"Positive", "Negative", "Neutral"};
+
 }
