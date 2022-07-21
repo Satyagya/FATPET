@@ -205,12 +205,12 @@ public class NativeQueries {
 
   public static final String GET_TRANSACTIONS_FROM_ENGATI = "select sum(coalesce(transactions, 0))as transactions "
       + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
-      + "where sourceMedium like '%engati%' \n"
+      + "where source like '%engati%' \n"
       + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
   public static final String GET_TRANSACTION_REVENUE_FROM_ENGATI = "select round(sum(coalesce(transactionRevenue, 0)),2)as transaction_revenue "
       + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
-      + "where sourceMedium like '%engati%' \n"
+      + "where source like '%engati%' \n"
       + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
 
