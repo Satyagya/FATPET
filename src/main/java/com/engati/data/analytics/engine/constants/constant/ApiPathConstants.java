@@ -26,7 +26,7 @@ public class ApiPathConstants {
   public static final String CONVERSATION_SENTIMENT = "{botRef}/getConversationSentimentBreakdown";
   public static final String LAST_UPDATED_ON = "{botRef}/lastUpdatedOn";
   public static final String SHOPIFY_GOOGLE_ANALYTICS_INFO = "shopify_google_analytics_info";
-  public static final String SAVE_GA_CREDS = "shopify/dashboard/ga-creds";
+  public static final String MANAGE_GA_CREDS = "shopify/dashboard/ga-creds";
   public static final String AUTH_JSON = "authJson";
   public static final String PROPERTY_ID = "propertyId";
  
