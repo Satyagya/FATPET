@@ -203,7 +203,7 @@ public class NativeQueries {
       + "and sentiment_label not like 'None'"
       + "group by sentiment_label ";
 
-  public static final String GET_TRANSACTIONS_FROM_ENGATI = "select sum(coalesce(transactions, 0))as transactions "
+  public static final String GET_TRANSACTIONS_FROM_ENGATI = "select coalesce(count(distinct transactionId), 0) as transactions "
       + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
       + "where source like '%engati%' \n"
       + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
