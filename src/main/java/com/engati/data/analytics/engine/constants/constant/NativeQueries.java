@@ -213,5 +213,12 @@ public class NativeQueries {
       + "where sourceMedium like '%engati%' \n"
       + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
+  public static final String MOST_ABANDONED_PRODUCTS =
+      "SELECT product_id FROM "
+          + "PARQUET_SCAN('%s') WHERE created_date BETWEEN DATE '%s' AND DATE '%s' GROUP BY "
+          + "product_id ORDER BY COUNT(product_id) DESC LIMIT 3";
 
+  public static final String ABANDONED_CHECKOUTS_BY_TIME_RANGE =
+      "SELECT COUNT(checkout_id) as abandoned_checkouts FROM PARQUET_SCAN('%s') WHERE created_date BETWEEN DATE '%s' - "
+          + "INTERVAL %d DAY AND '%s'";
 }
