@@ -707,7 +707,7 @@ public class DashboardServiceImpl implements DashboardService {
       String endDate) {
 
     String filePath =
-        Constants.PARQUET_FILE_PATH + String.format("/%d/checkouts_*.parquet", botRef);
+        Constants.PARQUET_FILE_PATH + String.format(Constants.ABANDONED_CHECKOUTS_PARQUET_PATH, botRef);
     String query =
         String.format(NativeQueries.MOST_ABANDONED_PRODUCTS, filePath, startDate, endDate);
 
@@ -733,7 +733,8 @@ public class DashboardServiceImpl implements DashboardService {
 
   public double getAbandonedCheckoutsByBotRefAndTimeRange(Long botRef, String date, long gap) {
     String filePath =
-        Constants.PARQUET_FILE_PATH + String.format("/%d/checkouts_*.parquet", botRef);
+        Constants.PARQUET_FILE_PATH + String.format(Constants.ABANDONED_CHECKOUTS_PARQUET_PATH,
+            botRef);
 
     String query =
         String.format(NativeQueries.ABANDONED_CHECKOUTS_BY_TIME_RANGE, filePath, date, gap, date);
