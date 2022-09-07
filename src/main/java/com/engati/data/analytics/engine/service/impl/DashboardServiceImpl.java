@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -196,14 +197,12 @@ public class DashboardServiceImpl implements DashboardService {
     String currency = "";
 
     try {
-      presentValue =
-          dashboardRepository.getAbandonedCheckoutsbyBotRefbyTimeRange(botRef, endDate, gap);
+      presentValue = getAbandonedCheckoutsByBotRefAndTimeRange(botRef, endDate, gap);
     } catch (Exception e) {
       log.error("Error getting abandonedCheckout for botRef: {} for date: {}", botRef, endDate, e);
     }
     try {
-      pastValue =
-          dashboardRepository.getAbandonedCheckoutsbyBotRefbyTimeRange(botRef, startDate, gap);
+      pastValue = getAbandonedCheckoutsByBotRefAndTimeRange(botRef, startDate, gap);
     } catch (Exception e) {
       log.error("Error getting abandonedCheckout for botRef: {} for date: {}", botRef, startDate,
           e);
@@ -350,8 +349,7 @@ public class DashboardServiceImpl implements DashboardService {
     List<Long> productList = null;
     List<DashboardProductResponse> dashboardProductResponseList;
     try {
-      productList =
-          dashboardRepository.getMostAbandonedProductsByBotRef(botRef, startDate, endDate);
+      productList = getMostAbandonedProductsByBotRef(botRef, startDate, endDate);
 
       dashboardProductResponseList = getProductDetails(productList, botRef);
 
@@ -522,7 +520,7 @@ public class DashboardServiceImpl implements DashboardService {
     List<DashboardProductResponse> dashboardProductResponseList = new ArrayList<>();
     try {
       JSONObject pdeRequestBody =
-          MAPPER.readValue(String.format(Constants.productDetailsRequest, productList.toString()),
+          MAPPER.readValue(String.format(Constants.PRODUCT_DETAILS_REQUEST, productList.toString()),
               JSONObject.class);
       Response<JsonNode> productDetailsResponse =
           pdeRestUtility.getProductDetails(botRef, "daeDomain", pdeRequestBody).execute();
@@ -703,6 +701,65 @@ public class DashboardServiceImpl implements DashboardService {
     return IntStream.iterate(0, i -> i + 1).limit(numOfDaysBetween)
         .mapToObj(i -> startLocalDate.plusDays(i).toString()).collect(Collectors.toList());
 
+  }
+
+  private List<Long> getMostAbandonedProductsByBotRef(Long botRef, String startDate,
+      String endDate) {
+
+    String filePath =
+        Constants.PARQUET_FILE_PATH + String.format("/%d/checkouts_*.parquet", botRef);
+    String query =
+        String.format(NativeQueries.MOST_ABANDONED_PRODUCTS, filePath, startDate, endDate);
+
+    JSONObject requestBody = new JSONObject();
+    requestBody.put(Constants.QUERY, query);
+
+    List<Long> productIdList = new ArrayList<>();
+    try {
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+          etlResponse.body())) {
+        productIdList = MAPPER.readValue(
+            MAPPER.readValue(etlResponse.body().toString(), JsonNode.class)
+                .get(Constants.RESPONSE_OBJECT).get(Constants.PRODUCT_ID).toString(),
+            ArrayList.class);
+      }
+    } catch (IOException e) {
+      log.error("Error while fetching MostAbandonedProducts for botRef: {}", botRef, e);
+    }
+    return productIdList;
+  }
+
+
+  public double getAbandonedCheckoutsByBotRefAndTimeRange(Long botRef, String date, long gap) {
+    String filePath =
+        Constants.PARQUET_FILE_PATH + String.format("/%d/checkouts_*.parquet", botRef);
+
+    String query =
+        String.format(NativeQueries.ABANDONED_CHECKOUTS_BY_TIME_RANGE, filePath, date, gap, date);
+
+    JSONObject requestBody = new JSONObject();
+    requestBody.put(Constants.QUERY, query);
+
+    int abandonedCheckouts = 0;
+    try {
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+          etlResponse.body())) {
+        List<Integer> queryResponse = MAPPER.readValue(
+            MAPPER.readValue(etlResponse.body().toString(), JsonNode.class)
+                .get(Constants.RESPONSE_OBJECT).get(Constants.ABANDONED_CHECKOUTS).toString(),
+            ArrayList.class);
+
+        if (Objects.nonNull(queryResponse) && !queryResponse.isEmpty()) {
+          abandonedCheckouts = queryResponse.get(0);
+        }
+      }
+    } catch (IOException e) {
+      log.error("Error while fetching AbandonedCheckoutsByBotRefAndTimeRange for botRef: {}",
+          botRef, e);
+    }
+    return abandonedCheckouts;
   }
 }
 
