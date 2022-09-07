@@ -16,6 +16,7 @@ public class Constants {
   public static final String DOMAIN = "domain";
   public static final String RESPONSE = "responseObject";
   public static final String ABANDONED_CHECKOUTS = "abandoned_checkouts";
+  public static final String ABANDONED_CHECKOUTS_PARQUET_PATH = "/%d/abandoned_checkouts_*.parquet";
 
 
   //  DuckDB Connection URL
