@@ -1,7 +1,6 @@
 package com.engati.data.analytics.engine.constants.constant;
 
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 
 public class Constants {
 
@@ -16,6 +15,8 @@ public class Constants {
   public static final String BOTREF = "botRef";
   public static final String DOMAIN = "domain";
   public static final String RESPONSE = "responseObject";
+  public static final String ABANDONED_CHECKOUTS = "abandoned_checkouts";
+  public static final String ABANDONED_CHECKOUTS_PARQUET_PATH = "/%d/abandoned_checkouts_*.parquet";
 
 
   //  DuckDB Connection URL
@@ -57,7 +58,7 @@ public class Constants {
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
 
-  public static final String productDetailsRequest = "{\n" + "    \"entities\": [ \n"
+  public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
       + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
       + "        {\n" + "            \"isOrCondition\": false,\n"
       + "            \"fieldName\": \"PRODUCT_productId\",\n" + "            \"value\": null,\n"
