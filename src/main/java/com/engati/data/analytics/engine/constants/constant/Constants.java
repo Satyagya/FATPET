@@ -20,8 +20,8 @@ public class Constants {
 
 
   //  DuckDB Connection URL
-  public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-  public static String PARQUET_FILE_PATH = "/opt/engati/parquet_store";
+  public static String DUCKDB_CONNECTION_URI = "http://127.0.0.1:8000";
+  public static String PARQUET_FILE_PATH = "/Users/aniketmodi/Documents/engati-service/shopify-etl-engine/parquet_store";
 
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
