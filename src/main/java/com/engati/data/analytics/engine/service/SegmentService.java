@@ -4,7 +4,6 @@ import com.engati.data.analytics.engine.model.request.CustomSegmentRequest;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 
 import java.util.List;
-import java.util.Map;
 
 
 public interface SegmentService {

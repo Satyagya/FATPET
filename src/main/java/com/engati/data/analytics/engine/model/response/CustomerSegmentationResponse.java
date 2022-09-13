@@ -9,6 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 @ToString(doNotUseGetters = true)
 public class CustomerSegmentationResponse implements Comparable<CustomerSegmentationResponse>{
+  @CsvBindByName(column = "CUSTOMER ID")
+  private Long customerId;
 
   @CsvBindByName(column = "CUSTOMER NAME")
   private String customerName;
@@ -33,6 +35,9 @@ public class CustomerSegmentationResponse implements Comparable<CustomerSegmenta
 
   @CsvBindByName(column = "ORDERS IN LAST TWELVE MONTH")
   private Long ordersInLastTwelveMonths;
+
+  @CsvBindByName(column = "TOTAL ORDERS")
+  private Long totalOrders;
 
   @Override
   public int compareTo(CustomerSegmentationResponse customerSegmentationResponse) {
