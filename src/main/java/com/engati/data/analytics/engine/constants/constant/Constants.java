@@ -1,5 +1,6 @@
 package com.engati.data.analytics.engine.constants.constant;
 
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 public class Constants {
@@ -27,6 +28,9 @@ public class Constants {
   public static Long DEFAULT_BOTREF = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;
+  public static Long DEFAULT_REVENUE_VALUE = 0L;
+  public static Date DEFAULT_LAST_ORDER_DATE = null;
+  public static String DEFAULT_PRODUCT_TYPES = "";
   public static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   //  Generic Constants

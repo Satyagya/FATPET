@@ -63,8 +63,7 @@ public class QueryConstants {
   public static String SENTIMENT_COUNT_SUM = "sentiment_count_sum";
   public static String TRANSACTIONS = "transactions";
   public static String TRANSACTION_REVENUE = "transaction_revenue";
-  public static String CUSTOMER_ID_SET1 = "customerIdSet1";
-  public static String CUSTOMER_ID_SET2 = "customerIdSet2";
+  public static String REVENUE = "revenue";
   public static String PRODUCT_TYPES = "ProductTypes";
 
 
