@@ -37,7 +37,7 @@ public class CustomerSegmentationCustomSegmentResponse implements Comparable<Cus
     private Date customerLastOrderDate;
 
     @CsvBindByName(column = "PRODUCT TYPES")
-    private String productTypes;
+    private String customerProductTypes;
 
     @Override
     public int compareTo(CustomerSegmentationCustomSegmentResponse customerSegmentationCustomSegmentResponse) {
