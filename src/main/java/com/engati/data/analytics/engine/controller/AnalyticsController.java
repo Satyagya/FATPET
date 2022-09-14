@@ -7,9 +7,12 @@ import com.engati.data.analytics.engine.model.request.PurchaseHistoryRequest;
 import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
+import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +31,10 @@ public class AnalyticsController {
   @Autowired
   private AnalyticsService analyticsService;
 
+  @Autowired
+  @Qualifier("com.engati.data.analytics.engine.service.impl.PrometheusManagementServiceImpl")
+  private PrometheusManagementService prometheusManagementService;
+
   @PostMapping(value = ApiPathConstants.API_BASE_PATH_FOR_VARIANTS_BY_UNIT_SALES)
   public ResponseEntity<DataAnalyticsResponse<List<ProductVariantResponse>>> getVariantsByUnitSales(
       @RequestBody ProductDiscoveryRequest productDiscoveryRequest,
@@ -44,6 +51,12 @@ public class AnalyticsController {
     log.info("Got call for fetching purchase History for botRef: {}, requestbody: {}", purchaseHistoryRequest.getBotRef(), purchaseHistoryRequest);
     DataAnalyticsResponse<List<OrderDetailsResponse>> response = analyticsService.getPurchaseHistory(purchaseHistoryRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
+  @GetMapping(value = "/test")
+  public void testSlackAlert() {
+    prometheusManagementService.apiRequestFailureEvent("test_event", String.valueOf(3456),
+        "java.Execption.test", "{...}");
   }
 
 }
