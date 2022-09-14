@@ -17,6 +17,11 @@ public class Constants {
   public static final String RESPONSE = "responseObject";
   public static final String ABANDONED_CHECKOUTS = "abandoned_checkouts";
   public static final String ABANDONED_CHECKOUTS_PARQUET_PATH = "/%d/abandoned_checkouts_*.parquet";
+  public static final String PROMETHEUS_API_REQUEST_COUNTER_NAME = "dae_api_request";
+  public static final String PROMETHEUS_BOT_REF = "bot_ref";
+  public static final String PROMETHEUS_SHOPIFY_EVENT = "shopify_event";
+  public static final String PROMETHEUS_CAUSE_OF_FAILURE = "cause_of_failure";
+  public static final String PROMETHEUS_REQUEST_PAYLOAD = "payload";
 
 
   //  DuckDB Connection URL
