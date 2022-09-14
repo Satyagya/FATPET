@@ -89,4 +89,15 @@ public class CommonUtils {
             TableConstants.CLIENT_EMAIL) && jsonObject.containsKey(TableConstants.CLIENT_ID);
     }
 
+    public static String getStringValueFromObject(Object object) {
+        String value = "";
+        try {
+            value = MAPPER.writeValueAsString(object);
+        } catch (Exception e) {
+            log.debug("Error while getting value from Object: {} with exception:{}", object,
+                e.getMessage());
+        }
+        return value;
+    }
+
 }

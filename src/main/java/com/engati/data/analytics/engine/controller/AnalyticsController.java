@@ -55,7 +55,7 @@ public class AnalyticsController {
 
   @GetMapping(value = "/test")
   public void testSlackAlert() {
-    prometheusManagementService.apiRequestFailureEvent("test_event", String.valueOf(3456),
+    prometheusManagementService.apiRequestFailureEvent("test_event", 3456L,
         "java.Execption.test", "{...}");
   }
 

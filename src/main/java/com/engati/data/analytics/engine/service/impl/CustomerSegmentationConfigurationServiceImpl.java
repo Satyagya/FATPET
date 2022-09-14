@@ -1,5 +1,6 @@
 package com.engati.data.analytics.engine.service.impl;
 
+import com.engati.data.analytics.engine.Utils.CommonUtils;
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.constants.enums.RecencyMetric;
@@ -9,10 +10,12 @@ import com.engati.data.analytics.engine.model.request.CustomerSegmentationConfig
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationConfigurationResponse;
 import com.engati.data.analytics.engine.repository.CustomerSegmentationConfigurationRepository;
 import com.engati.data.analytics.engine.service.CustomerSegmentationConfigurationService;
+import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +28,10 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
 
   @Autowired
   private CustomerSegmentationConfigurationRepository customerSegmentationConfigurationRepository;
+
+  @Autowired
+  @Qualifier("com.engati.data.analytics.engine.service.impl.PrometheusManagementServiceImpl")
+  private PrometheusManagementService prometheusManagementService;
 
   @Override
   public DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> getSystemSegmentConfigByBotRefAndSegment(Long botRef, String segmentName) {
@@ -57,6 +64,8 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
       }
     }catch (Exception e) {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+      prometheusManagementService.apiRequestFailureEvent("getSystemSegmentConfigByBotRefAndSegment",
+          botRef, e.getMessage(), segmentName);
       log.info("Exception caught while getting config for botRef: {}, segment: {}", botRef, segmentName, e);
     }
     return response;
@@ -93,6 +102,9 @@ public class CustomerSegmentationConfigurationServiceImpl implements CustomerSeg
         log.error("No SegmentName for updating config for botRef: {}, segment: {}", botRef, segmentName);
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent(
+          "updateSystemSegmentConfigByBotRefAndSegment", botRef, e.getMessage(),
+          CommonUtils.getStringValueFromObject(customerSegmentationConfigurationRequest));
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while updating config for botRef: {}, segment: {}", botRef, segmentName, e);
     }
