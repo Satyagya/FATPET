@@ -10,6 +10,7 @@ import com.engati.data.analytics.engine.constants.enums.QueryOperators;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
 import com.engati.data.analytics.engine.model.request.CustomSegmentRequest;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationConfigurationResponse;
+import com.engati.data.analytics.engine.model.response.CustomerSegmentationCustomSegmentResponse;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.engati.data.analytics.engine.model.response.KafkaPayloadForSegmentStatus;
 import com.engati.data.analytics.engine.repository.SegmentRepository;
@@ -71,14 +72,12 @@ public class SegmentServiceImpl implements SegmentService {
 
     String storeAOV = null;
     storeAOV = getStoreAOV(botRef);
-    Map<Long,Map<String,Long>> customerOrder = getCustomerOrder(customerList,botRef);
     Map<Long, Map<String, Object>> customerAOV = getCustomerAOV(customerList, botRef);
     Map<Long, Map<String, Long>> ordersLastMonth = getOrdersForLastXMonth(customerList, botRef, 1);
     Map<Long, Map<String, Long>> ordersLast6Months = getOrdersForLastXMonth(customerList, botRef, 6);
     Map<Long, Map<String, Long>> ordersLast12Months = getOrdersForLastXMonth(customerList, botRef, 12);
     for (Long customerId : customerList) {
       CustomerSegmentationResponse customerSegmentationResponse = new CustomerSegmentationResponse();
-      customerSegmentationResponse.setCustomerId(customerId);
 
       for (Map<Long, Object> row : customerDetails) {
         if ((row.get(Constants.CUSTOMER_ID)).toString().equals(customerId.toString())) {
@@ -93,12 +92,6 @@ public class SegmentServiceImpl implements SegmentService {
         customerSegmentationResponse.setCustomerAOV((Double) customerAOV.get(customerId).getOrDefault(QueryConstants.AOV, Constants.DEFAULT_AOV_VALUE));
       } catch (NullPointerException e) {
         customerSegmentationResponse.setCustomerAOV(Double.valueOf(Constants.DEFAULT_AOV_VALUE));
-      }
-
-      try {
-        customerSegmentationResponse.setTotalOrders(customerOrder.get(customerId).getOrDefault(QueryConstants.TOTAL_ORDERS, Long.valueOf(Constants.DEFAULT_ORDER_VALUE)));
-      } catch (NullPointerException e) {
-        customerSegmentationResponse.setTotalOrders(Long.valueOf(Constants.DEFAULT_ORDER_VALUE));
       }
 
       try {
@@ -120,6 +113,150 @@ public class SegmentServiceImpl implements SegmentService {
       customerSegmentationResponseList.sort(Collections.reverseOrder());
     }
     return customerSegmentationResponseList;
+  }
+
+  private List<CustomerSegmentationCustomSegmentResponse> getDetailsforCustomerCustomSegments(Set<Long> customerList, Long botRef,String startDate,String endDate) {
+    log.info("Getting details for Customer segment with botRef : {}", botRef);
+    List<CustomerSegmentationCustomSegmentResponse> customerSegmentationResponseList = new ArrayList<>();
+    List<Map<Long, Object>> customerDetails = segmentRepository.findByShopifyCustomerId(customerList);
+
+    String storeAOV = null;
+    storeAOV = getStoreAOV(botRef);
+    Map<Long,Map<String,Long>> customerOrders = getCustomerOrdersCustomSegment(customerList,botRef,startDate,endDate);
+    Map<Long,Map<String,Object>> customerAOV = getCustomerAOVCustomSegment(customerList,botRef,startDate,endDate);
+    Map<Long,Map<String,Object>> customerRevenue = getCustomerRevenueCustomerSegment(customerList,botRef,startDate,endDate);
+    Map<Long,Map<String,Date>> customerLastOrderDate = getCustomerLastOrderDateCustomerSegment(customerList,botRef,startDate,endDate) ;
+    Map<Long,Map<String,String>> customerProductType = getCustomerProductTypeCustomerSegment(customerList,botRef,startDate,endDate);
+    for (Long customerId : customerList) {
+      CustomerSegmentationCustomSegmentResponse customerSegmentationCustomSegmentResponse = new CustomerSegmentationCustomSegmentResponse();
+
+      for (Map<Long, Object> row : customerDetails) {
+        if ((row.get(Constants.CUSTOMER_ID)).toString().equals(customerId.toString())) {
+          customerSegmentationCustomSegmentResponse.setCustomerEmail(String.valueOf(row.get(Constants.CUSTOMER_EMAIL)));
+          customerSegmentationCustomSegmentResponse.setCustomerPhone(String.valueOf(row.get(Constants.CUSTOMER_PHONE)));
+          customerSegmentationCustomSegmentResponse.setCustomerName(String.valueOf(row.get(Constants.CUSTOMER_NAME)));
+        }
+        continue;
+      }
+      customerSegmentationCustomSegmentResponse.setStoreAOV(Double.valueOf(storeAOV));
+
+      try {
+        customerSegmentationCustomSegmentResponse.setCustomerOrders(customerOrders.get(customerId).getOrDefault(QueryConstants.TOTAL_ORDERS, Long.valueOf(Constants.DEFAULT_ORDER_VALUE)));
+      } catch (NullPointerException e) {
+        customerSegmentationCustomSegmentResponse.setCustomerOrders(Long.valueOf(Constants.DEFAULT_ORDER_VALUE));
+      }
+
+      try {
+        customerSegmentationCustomSegmentResponse.setCustomerAOV((Double) customerAOV.get(customerId).getOrDefault(QueryConstants.AOV, Constants.DEFAULT_AOV_VALUE));
+      } catch (NullPointerException e) {
+        customerSegmentationCustomSegmentResponse.setCustomerAOV(Double.valueOf(Constants.DEFAULT_AOV_VALUE));
+      }
+
+      try {
+        customerSegmentationCustomSegmentResponse.setCustomerRevenue((Double) customerRevenue.get(customerId).getOrDefault(QueryConstants.REVENUE, Constants.DEFAULT_REVENUE_VALUE));
+      } catch (NullPointerException e) {
+        customerSegmentationCustomSegmentResponse.setCustomerRevenue(Double.valueOf(Constants.DEFAULT_REVENUE_VALUE));
+      }
+
+      try {
+        customerSegmentationCustomSegmentResponse.setCustomerLastOrderDate(customerLastOrderDate.get(customerId).getOrDefault(QueryConstants.LAST_ORDER_DATE, Constants.DEFAULT_LAST_ORDER_DATE));
+      } catch (NullPointerException e) {
+        customerSegmentationCustomSegmentResponse.setCustomerLastOrderDate(Constants.DEFAULT_LAST_ORDER_DATE);
+      }
+
+      try {
+        customerSegmentationCustomSegmentResponse.setProductTypes(customerProductType.get(customerId).getOrDefault(QueryConstants.PRODUCT_TYPES, Constants.DEFAULT_PRODUCT_TYPES));
+      } catch (NullPointerException e) {
+        customerSegmentationCustomSegmentResponse.setProductTypes(Constants.DEFAULT_PRODUCT_TYPES);
+      }
+
+      customerSegmentationResponseList.add(customerSegmentationCustomSegmentResponse);
+      customerSegmentationResponseList.sort(Collections.reverseOrder());
+    }
+    return customerSegmentationResponseList;
+  }
+
+  private Map<Long,Map<String,Date>> getCustomerLastOrderDateCustomerSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
+    Map<Long,Map<String,Date>> customerLastOrderDate = new HashMap<>();
+    try {
+      String query = NativeQueries.CUSTOMER_LAST_ORDER_DATE;
+      query = query.replace(Constants.BOT_REF,botRef.toString());
+      query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
+      query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.START_DATE,startDate);
+      query = query.replace(QueryConstants.END_DATE,endDate);
+
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        customerLastOrderDate = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Date>>>() {
+        });
+      }
+
+    } catch (Exception e) {
+      log.error("Error while getting Customer Last Order Date for: botRef:{}", botRef, e);
+    }
+    return customerLastOrderDate;
+  }
+
+  private Map<Long,Map<String,Object>> getCustomerRevenueCustomerSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
+    Map<Long,Map<String,Object>> customerRevenue = new HashMap<>();
+    try {
+      String query = NativeQueries.CUSTOMER_REVENUE;
+      query = query.replace(Constants.BOT_REF,botRef.toString());
+      query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
+      query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.START_DATE,startDate);
+      query = query.replace(QueryConstants.END_DATE,endDate);
+
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        customerRevenue = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
+        });
+      }
+
+    } catch (Exception e) {
+      log.error("Error while getting Customer Revenue for: botRef:{}", botRef, e);
+    }
+    return customerRevenue;
+  }
+
+  private Map<Long,Map<String,String>> getCustomerProductTypeCustomerSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
+    Map<Long,Map<String,String>> customerProductType = new HashMap<>();
+    try{
+      String query = NativeQueries.CUSTOMER_PRODUCT_TYPE;
+      query = query.replace(Constants.BOT_REF,botRef.toString());
+      query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
+      query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.START_DATE,startDate);
+      query = query.replace(QueryConstants.END_DATE,endDate);
+
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        customerProductType = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, String>>>() {
+        });
+      }
+
+
+    } catch (Exception e) {
+      log.error("Error while getting Customer Product Type for: botRef:{}", botRef, e);
+    }
+
+    return customerProductType;
   }
 
   @Override
@@ -297,14 +434,16 @@ public class SegmentServiceImpl implements SegmentService {
     return storeAov;
   }
 
-  private Map<Long,Map<String, Long>> getCustomerOrder(Set<Long> customerIds, Long botRef) {
-    Map<Long, Map<String, Long>> customerOrder = new HashMap<>();
+  private Map<Long,Map<String, Long>> getCustomerOrdersCustomSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
+    Map<Long, Map<String, Long>> customerOrders = new HashMap<>();
     try {
       String query = NativeQueries.CUSTOMER_ORDERS;
       query = query.replace(Constants.BOT_REF, botRef.toString());
       query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
       query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
       query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.START_DATE,startDate);
+      query = query.replace(QueryConstants.END_DATE,endDate);
 
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
@@ -312,13 +451,40 @@ public class SegmentServiceImpl implements SegmentService {
       log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
-        customerOrder = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Long>>>() {
+        customerOrders = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Long>>>() {
         });
       }
     } catch (Exception e) {
+      log.error("Error while getting Customer Orders for: botRef:{}", botRef, e);
+    }
+    return customerOrders;
+  }
+
+  private Map<Long,Map<String,Object>> getCustomerAOVCustomSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
+    Map<Long,Map<String,Object>> customerAOV = new HashMap<>();
+    try {
+      String query = NativeQueries.CUSTOMER_AOV_CUSTOM_SEGMENT;
+      query = query.replace(Constants.BOT_REF,botRef.toString());
+      query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
+      query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.START_DATE,startDate);
+      query = query.replace(QueryConstants.END_DATE,endDate);
+
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        customerAOV = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
+        });
+      }
+
+    } catch (Exception e) {
       log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
     }
-    return customerOrder;
+    return customerAOV;
   }
 
   private Map<Long, Map<String, Object>> getCustomerAOV(Set<Long> customerIds, Long botRef) {
@@ -467,7 +633,7 @@ public class SegmentServiceImpl implements SegmentService {
   }
 */
   @Override
-  public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest) {
+  public DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest) {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
 
     String segmentCondition = customSegmentRequest.getSegmentCondition();
@@ -477,7 +643,7 @@ public class SegmentServiceImpl implements SegmentService {
     String startDate = formatter.format(customSegmentRequest.getStartDate());
     String endDate = formatter.format(customSegmentRequest.getEndDate());
 
-    DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
+    DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> response = new DataAnalyticsResponse<>();
     response.setStatus(ResponseStatusCode.SUCCESS);
     Pattern segmentOperators = Pattern.compile("(?i) AND | OR ");
     Matcher OperatorMatcher = segmentOperators.matcher(segmentCondition);
@@ -533,7 +699,6 @@ public class SegmentServiceImpl implements SegmentService {
       Long query_for_operand_execution_time = (Long) query_operand_parameter_response.get("execution_time");
       log.info("Executed Query: {} in time: {}", query_for_operand, query_for_operand_execution_time);
 
-
       if(Objects.isNull(resultSet)) {
           resultSet = customerId;
       }
@@ -566,7 +731,8 @@ public class SegmentServiceImpl implements SegmentService {
 
     }
 
-    List<CustomerSegmentationResponse> customerDetails = getDetailsforCustomerSegments(resultSet, botRef);
+//    List<CustomerSegmentationResponse> customerDetails = getDetailsforCustomerSegments(resultSet, botRef);
+    List<CustomerSegmentationCustomSegmentResponse> customerDetails = getDetailsforCustomerCustomSegments(resultSet, botRef,startDate,endDate);
     response.setStatus(ResponseStatusCode.SUCCESS);
     response.setResponseObject(customerDetails);
 
