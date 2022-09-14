@@ -165,9 +165,9 @@ public class SegmentServiceImpl implements SegmentService {
       }
 
       try {
-        customerSegmentationCustomSegmentResponse.setProductTypes(customerProductType.get(customerId).getOrDefault(QueryConstants.PRODUCT_TYPES, Constants.DEFAULT_PRODUCT_TYPES));
+        customerSegmentationCustomSegmentResponse.setCustomerProductTypes(customerProductType.get(customerId).getOrDefault(QueryConstants.PRODUCT_TYPES, Constants.DEFAULT_PRODUCT_TYPES));
       } catch (NullPointerException e) {
-        customerSegmentationCustomSegmentResponse.setProductTypes(Constants.DEFAULT_PRODUCT_TYPES);
+        customerSegmentationCustomSegmentResponse.setCustomerProductTypes(Constants.DEFAULT_PRODUCT_TYPES);
       }
 
       customerSegmentationResponseList.add(customerSegmentationCustomSegmentResponse);
