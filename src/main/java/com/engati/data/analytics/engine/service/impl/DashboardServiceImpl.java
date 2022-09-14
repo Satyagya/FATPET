@@ -1,5 +1,6 @@
 package com.engati.data.analytics.engine.service.impl;
 
+import com.engati.data.analytics.engine.Utils.CommonUtils;
 import com.engati.data.analytics.engine.Utils.EtlEngineRestUtility;
 import com.engati.data.analytics.engine.Utils.PdeRestUtility;
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
@@ -15,12 +16,15 @@ import com.engati.data.analytics.engine.model.response.DashboardProductResponse;
 import com.engati.data.analytics.engine.model.response.PdeProductResponse;
 import com.engati.data.analytics.engine.repository.DashboardRepository;
 import com.engati.data.analytics.engine.service.DashboardService;
+import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
@@ -62,6 +66,10 @@ public class DashboardServiceImpl implements DashboardService {
   @Autowired
   private PdeRestUtility pdeRestUtility;
 
+  @Autowired
+  @Qualifier("com.engati.data.analytics.engine.service.impl.PrometheusManagementServiceImpl")
+  private PrometheusManagementService prometheusManagementService;
+
   @Override
   public DataAnalyticsResponse<DashboardFlierResponse> getEngagedUsers(Long botRef,
       DashboardRequest dashboardRequest) {
@@ -69,32 +77,39 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting Engaged Users for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardFlierResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(
-        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
-    String startDate = formatter.format(dashboardRequest.getStartTime());
-    String endDate = formatter.format(dashboardRequest.getEndTime());
-    double presentValue = 0.0;
-    double percentageChange = 0.0;
-    double pastValue = 0.0;
-    String currency = "";
 
-    Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
-    query_params.put(QueryConstants.DATE, endDate);
-    query_params.put(Constants.BOT_REF, botRef.toString());
-    presentValue = executeQueryForDashboardFlier(NativeQueries.GET_ENGAGED_USERS, query_params,
-        QueryConstants.USERS, botRef);
+    try {
+      long diffInMillies = Math.abs(dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+      long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+      DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+      String startDate = formatter.format(dashboardRequest.getStartTime());
+      String endDate = formatter.format(dashboardRequest.getEndTime());
+      double presentValue = 0.0;
+      double percentageChange = 0.0;
+      double pastValue = 0.0;
+      String currency = "";
 
-    query_params.put(QueryConstants.DATE, startDate);
-    pastValue = executeQueryForDashboardFlier(NativeQueries.GET_ENGAGED_USERS, query_params,
-        QueryConstants.USERS, botRef);
+      Map<String, String> query_params = new HashMap<>();
+      query_params.put(QueryConstants.GAP, String.valueOf(gap));
+      query_params.put(QueryConstants.DATE, endDate);
+      query_params.put(Constants.BOT_REF, botRef.toString());
+      presentValue = executeQueryForDashboardFlier(NativeQueries.GET_ENGAGED_USERS, query_params,
+          QueryConstants.USERS, botRef);
 
-    percentageChange = percentageChange(presentValue, pastValue);
-    response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
-        .percentageChange(percentageChange).currency(currency).build());
-    response.setStatus(ResponseStatusCode.SUCCESS);
+      query_params.put(QueryConstants.DATE, startDate);
+      pastValue = executeQueryForDashboardFlier(NativeQueries.GET_ENGAGED_USERS, query_params,
+          QueryConstants.USERS, botRef);
+
+      percentageChange = percentageChange(presentValue, pastValue);
+      response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue).percentageChange(percentageChange).currency(currency).build());
+      response.setStatus(ResponseStatusCode.SUCCESS);
+
+    } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getEngagedUsers", botRef, e.getMessage(),
+          CommonUtils.getStringValueFromObject(dashboardRequest));
+      log.error("Error while performing getEngagedUsers for dashboardRequest: {}", dashboardRequest,
+          e);
+    }
     return response;
   }
 
@@ -105,32 +120,39 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting OrderCounts for botRef: {} for timeRanges between {} and "
             + "{}", botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardFlierResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(
-        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
-    String startDate = formatter.format(dashboardRequest.getStartTime());
-    String endDate = formatter.format(dashboardRequest.getEndTime());
-    double presentValue = 0.0;
-    double percentageChange = 0.0;
-    double pastValue = 0.0;
-    String currency = "";
 
-    Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
-    query_params.put(QueryConstants.DATE, endDate);
-    query_params.put(Constants.BOT_REF, botRef.toString());
-    presentValue = executeQueryForDashboardFlier(NativeQueries.GET_ORDER_COUNTS, query_params,
-        QueryConstants.ORDERS, botRef);
+    try {
+      long diffInMillies = Math.abs(dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+      long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+      DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+      String startDate = formatter.format(dashboardRequest.getStartTime());
+      String endDate = formatter.format(dashboardRequest.getEndTime());
+      double presentValue = 0.0;
+      double percentageChange = 0.0;
+      double pastValue = 0.0;
+      String currency = "";
 
-    query_params.put(QueryConstants.DATE, startDate);
-    pastValue = executeQueryForDashboardFlier(NativeQueries.GET_ORDER_COUNTS, query_params,
-        QueryConstants.ORDERS, botRef);
+      Map<String, String> query_params = new HashMap<>();
+      query_params.put(QueryConstants.GAP, String.valueOf(gap));
+      query_params.put(QueryConstants.DATE, endDate);
+      query_params.put(Constants.BOT_REF, botRef.toString());
+      presentValue = executeQueryForDashboardFlier(NativeQueries.GET_ORDER_COUNTS, query_params,
+          QueryConstants.ORDERS, botRef);
 
-    percentageChange = percentageChange(presentValue, pastValue);
-    response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
-        .percentageChange(percentageChange).currency(currency).build());
-    response.setStatus(ResponseStatusCode.SUCCESS);
+      query_params.put(QueryConstants.DATE, startDate);
+      pastValue = executeQueryForDashboardFlier(NativeQueries.GET_ORDER_COUNTS, query_params,
+          QueryConstants.ORDERS, botRef);
+
+      percentageChange = percentageChange(presentValue, pastValue);
+      response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue).percentageChange(percentageChange).currency(currency).build());
+      response.setStatus(ResponseStatusCode.SUCCESS);
+
+    } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getOrderCount", botRef, e.getMessage(),
+          CommonUtils.getStringValueFromObject(dashboardRequest));
+      log.error("Error while performing getOrderCount for dashboardRequest: {}", dashboardRequest,
+          e);
+    }
     return response;
   }
 
@@ -141,39 +163,48 @@ public class DashboardServiceImpl implements DashboardService {
         "Request received for getting AOV for botRef: {} for timeRanges between {} and " + "{}",
         botRef, dashboardRequest.getStartTime(), dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardFlierResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(
-        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
-    String startDate = formatter.format(dashboardRequest.getStartTime());
-    String endDate = formatter.format(dashboardRequest.getEndTime());
-    double presentValue = 0.0;
-    double percentageChange = 0.0;
-    double pastValue = 0.0;
-    String currency;
+
     try {
-      currency = dashboardRepository.findCurrencyByBotRef(botRef);
+      long diffInMillies = Math.abs(dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+      long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+      DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+      String startDate = formatter.format(dashboardRequest.getStartTime());
+      String endDate = formatter.format(dashboardRequest.getEndTime());
+      double presentValue = 0.0;
+      double percentageChange = 0.0;
+      double pastValue = 0.0;
+      String currency;
+      try {
+        currency = dashboardRepository.findCurrencyByBotRef(botRef);
+      } catch (Exception e) {
+        prometheusManagementService.apiRequestFailureEvent("getCurrency", botRef, e.getMessage(),
+            CommonUtils.getStringValueFromObject(dashboardRequest));
+        log.error("Error getting currency for botRef: {}", botRef, e);
+        currency = "";
+      }
+      Map<String, String> query_params = new HashMap<>();
+      query_params.put(QueryConstants.GAP, String.valueOf(gap));
+      query_params.put(QueryConstants.DATE, endDate);
+      query_params.put(Constants.BOT_REF, botRef.toString());
+      presentValue =
+          executeQueryForDashboardFlier(NativeQueries.GET_AOV, query_params, QueryConstants.AOV,
+              botRef);
+
+      query_params.put(QueryConstants.DATE, startDate);
+      pastValue =
+          executeQueryForDashboardFlier(NativeQueries.GET_AOV, query_params, QueryConstants.AOV,
+              botRef);
+
+      percentageChange = percentageChange(presentValue, pastValue);
+      response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue).percentageChange(percentageChange).currency(currency).build());
+      response.setStatus(ResponseStatusCode.SUCCESS);
+
     } catch (Exception e) {
-      log.error("Error getting currency for botRef: {}", botRef, e);
-      currency = "";
+      prometheusManagementService.apiRequestFailureEvent("getAOV", botRef, e.getMessage(),
+          CommonUtils.getStringValueFromObject(dashboardRequest));
+      log.error("Error while performing getAOV for dashboardRequest: {}", dashboardRequest,
+          e);
     }
-    Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
-    query_params.put(QueryConstants.DATE, endDate);
-    query_params.put(Constants.BOT_REF, botRef.toString());
-    presentValue =
-        executeQueryForDashboardFlier(NativeQueries.GET_AOV, query_params, QueryConstants.AOV,
-            botRef);
-
-    query_params.put(QueryConstants.DATE, startDate);
-    pastValue =
-        executeQueryForDashboardFlier(NativeQueries.GET_AOV, query_params, QueryConstants.AOV,
-            botRef);
-
-    percentageChange = percentageChange(presentValue, pastValue);
-    response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
-        .percentageChange(percentageChange).currency(currency).build());
-    response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }
 
@@ -199,11 +230,15 @@ public class DashboardServiceImpl implements DashboardService {
     try {
       presentValue = getAbandonedCheckoutsByBotRefAndTimeRange(botRef, endDate, gap);
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getAbandonedCheckouts", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(dashboardRequest));
       log.error("Error getting abandonedCheckout for botRef: {} for date: {}", botRef, endDate, e);
     }
     try {
       pastValue = getAbandonedCheckoutsByBotRefAndTimeRange(botRef, startDate, gap);
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getAbandonedCheckouts", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(dashboardRequest));
       log.error("Error getting abandonedCheckout for botRef: {} for date: {}", botRef, startDate,
           e);
     }
@@ -222,32 +257,41 @@ public class DashboardServiceImpl implements DashboardService {
             + "{} and " + "{}", botRef, dashboardRequest.getStartTime(),
         dashboardRequest.getEndTime());
     DataAnalyticsResponse<DashboardFlierResponse> response = new DataAnalyticsResponse<>();
-    long diffInMillies = Math.abs(
-        dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
-    long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
-    String startDate = formatter.format(dashboardRequest.getStartTime());
-    String endDate = formatter.format(dashboardRequest.getEndTime());
-    double presentValue = 0.0;
-    double percentageChange = 0.0;
-    double pastValue = 0.0;
-    String currency = "";
 
-    Map<String, String> query_params = new HashMap<>();
-    query_params.put(QueryConstants.GAP, String.valueOf(gap));
-    query_params.put(QueryConstants.DATE, endDate);
-    query_params.put(Constants.BOT_REF, botRef.toString());
-    presentValue = executeQueryForDashboardFlier(NativeQueries.GET_TRANSACTIONS_FROM_ENGATI, query_params,
-        QueryConstants.TRANSACTIONS, botRef);
+    try {
+      long diffInMillies = Math.abs(dashboardRequest.getEndTime().getTime() - dashboardRequest.getStartTime().getTime());
+      long gap = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+      DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+      String startDate = formatter.format(dashboardRequest.getStartTime());
+      String endDate = formatter.format(dashboardRequest.getEndTime());
+      double presentValue = 0.0;
+      double percentageChange = 0.0;
+      double pastValue = 0.0;
+      String currency = "";
 
-    query_params.put(QueryConstants.DATE, startDate);
-    pastValue = executeQueryForDashboardFlier(NativeQueries.GET_TRANSACTIONS_FROM_ENGATI, query_params,
-        QueryConstants.TRANSACTIONS, botRef);
+      Map<String, String> query_params = new HashMap<>();
+      query_params.put(QueryConstants.GAP, String.valueOf(gap));
+      query_params.put(QueryConstants.DATE, endDate);
+      query_params.put(Constants.BOT_REF, botRef.toString());
+      presentValue =
+          executeQueryForDashboardFlier(NativeQueries.GET_TRANSACTIONS_FROM_ENGATI, query_params,
+              QueryConstants.TRANSACTIONS, botRef);
 
-    percentageChange = percentageChange(presentValue, pastValue);
-    response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue)
-        .percentageChange(percentageChange).currency(currency).build());
-    response.setStatus(ResponseStatusCode.SUCCESS);
+      query_params.put(QueryConstants.DATE, startDate);
+      pastValue =
+          executeQueryForDashboardFlier(NativeQueries.GET_TRANSACTIONS_FROM_ENGATI, query_params,
+              QueryConstants.TRANSACTIONS, botRef);
+
+      percentageChange = percentageChange(presentValue, pastValue);
+      response.setResponseObject(DashboardFlierResponse.builder().presentValue(presentValue).percentageChange(percentageChange).currency(currency).build());
+      response.setStatus(ResponseStatusCode.SUCCESS);
+
+    } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getTransactionsFromEngati", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(dashboardRequest));
+      log.error("Error while performing getTransactionsFromEngati for dashboardRequest: {}",
+          dashboardRequest, e);
+    }
     return response;
   }
 
@@ -273,6 +317,8 @@ public class DashboardServiceImpl implements DashboardService {
     try {
       currency = dashboardRepository.findCurrencyByBotRef(botRef);
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getCurrency", botRef, e.getMessage(),
+          CommonUtils.getStringValueFromObject(dashboardRequest));
       log.error("Error getting currency for botRef: {}", botRef, e);
       currency = "";
     }
@@ -331,6 +377,8 @@ public class DashboardServiceImpl implements DashboardService {
         }
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getMostPurchasedProducts", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(dashboardRequest));
       log.error("Error executing query :{} with botRef: {}", query, botRef, e);
     }
     return response;
@@ -361,6 +409,8 @@ public class DashboardServiceImpl implements DashboardService {
       }
 
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getAbandonedProducts", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(dashboardRequest));
       log.error("Error getting most abandonedProducts for botRef: {}", botRef, e);
     }
 
@@ -431,6 +481,8 @@ public class DashboardServiceImpl implements DashboardService {
         response.setResponseObject(dashboardGraphResponseList);
         response.setStatus(ResponseStatusCode.SUCCESS);
       } catch (Exception e) {
+        prometheusManagementService.apiRequestFailureEvent("getBotQueriesChart", botRef,
+            e.getMessage(), CommonUtils.getStringValueFromObject(dashboardRequest));
         dashboardGraphResponseList = null;
         response.setResponseObject(dashboardGraphResponseList);
         response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
@@ -472,6 +524,8 @@ public class DashboardServiceImpl implements DashboardService {
         response.setResponseObject(dashboardGraphResponseList);
         response.setStatus(ResponseStatusCode.SUCCESS);
       } catch (Exception e) {
+        prometheusManagementService.apiRequestFailureEvent("getBotQueriesChart", botRef,
+            e.getMessage(), CommonUtils.getStringValueFromObject(dashboardRequest));
         dashboardGraphResponseList = null;
         response.setResponseObject(dashboardGraphResponseList);
         response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
@@ -511,6 +565,8 @@ public class DashboardServiceImpl implements DashboardService {
             MAPPER.readValue(responseString, ArrayList.class).stream().findFirst().get()));
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("executeQueryForDashboardFlier", botRef,
+          e.getMessage(), query);
       log.error("Error executing query :{} with botRef: {}", query, botRef, e);
     }
     return value;
@@ -543,6 +599,8 @@ public class DashboardServiceImpl implements DashboardService {
         return null;
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getProductDetailsFromPde", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(productList));
       log.error("Error while getting Product Details from PDE for BotRef: {}", botRef);
       return null;
     }
@@ -624,6 +682,8 @@ public class DashboardServiceImpl implements DashboardService {
     try {
       lastUpdatedOn = dashboardRepository.getLastUpdatedOn(botRef);
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getLastUpdatedOn", botRef, e.getMessage(),
+          StringUtils.EMPTY);
       log.error("Error getting LastUpdatedOn from the DB");
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
     }
@@ -660,6 +720,8 @@ public class DashboardServiceImpl implements DashboardService {
         dashboardChartResponse = getDashBoardChartResponse(countPerMetric, metrics, metric_name);
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("executeQueryForDashboardChart", botRef,
+          e.getMessage(), query);
       log.error("Error executing query :{} with botRef: {}", query, botRef, e);
     }
     return dashboardChartResponse;
@@ -725,6 +787,8 @@ public class DashboardServiceImpl implements DashboardService {
             ArrayList.class);
       }
     } catch (IOException e) {
+      prometheusManagementService.apiRequestFailureEvent("getMostAbandonedProductsByBotRef", botRef,
+          e.getMessage(), StringUtils.EMPTY);
       log.error("Error while fetching MostAbandonedProducts for botRef: {}", botRef, e);
     }
     return productIdList;
@@ -757,6 +821,8 @@ public class DashboardServiceImpl implements DashboardService {
         }
       }
     } catch (IOException e) {
+      prometheusManagementService.apiRequestFailureEvent(
+          "getAbandonedCheckoutsByBotRefAndTimeRange", botRef, e.getMessage(), StringUtils.EMPTY);
       log.error("Error while fetching AbandonedCheckoutsByBotRefAndTimeRange for botRef: {}",
           botRef, e);
     }

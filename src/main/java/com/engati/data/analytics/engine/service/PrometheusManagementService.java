@@ -9,5 +9,5 @@ public interface PrometheusManagementService {
    * @param causeOfFailure
    * @param apiRequest
    */
-  void apiRequestFailureEvent(String event, String botRef, String causeOfFailure, String apiRequest);
+  void apiRequestFailureEvent(String event, Long botRef, String causeOfFailure, String apiRequest);
 }

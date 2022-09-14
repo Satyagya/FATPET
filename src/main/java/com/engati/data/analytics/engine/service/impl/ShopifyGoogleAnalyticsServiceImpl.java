@@ -6,12 +6,15 @@ import com.engati.data.analytics.engine.constants.constant.TableConstants;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
 import com.engati.data.analytics.engine.entity.ShopifyGoogleAnalyticsInfo;
 import com.engati.data.analytics.engine.repository.ShopifyGoogleAnalyticsInfoRepository;
+import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.engati.data.analytics.engine.service.ShopifyGoogleAnalyticsService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +29,10 @@ public class ShopifyGoogleAnalyticsServiceImpl implements ShopifyGoogleAnalytics
 
   @Autowired
   private ShopifyGoogleAnalyticsInfoRepository shopifyGoogleAnalyticsInfoRepository;
+
+  @Autowired
+  @Qualifier("com.engati.data.analytics.engine.service.impl.PrometheusManagementServiceImpl")
+  private PrometheusManagementService prometheusManagementService;
 
   @Override
   public DataAnalyticsResponse<String> manageGACreds(MultipartFile authJson, Integer botRef,
@@ -63,8 +70,12 @@ public class ShopifyGoogleAnalyticsServiceImpl implements ShopifyGoogleAnalytics
         }
       }
     } catch (ParseException e) {
+      prometheusManagementService.apiRequestFailureEvent("manageGACreds", 0L, e.getMessage(),
+          StringUtils.EMPTY);
       log.error("Error while processing the file for botRef {}", botRef, e);
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("manageGACreds", 0L, e.getMessage(),
+          StringUtils.EMPTY);
       log.error("Error while processing the request for botRef {}", botRef, e);
     }
     return response;
