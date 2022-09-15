@@ -4,7 +4,6 @@ public class ApiPathConstants {
 
   public static final String API_BASE_PATH = "/v1";
   public static final String GET_SYSTEM_SEGMENT = "/botRef/{botRef}/segment/{segmentName}/getSystemSegment";
-  public static final String GET_PRODUCTTYPE_COLLECTION_SEGMENT = "/botRef/{botRef}/segment/{segmentName}/getProductTypeCollectionSegment";
   public static final String CUSTOMERID = "customerId";
   public static final String BOTREF = "botRef";
   public static final String SEGMENT_NAME = "segmentName";
