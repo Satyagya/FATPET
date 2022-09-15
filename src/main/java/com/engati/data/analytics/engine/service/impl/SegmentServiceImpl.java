@@ -14,6 +14,7 @@ import com.engati.data.analytics.engine.model.response.CustomerSegmentationRespo
 import com.engati.data.analytics.engine.model.response.KafkaPayloadForSegmentStatus;
 import com.engati.data.analytics.engine.repository.SegmentRepository;
 import com.engati.data.analytics.engine.service.CustomerSegmentationConfigurationService;
+import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.engati.data.analytics.engine.service.SegmentService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -59,6 +61,10 @@ public class SegmentServiceImpl implements SegmentService {
   @Autowired
   private EtlEngineRestUtility etlEngineRestUtility;
 
+  @Autowired
+  @Qualifier("com.engati.data.analytics.engine.service.impl.PrometheusManagementServiceImpl")
+  private PrometheusManagementService prometheusManagementService;
+
   public static final ObjectMapper MAPPER = new ObjectMapper();
 
   private List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList, Long botRef) {
@@ -86,21 +92,29 @@ public class SegmentServiceImpl implements SegmentService {
       try {
         customerSegmentationResponse.setCustomerAOV((Double) customerAOV.get(customerId).getOrDefault(QueryConstants.AOV, Constants.DEFAULT_AOV_VALUE));
       } catch (NullPointerException e) {
+        prometheusManagementService.apiRequestFailureEvent("CustomerAOV", botRef,
+            e.getMessage(), CommonUtils.getStringValueFromObject(customerList));
         customerSegmentationResponse.setCustomerAOV(Double.valueOf(Constants.DEFAULT_AOV_VALUE));
       }
       try {
         customerSegmentationResponse.setOrdersInLastOneMonth(ordersLastMonth.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_1_MONTH, Long.valueOf(Constants.DEFAULT_ORDER_VALUE)));
       } catch (NullPointerException e) {
+        prometheusManagementService.apiRequestFailureEvent("OrdersInLastOneMonth", botRef,
+            e.getMessage(), CommonUtils.getStringValueFromObject(customerList));
         customerSegmentationResponse.setOrdersInLastOneMonth(Long.valueOf(Constants.DEFAULT_ORDER_VALUE));
       }
       try {
         customerSegmentationResponse.setOrdersInLastSixMonths(ordersLast6Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_6_MONTHS, Long.valueOf(Constants.DEFAULT_ORDER_VALUE)));
       } catch (NullPointerException e) {
+        prometheusManagementService.apiRequestFailureEvent("OrdersInLastSixMonths", botRef,
+            e.getMessage(), CommonUtils.getStringValueFromObject(customerList));
         customerSegmentationResponse.setOrdersInLastSixMonths(Long.valueOf(Constants.DEFAULT_ORDER_VALUE));
       }
       try {
         customerSegmentationResponse.setOrdersInLastTwelveMonths(ordersLast12Months.get(customerId).getOrDefault(QueryConstants.ORDERS_LAST_12_MONTHS, Long.valueOf(Constants.DEFAULT_ORDER_VALUE)));
       } catch (NullPointerException e) {
+        prometheusManagementService.apiRequestFailureEvent("OrdersInLastTwelveMonths", botRef,
+            e.getMessage(), CommonUtils.getStringValueFromObject(customerList));
         customerSegmentationResponse.setOrdersInLastTwelveMonths(Long.valueOf(Constants.DEFAULT_ORDER_VALUE));
       }
       customerSegmentationResponseList.add(customerSegmentationResponse);
@@ -153,6 +167,8 @@ public class SegmentServiceImpl implements SegmentService {
         }
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getCustomersForSystemSegment", botRef,
+          e.getMessage(), segmentName);
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
     }
@@ -212,6 +228,8 @@ public class SegmentServiceImpl implements SegmentService {
         monetaryList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getMonetarySegment", 0L, e.getMessage(),
+          CommonUtils.getStringValueFromObject(configDetails));
       log.error("Exception while getting StoreAOV for botRef: {}", configDetails.getResponseObject().getBotRef().toString(), e);
     }
     return monetaryList;
@@ -232,6 +250,8 @@ public class SegmentServiceImpl implements SegmentService {
         frequencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getFrequencySegment", 0L, e.getMessage(),
+          CommonUtils.getStringValueFromObject(configDetails));
       log.error("Error while getting Frequency Segment for: {}", configDetails, e);
     }
     return frequencyList;
@@ -257,6 +277,8 @@ public class SegmentServiceImpl implements SegmentService {
         recencyList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)), ArrayList.class).stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getRecencySegment", 0L, e.getMessage(),
+          CommonUtils.getStringValueFromObject(configDetails));
       log.error("Error while getting Recency Segment for:{}", configDetails, e);
     }
     return recencyList;
@@ -279,6 +301,7 @@ public class SegmentServiceImpl implements SegmentService {
         storeAov = String.valueOf(MAPPER.readValue(responseString, ArrayList.class).stream().findFirst().get());
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getStoreAOV", botRef, e.getMessage(), "");
       log.error("Exception while getting StoreAOV for botRef: {}", botRef, e);
     }
     return storeAov;
@@ -303,6 +326,8 @@ public class SegmentServiceImpl implements SegmentService {
         });
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getCustomerAOV", botRef, e.getMessage(),
+          "");
       log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
     }
     return customerAOV;
@@ -330,6 +355,8 @@ public class SegmentServiceImpl implements SegmentService {
         });
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getOrdersForLastXMonth", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(customerIds));
       log.error("Error while getting Orders For Last X Month for botRef: {}", botRef, e);
     }
     return customerOrders;
@@ -414,6 +441,8 @@ public class SegmentServiceImpl implements SegmentService {
         }
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getCustomersForCustomSegment", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(customSegmentRequest));
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
       kafkaPayload.setStatus("FAILURE - PROCESSING ERROR");
@@ -442,6 +471,8 @@ public class SegmentServiceImpl implements SegmentService {
         responseMap.put("response", parameter_customer_set);
       }
     } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getCustomerListForParameter", 0L,
+          e.getMessage(), parameter_query_definition);
       e.printStackTrace();
     }
     return responseMap;
