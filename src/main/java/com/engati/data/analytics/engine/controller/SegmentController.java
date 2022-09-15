@@ -39,4 +39,11 @@ public class SegmentController {
 
 
   }
+
+  @GetMapping(value = ApiPathConstants.GET_PRODUCT_TYPE)
+  public ResponseEntity<DataAnalyticsResponse> getProductType(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef) {
+    log.info("Got call to fetch productType for botRef: {}", botRef);
+    DataAnalyticsResponse<List<String>> response = segmentService.getProductType(botRef);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
 }
