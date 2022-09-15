@@ -538,7 +538,7 @@ public class SegmentServiceImpl implements SegmentService {
     return customerOrders;
   }
 
- /* @Override
+  @Override
   public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest) {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
     String segmentCondition = customSegmentRequest.getSegmentCondition();
@@ -631,17 +631,22 @@ public class SegmentServiceImpl implements SegmentService {
     }
     return response;
   }
-*/
+
   @Override
-  public DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest) {
+  public DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> getCustomersForCustomSegmentV2(Long botRef, CustomSegmentRequest customSegmentRequest) {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
 
     String segmentCondition = customSegmentRequest.getSegmentCondition();
     String segmentName = customSegmentRequest.getSegmentName();
 
     DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
-    String startDate = formatter.format(customSegmentRequest.getStartDate());
-    String endDate = formatter.format(customSegmentRequest.getEndDate());
+    String startDate = formatter.format(customSegmentRequest.getStartDate().orElse(null));
+    String endDate = formatter.format(customSegmentRequest.getEndDate().orElse(null));
+
+    KafkaPayloadForSegmentStatus kafkaPayload = new KafkaPayloadForSegmentStatus();
+    kafkaPayload.setSegmentName(customSegmentRequest.getSegmentName());
+    kafkaPayload.setFileName(customSegmentRequest.getFileName());
+    kafkaPayload.setBotRef(botRef);
 
     DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> response = new DataAnalyticsResponse<>();
     response.setStatus(ResponseStatusCode.SUCCESS);
@@ -653,7 +658,7 @@ public class SegmentServiceImpl implements SegmentService {
       operators.add(OperatorMatcher.group().trim());
     }
 
-    if (operators.size() > 4) {
+    if (operators.size() > Constants.MAXIMUM_NUMBER_OF_OPERATORS) {
       response.setResponseObject(null);
       response.setStatus(ResponseStatusCode.OPERATORS_PERMISSIBLE_LIMITS_REACHED);
       return response;
@@ -667,8 +672,8 @@ public class SegmentServiceImpl implements SegmentService {
 
     Iterator it = operators.iterator();
 
-    for(int i=0;i<operands.length;i++) {
-      String operand = operands[i];
+    for(int index=0;index<operands.length;index++) {
+      String operand = operands[index];
 
       if(operand.contains("ORDERS")) {
         query_for_operand = generateQueryForOrdersCustomSegment(botRef,operand,startDate,endDate);
@@ -731,11 +736,44 @@ public class SegmentServiceImpl implements SegmentService {
 
     }
 
-//    List<CustomerSegmentationResponse> customerDetails = getDetailsforCustomerSegments(resultSet, botRef);
-    List<CustomerSegmentationCustomSegmentResponse> customerDetails = getDetailsforCustomerCustomSegments(resultSet, botRef,startDate,endDate);
-    response.setStatus(ResponseStatusCode.SUCCESS);
-    response.setResponseObject(customerDetails);
-
+    try {
+      String fileName = getOutputFileName(botRef, segmentName);
+      if (Objects.nonNull(fileName)) {
+        kafkaPayload.setStatus("SUCCESS");
+        kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+        if (!CollectionUtils.isEmpty(resultSet)) {
+          List<CustomerSegmentationCustomSegmentResponse> customerDetail = getDetailsforCustomerCustomSegments(resultSet,botRef,startDate,endDate);
+          if (!CommonUtils.createCustomSegmentCsv(customerDetail, botRef, segmentName, fileName)) {
+            response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+            kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+            kafkaPayload.setStatus("FAILURE - CSV_CREATION_FAILURE");
+          }
+        } else {
+          File emptyFile = new File(fileName);
+          if (emptyFile.exists()) {
+            emptyFile.delete();
+          }
+          if (!emptyFile.createNewFile()) {
+            log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
+          }
+          response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
+          kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
+          kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+        }
+      }
+    } catch (Exception e) {
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+      log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
+      kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+      kafkaPayload.setStatus("FAILURE - PROCESSING ERROR");
+    }
+    try {
+      log.info("Pushing to the response kafka topic, payload : {}", kafkaPayload);
+      kafka.send(segmentResponseTopic, CommonUtils.MAPPER.writeValueAsString(kafkaPayload));
+    } catch (JsonProcessingException e) {
+      log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
+      e.printStackTrace();
+    }
     return response;
   }
 
@@ -800,7 +838,7 @@ public class SegmentServiceImpl implements SegmentService {
     String[] operand_params = operand.split(" ");
 
     if (operand_params.length == 3) {
-      query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(operand_params[1]));
+      query = query.replace(QueryConstants.OPERATOR, operand_params[1]);
       query = query.replace(QueryConstants.VALUE, operand_params[2]);
       query = query.replace(QueryConstants.START_DATE, startDate);
       query = query.replace(QueryConstants.END_DATE, endDate);
@@ -818,7 +856,7 @@ public class SegmentServiceImpl implements SegmentService {
     String[] operand_params = operand.split(" ");
 
     if (operand_params.length == 3) {
-      query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(operand_params[1]));
+      query = query.replace(QueryConstants.OPERATOR, operand_params[1]);
       query = query.replace(QueryConstants.VALUE, operand_params[2]);
       query = query.replace(QueryConstants.START_DATE, startDate);
       query = query.replace(QueryConstants.END_DATE, endDate);
@@ -853,7 +891,7 @@ public class SegmentServiceImpl implements SegmentService {
     String[] operand_params = operand.split(" ");
 
     if (operand_params.length == 3) {
-      query = query.replace(QueryConstants.OPERATOR, QueryOperators.getOperator(operand_params[1]));
+      query = query.replace(QueryConstants.OPERATOR, operand_params[1]);
       query = query.replace(QueryConstants.VALUE, operand_params[2]);
       query = query.replace(QueryConstants.START_DATE, startDate);
       query = query.replace(QueryConstants.END_DATE, endDate);
