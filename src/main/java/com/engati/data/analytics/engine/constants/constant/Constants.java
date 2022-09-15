@@ -63,7 +63,7 @@ public class Constants {
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
   public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"NAME", "EMAIL", "PHONE",
-          "STORE AOV", "ORDERS","AVERAGE ORDER VALUE ","REVENUE", "LAST_ORDER_DATE", "PRODUCT TYPES"};
+          "STORE AOV","AVERAGE ORDER VALUE","ORDERS","REVENUE", "LAST_ORDER_DATE", "PRODUCT TYPES"};
   public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
       + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
       + "        {\n" + "            \"isOrCondition\": false,\n"
