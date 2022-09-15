@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 
 public enum ResponseStatusCode implements AppCode<ResponseStatusCode> {
   PROCESSING_ERROR(999, "PROCESSING_ERROR"),
+  START_DATE_IS_NULL(9988,"START_DATE_IS_NULL"),
+  END_DATE_IS_NULL(9987,"END_DATE_IS_NULL"),
   SUCCESS(1000, "SUCCESS"),
   EMPTY_SEGMENT(9999, "EMPTY_SEGMENT"),
   DUCK_DB_QUERY_FAILURE(9998, "DUCK_DB_QUERY_FAILURE"),

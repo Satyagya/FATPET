@@ -639,10 +639,6 @@ public class SegmentServiceImpl implements SegmentService {
     String segmentCondition = customSegmentRequest.getSegmentCondition();
     String segmentName = customSegmentRequest.getSegmentName();
 
-    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
-    String startDate = formatter.format(customSegmentRequest.getStartDate().orElse(null));
-    String endDate = formatter.format(customSegmentRequest.getEndDate().orElse(null));
-
     KafkaPayloadForSegmentStatus kafkaPayload = new KafkaPayloadForSegmentStatus();
     kafkaPayload.setSegmentName(customSegmentRequest.getSegmentName());
     kafkaPayload.setFileName(customSegmentRequest.getFileName());
@@ -650,6 +646,34 @@ public class SegmentServiceImpl implements SegmentService {
 
     DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> response = new DataAnalyticsResponse<>();
     response.setStatus(ResponseStatusCode.SUCCESS);
+
+    DateFormat formatter = new SimpleDateFormat(Constants.DATE_FORMAT);
+
+    String startDate="";
+    String endDate="";
+
+    if(Objects.nonNull(customSegmentRequest.getStartDate())) {
+       startDate = formatter.format(customSegmentRequest.getStartDate());
+    } else {
+      response.setResponseObject(null);
+      response.setStatus(ResponseStatusCode.START_DATE_IS_NULL);
+      kafkaPayload.setStatus("FAILURE - START_DATE_IS_NULL");
+      kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+      kafka.send(segmentResponseTopic, kafkaPayload.toString());
+      return response;
+    }
+
+    if(Objects.nonNull(customSegmentRequest.getEndDate())) {
+      endDate = formatter.format(customSegmentRequest.getEndDate());
+    } else {
+      response.setResponseObject(null);
+      response.setStatus(ResponseStatusCode.END_DATE_IS_NULL);
+      kafkaPayload.setStatus("FAILURE - END_DATE_IS_NULL");
+      kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+      kafka.send(segmentResponseTopic, kafkaPayload.toString());
+      return response;
+    }
+
     Pattern segmentOperators = Pattern.compile("(?i) AND | OR ");
     Matcher OperatorMatcher = segmentOperators.matcher(segmentCondition);
     ArrayList<String> operators = new ArrayList<>();
@@ -661,6 +685,9 @@ public class SegmentServiceImpl implements SegmentService {
     if (operators.size() > Constants.MAXIMUM_NUMBER_OF_OPERATORS) {
       response.setResponseObject(null);
       response.setStatus(ResponseStatusCode.OPERATORS_PERMISSIBLE_LIMITS_REACHED);
+      kafkaPayload.setStatus("FAILURE - EXCEEDED_OPERATOR_LIMITS");
+      kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+      kafka.send(segmentResponseTopic, kafkaPayload.toString());
       return response;
     }
 
@@ -696,7 +723,8 @@ public class SegmentServiceImpl implements SegmentService {
       } else {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
-        return response;
+        kafkaPayload.setStatus("FAILURE - INVALID_ATTRIBUTES");
+        kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
       }
 
       Map<String, Object> query_operand_parameter_response = getCustomerListForParameter(query_for_operand);
@@ -729,7 +757,8 @@ public class SegmentServiceImpl implements SegmentService {
         } else {
           response.setResponseObject(null);
           response.setStatus(ResponseStatusCode.INVALID_EXPRESSION_CONDITION_PROVIDED);
-          return response;
+          kafkaPayload.setStatus("FAILURE - INVALID_EXPRESSION_CONDITION_PROVIDED");
+          kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         }
 
       }
