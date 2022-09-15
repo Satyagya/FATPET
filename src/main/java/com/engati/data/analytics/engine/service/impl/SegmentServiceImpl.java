@@ -502,7 +502,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     } catch (Exception e) {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      log.info("Error while getting Customer AOV for: botRef:{}", botRef, e);
+      log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
     }
     response.setResponseObject(productTypes.get("product_type"));
     response.setStatus(ResponseStatusCode.SUCCESS);
