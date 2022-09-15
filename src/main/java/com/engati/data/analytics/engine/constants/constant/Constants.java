@@ -21,8 +21,8 @@ public class Constants {
 
 
   //  DuckDB Connection URL
-  public static String DUCKDB_CONNECTION_URI = "http://127.0.0.1:8000";
-  public static String PARQUET_FILE_PATH = "/Users/aniketmodi/Documents/engati-service/shopify-etl-engine/parquet_store";
+  public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
+  public static String PARQUET_FILE_PATH = "/opt/engati/parquet_store";
 
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
@@ -45,7 +45,7 @@ public class Constants {
   public static String CREATED_DATE = "created_date";
   public static String QUERIES_ASKED = "queries_asked";
   public static String QUERIES_UNANSWERED= "queries_unanswered";
-
+  public static Integer MAXIMUM_NUMBER_OF_OPERATORS = 4;
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";
@@ -61,7 +61,8 @@ public class Constants {
   public static final String[] CUSTOMER_SEGMENT_HEADER = new String[]{"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
-
+  public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
+          "STORE AOV", "CUSTOMER ORDERS","CUSTOMER AOV","CUSTOMER REVENUE", "CUSTOMER LAST_ORDER_DATE", "PRODUCT TYPES"};
   public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
       + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
       + "        {\n" + "            \"isOrCondition\": false,\n"
