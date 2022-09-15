@@ -395,6 +395,7 @@ public class SegmentServiceImpl implements SegmentService {
         kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         if (!CollectionUtils.isEmpty(combined_query_parameter_set)) {
           List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(combined_query_parameter_set, botRef);
+          kafkaPayload.setCustomerCount(customerDetail.size());
           if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
             response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
             kafkaPayload.setStatus("FAILURE - CSV_CREATION_FAILURE");
@@ -483,5 +484,30 @@ public class SegmentServiceImpl implements SegmentService {
       return "";
     }
   }
+
+  @Override
+  public DataAnalyticsResponse<List<String>> getProductType(Long botRef) {
+    Map<String, List<String>> productTypes = new HashMap<>();
+    DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
+    try {
+      String query = NativeQueries.PRODUCT_TYPE_QUERY;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        productTypes = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String, List<String>>>() {
+        });
+      }
+    } catch (Exception e) {
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+      log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
+    }
+    response.setResponseObject(productTypes.get("product_type"));
+    response.setStatus(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
 }
 
