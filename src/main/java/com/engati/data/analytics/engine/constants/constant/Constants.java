@@ -62,8 +62,8 @@ public class Constants {
   public static final String[] CUSTOMER_SEGMENT_HEADER = new String[]{"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
-  public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
-          "STORE AOV", "CUSTOMER ORDERS","CUSTOMER AOV","CUSTOMER REVENUE", "CUSTOMER LAST_ORDER_DATE", "PRODUCT TYPES"};
+  public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"NAME", "EMAIL", "PHONE",
+          "STORE AOV", "ORDERS","AVERAGE ORDER VALUE ","REVENUE", "LAST_ORDER_DATE", "PRODUCT TYPES"};
   public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
       + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
       + "        {\n" + "            \"isOrCondition\": false,\n"
