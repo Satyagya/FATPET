@@ -137,7 +137,6 @@ public class NativeQueries {
             "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
             "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
             "where cancelled_at like 'None'\n" +
-            "and (is_test like 'nan' or is_test = 0 or is_test is null) " +
             "and created_date between '_startdate_' and '_enddate_'\n" +
             "group by customer_id,order_id,total_price)as a\n" +
             "group by customer_id)as b)as c)\n" +
@@ -148,14 +147,12 @@ public class NativeQueries {
             "(select customer_id, order_id, created_date\n" +
             "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
             "where cancelled_at like 'None'\n" +
-            "and (is_test like 'nan' or is_test = 0 or is_test is null) " +
             "and created_date between '_startdate_' and '_enddate_')as a\n" +
             "group by customer_id)as b where total_orders operator value\n";
 
   public static final String LAST_ORDER_DAYS_CUSTOM_SEGMENT = "select distinct(customer_id) from\n" +
             "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
             "where cancelled_at like 'None'\n" +
-            "and (is_test like 'nan' or is_test = 0 or is_test is null) " +
             "and (created_date between '_startdate_' and '_enddate_') " +
             "and created_date>=CURRENT_DATE - INTERVAL gap day";
 
@@ -164,7 +161,6 @@ public class NativeQueries {
             "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
             "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
             "where cancelled_at like 'None'\n" +
-            "and (is_test like 'nan' or is_test = 0 or is_test is null)" +
             "and created_date between '_startdate_' and '_enddate_'\n" +
             "group by customer_id,order_id,total_price)as a\n" +
             "group by customer_id)as b where revenue operator value";
@@ -176,13 +172,11 @@ public class NativeQueries {
           "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_products_*.parquet')\n" +
           "where product_type in ProductTypes)\n" +
           "and cancelled_at like 'None'\n" +
-          "and (is_test like 'nan' or is_test = 0 or is_test is null)" +
           "and created_date between '_startdate_' and '_enddate_'";
 
   public static final String CUSTOMER_ORDERS = "select customer_id, count(distinct order_id)as total_orders from\n" +
             "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')" +
             "where cancelled_at like 'None' \n" +
-            "and (is_test like 'nan' or is_test = 0 or is_test is null)" +
             "and created_date between '_startdate_' and '_enddate_'" +
             "and customer_id in customerSet\n" +
             "group by customer_id";
@@ -193,7 +187,6 @@ public class NativeQueries {
                       "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
                       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
                       "where cancelled_at like 'None' \n" +
-                      "and (is_test like 'nan' or is_test = 0 or is_test is null) " +
                       "and created_date between '_startdate_' and '_enddate_'" +
                       "and customer_id in customerSet\n" +
                       "group by customer_id,order_id,total_price)as a\n" +
@@ -204,7 +197,6 @@ public class NativeQueries {
           "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
           "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
           "where cancelled_at like 'None'\n" +
-          "and (is_test like 'nan' or is_test = 0 or is_test is null)" +
           "and created_date between '_startdate_' and '_enddate_'\n" +
           "and customer_id in customerSet\n" +
           "group by customer_id,order_id,total_price)as a\n" +
@@ -213,7 +205,6 @@ public class NativeQueries {
   public static final String CUSTOMER_LAST_ORDER_DATE = "select customer_id,max(created_date)as LAST_ORDER_DATE from\n" +
           "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*parquet')\n" +
           "where cancelled_at like 'None'\n" +
-          "and (is_test like 'nan' or is_test = 0 or is_test is null)\n" +
           "and (created_date between '_startdate_' and '_enddate_')\n" +
           "and customer_id in customerSet\n" +
           "group by customer_id";
@@ -222,7 +213,6 @@ public class NativeQueries {
           "(select customer_id,product_id from\n" +
           "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*parquet')\n" +
           "where cancelled_at like 'None'\n" +
-          "and (is_test like 'nan' or is_test = 0 or is_test is null)\n" +
           "and created_date between '_startdate_' and '_enddate_'\n" +
           "and customer_id in customerSet\n" +
           "group by customer_id,product_id) as orders\n" +
