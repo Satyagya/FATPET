@@ -3,6 +3,7 @@ package com.engati.data.analytics.engine.Utils;
 import com.engati.data.analytics.engine.configuration.csv.OrderedComparatorIgnoringCase;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.constants.constant.TableConstants;
+import com.engati.data.analytics.engine.model.response.CustomerSegmentationCustomSegmentResponse;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
@@ -34,6 +35,30 @@ public class CommonUtils {
                     new HeaderColumnNameMappingStrategy<>();
             mappingStrategy.setType(CustomerSegmentationResponse.class);
             mappingStrategy.setColumnOrderOnWrite(new OrderedComparatorIgnoringCase(Constants.CUSTOMER_SEGMENT_HEADER));
+
+            StatefulBeanToCsv statefulBeanToCsv = new StatefulBeanToCsvBuilder(writer)
+                    .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+                    .withMappingStrategy(mappingStrategy)
+                    .build();
+            statefulBeanToCsv.write(customerDetail);
+
+        } catch (Exception e) {
+            log.error("Error while creating CSV file for SegmentName: {} for BotRef: {}", segmentName, botRef, e);
+            isCsvCreated = Boolean.FALSE;
+
+        }
+        return isCsvCreated;
+    }
+
+    public static Boolean createCustomSegmentCsv(List<CustomerSegmentationCustomSegmentResponse> customerDetail, Long botRef,
+                                                 String segmentName, String fileName) {
+        Boolean isCsvCreated = Boolean.TRUE;
+        log.info("Creating CSV file for SegmentName: {} for BotRef: {}", segmentName, botRef);
+        try (FileWriter writer = new FileWriter(fileName)) {
+            HeaderColumnNameMappingStrategy<CustomerSegmentationCustomSegmentResponse> mappingStrategy =
+                    new HeaderColumnNameMappingStrategy<>();
+            mappingStrategy.setType(CustomerSegmentationCustomSegmentResponse.class);
+            mappingStrategy.setColumnOrderOnWrite(new OrderedComparatorIgnoringCase(Constants.CUSTOMER_CUSTOM_SEGMENT_HEADER));
 
             StatefulBeanToCsv statefulBeanToCsv = new StatefulBeanToCsvBuilder(writer)
                     .withSeparator(CSVWriter.DEFAULT_SEPARATOR)

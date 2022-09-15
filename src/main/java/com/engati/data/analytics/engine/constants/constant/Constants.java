@@ -1,5 +1,6 @@
 package com.engati.data.analytics.engine.constants.constant;
 
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 public class Constants {
@@ -27,6 +28,9 @@ public class Constants {
   public static Long DEFAULT_BOTREF = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;
+  public static Long DEFAULT_REVENUE_VALUE = 0L;
+  public static Date DEFAULT_LAST_ORDER_DATE = null;
+  public static String DEFAULT_PRODUCT_TYPES = "";
   public static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   //  Generic Constants
@@ -41,7 +45,7 @@ public class Constants {
   public static String CREATED_DATE = "created_date";
   public static String QUERIES_ASKED = "queries_asked";
   public static String QUERIES_UNANSWERED= "queries_unanswered";
-
+  public static Integer MAXIMUM_NUMBER_OF_OPERATORS = 4;
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";
@@ -57,7 +61,8 @@ public class Constants {
   public static final String[] CUSTOMER_SEGMENT_HEADER = new String[]{"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
-
+  public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
+          "STORE AOV", "CUSTOMER ORDERS","CUSTOMER AOV","CUSTOMER REVENUE", "CUSTOMER LAST_ORDER_DATE", "PRODUCT TYPES"};
   public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
       + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
       + "        {\n" + "            \"isOrCondition\": false,\n"
