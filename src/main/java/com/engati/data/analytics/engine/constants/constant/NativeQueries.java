@@ -50,6 +50,8 @@ public class NativeQueries {
        "group by customer_id, order_id, total_price)as a\n" +
        "group by customer_id)as b)as c" ;
 
+  public static String PRODUCT_TYPE_QUERY = "select distinct(product_type)\n" +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_products_*.parquet') ";
    public static String ORDERS_FOR_X_MONTHS = "select customer_id, count(distinct order_id)as orders__last_gap_months \n" +
        "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet') " +
        "       where cancelled_at like 'None'\n" +

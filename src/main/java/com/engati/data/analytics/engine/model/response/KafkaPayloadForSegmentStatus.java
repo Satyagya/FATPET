@@ -12,5 +12,5 @@ public class KafkaPayloadForSegmentStatus {
   private String segmentName;
   private Long botRef;
   private String fileName;
-
+  private int customerCount;
 }
