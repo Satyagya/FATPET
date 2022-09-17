@@ -132,6 +132,95 @@ public class NativeQueries {
       "group by customer_id)as b)as c)\n" +
       "where AOV operator value \n";
 
+  public static final String CUSTOMER_AOV_QUERY_CUSTOM_SEGMENT = "select customer_id from\n" +
+            "(select customer_id,coalesce(round(AOV,2),0) as AOV from\n" +
+            "(select customer_id,((sum_total)*1.0/(number_of_orders)) as AOV from\n" +
+            "(select customer_id,sum(total_price)as sum_total,count(distinct order_id)as number_of_orders from\n" +
+            "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
+            "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+            "where cancelled_at like 'None'\n" +
+            "and created_date between '_startdate_' and '_enddate_'\n" +
+            "group by customer_id,order_id,total_price)as a\n" +
+            "group by customer_id)as b)as c)\n" +
+            "where AOV operator value\n";
+
+  public static final String NUMBER_OF_ORDERS_CUSTOM_SEGMENT = "select customer_id from\n" +
+            "(select customer_id,count(distinct  order_id)as total_orders from\n" +
+            "(select customer_id, order_id, created_date\n" +
+            "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+            "where cancelled_at like 'None'\n" +
+            "and created_date between '_startdate_' and '_enddate_')as a\n" +
+            "group by customer_id)as b where total_orders operator value\n";
+
+  public static final String LAST_ORDER_DAYS_CUSTOM_SEGMENT = "select distinct(customer_id) from\n" +
+            "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+            "where cancelled_at like 'None'\n" +
+            "and (created_date between '_startdate_' and '_enddate_') " +
+            "and created_date>=CURRENT_DATE - INTERVAL gap day";
+
+  public static final String REVENUE_CUSTOM_SEGMENT = "select customer_id from\n" +
+            "(select customer_id,sum(total_price)as revenue from\n" +
+            "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
+            "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
+            "where cancelled_at like 'None'\n" +
+            "and created_date between '_startdate_' and '_enddate_'\n" +
+            "group by customer_id,order_id,total_price)as a\n" +
+            "group by customer_id)as b where revenue operator value";
+
+  public static final String GET_CUSTOMERS_FOR_PRODUCT_TYPE = "select distinct(customer_id) from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+          "where product_id in\n" +
+          "(select product_id from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_products_*.parquet')\n" +
+          "where product_type in ProductTypes)\n" +
+          "and cancelled_at like 'None'\n" +
+          "and created_date between '_startdate_' and '_enddate_'";
+
+  public static final String CUSTOMER_ORDERS = "select customer_id, count(distinct order_id)as total_orders from\n" +
+            "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')" +
+            "where cancelled_at like 'None' \n" +
+            "and created_date between '_startdate_' and '_enddate_'" +
+            "and customer_id in customerSet\n" +
+            "group by customer_id";
+
+  public static final String CUSTOMER_AOV_CUSTOM_SEGMENT = "select customer_id,coalesce(round(AOV,2),0) as AOV from\n" +
+                      "(select customer_id,((sum_total)*1.0/(number_of_orders)) as AOV from\n" +
+                      "(select customer_id,sum(total_price)as sum_total,count(distinct order_id)as number_of_orders from\n" +
+                      "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
+                      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+                      "where cancelled_at like 'None' \n" +
+                      "and created_date between '_startdate_' and '_enddate_'" +
+                      "and customer_id in customerSet\n" +
+                      "group by customer_id,order_id,total_price)as a\n" +
+                      "group by customer_id)as b)";
+
+  public static final String CUSTOMER_REVENUE = "select customer_id,round(revenue,2) as revenue from\n" +
+          "(select customer_id,sum(total_price)as revenue from\n" +
+          "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
+          "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
+          "where cancelled_at like 'None'\n" +
+          "and created_date between '_startdate_' and '_enddate_'\n" +
+          "and customer_id in customerSet\n" +
+          "group by customer_id,order_id,total_price)as a\n" +
+          "group by customer_id)";
+
+  public static final String CUSTOMER_LAST_ORDER_DATE = "select customer_id,max(created_date)as LAST_ORDER_DATE from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*parquet')\n" +
+          "where cancelled_at like 'None'\n" +
+          "and (created_date between '_startdate_' and '_enddate_')\n" +
+          "and customer_id in customerSet\n" +
+          "group by customer_id";
+
+  public static final String CUSTOMER_PRODUCT_TYPE = "select customer_id,GROUP_CONCAT(distinct(product_type), ',') as ProductTypes from\n" +
+          "(select customer_id,product_id from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*parquet')\n" +
+          "where cancelled_at like 'None'\n" +
+          "and created_date between '_startdate_' and '_enddate_'\n" +
+          "and customer_id in customerSet\n" +
+          "group by customer_id,product_id) as orders\n" +
+          "natural join (select product_type,product_id from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_products_*.parquet')) as products\n" +
+          "group by customer_id";
   public static final String GET_ENGAGED_USERS = "select coalesce(count(distinct  user_id), 0)as users\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/users_*.parquet')\n "
       + "where created_date between date '_date_' - interval 'gap' day and date '_date_'";
