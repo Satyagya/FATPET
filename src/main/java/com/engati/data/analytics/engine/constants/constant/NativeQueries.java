@@ -52,10 +52,11 @@ public class NativeQueries {
 
   public static String PRODUCT_TYPE_QUERY = "select distinct(product_type)\n" +
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_products_*.parquet') ";
+
    public static String ORDERS_FOR_X_MONTHS = "select customer_id, count(distinct order_id)as orders__last_gap_months \n" +
        "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet') " +
        "       where cancelled_at like 'None'\n" +
-       "       and created_date >= CURRENT_DATE - INTERVAL gap MONTH\n" +
+       "       and created_date > CURRENT_DATE - INTERVAL gap MONTH\n" +
        "       and customer_id in customerSet" +
        "       group by customer_id";
 
@@ -116,7 +117,7 @@ public class NativeQueries {
       "(select customer_id, count(distinct order_id)as orders__last_gap_months\n" +
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet') \n" +
       "where cancelled_at like 'None'\n" +
-      "and created_date >= CURRENT_DATE - INTERVAL gap MONTH\n" +
+      "and created_date > CURRENT_DATE - INTERVAL gap MONTH\n" +
       "group by customer_id)as a\n" +
       "where orders__last_gap_months operator value\n" ;
 
