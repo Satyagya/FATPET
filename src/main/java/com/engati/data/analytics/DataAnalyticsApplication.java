@@ -1,7 +1,5 @@
 package com.engati.data.analytics;
 
-import com.engati.data.analytics.engine.constants.constant.Constants;
-import net.minidev.json.JSONObject;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
