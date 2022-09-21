@@ -73,7 +73,7 @@ public class Constants {
       "{\n" + "\t\"entities\": [\n" + "\t\t\"PRODUCT\",\n" + "\t\t\"IMAGE\"\n" + "\t],\n"
       + "\t\"searchFilters\": [{\n" + "\t\t\"isOrCondition\": false,\n"
       + "\t\t\"fieldName\": \"PRODUCT_productId\",\n" + "\t\t\"value\": null,\n"
-      + "\t\t\"values\": % s,\n" + "\t\t\"condition\": \"IN\"\n" + "\t}],\n" + "\t\"fields\": [\n"
+      + "\t\t\"values\": %s,\n" + "\t\t\"condition\": \"IN\"\n" + "\t}],\n" + "\t\"fields\": [\n"
       + "\t\t\"PRODUCT_productId\",\n" + "\t\t\"PRODUCT_title\",\n" + "\t\t\"IMAGE_url\"\n"
       + "\t],\n" + "\t\"customSort\": [{\n" + "\t\t\"name\": \"PRODUCT_productId\",\n"
       + "\t\t\"isAsc\": true\n" + "\t}],\n" + "\t\"is_unique_variants\": true,\n"
