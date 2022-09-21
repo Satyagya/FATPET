@@ -69,16 +69,15 @@ public class Constants {
 
   public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"NAME", "EMAIL", "PHONE",
           "STORE AOV","AVERAGE ORDER VALUE","ORDERS","REVENUE", "LAST_ORDER_DATE", "PRODUCT TYPES"};
-  public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
-      + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
-      + "        {\n" + "            \"isOrCondition\": false,\n"
-      + "            \"fieldName\": \"PRODUCT_productId\",\n" + "            \"value\": null,\n"
-      + "            \"values\": %s,\n"
-      + "            \"condition\": \"IN\"\n" + "        }\n" + "    ],\n" + "    \"fields\": [\n"
-      + "        \"PRODUCT_productId\",\n" + "        \"PRODUCT_title\",\n"
-      + "        \"IMAGE_url\"\n" + "    ],\n" + "    \"customSort\": [\n" + "        {\n"
-      + "            \"name\": \"PRODUCT_productId\",\n" + "            \"isAsc\": true\n"
-      + "        }\n" + "    ],\n" + "    \"pageNumber\": 1,\n" + "    \"pageSize\": 10\n" + "}";
+  public static final String PRODUCT_DETAILS_REQUEST =
+      "{\n" + "\t\"entities\": [\n" + "\t\t\"PRODUCT\",\n" + "\t\t\"IMAGE\"\n" + "\t],\n"
+      + "\t\"searchFilters\": [{\n" + "\t\t\"isOrCondition\": false,\n"
+      + "\t\t\"fieldName\": \"PRODUCT_productId\",\n" + "\t\t\"value\": null,\n"
+      + "\t\t\"values\": % s,\n" + "\t\t\"condition\": \"IN\"\n" + "\t}],\n" + "\t\"fields\": [\n"
+      + "\t\t\"PRODUCT_productId\",\n" + "\t\t\"PRODUCT_title\",\n" + "\t\t\"IMAGE_url\"\n"
+      + "\t],\n" + "\t\"customSort\": [{\n" + "\t\t\"name\": \"PRODUCT_productId\",\n"
+      + "\t\t\"isAsc\": true\n" + "\t}],\n" + "\t\"is_unique_variants\": true,\n"
+      + "\t\"pageNumber\": 0,\n" + "\t\"pageSize\": 10\n" + "}";
 
   public static final String[] INTENT_LIST = new String[]{"ORDER_ENQUIRY", "PURCHASE_ENQUIRY", "RETURN_AND_EXCHANGE",
                                                           "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};
