@@ -27,12 +27,12 @@ public class DashboardProductResponse implements Serializable {
   private static final long serialVersionUID = -5432144884474765952L;
 
   @JsonProperty(value = "product_id")
-  private Long PRODUCT_productId;
+  private Long product_id;
 
   @JsonProperty(value = "product_title")
-  private String PRODUCT_title;
+  private String title;
 
   @JsonProperty(value = "product_image")
-  private String IMAGE_url;
+  private String image_url;
 
 }
