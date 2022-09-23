@@ -34,7 +34,7 @@ public class Constants {
   public static Long DEFAULT_BOTREF = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;
-  public static Long DEFAULT_REVENUE_VALUE = 0L;
+  public static Long DEFAULT_SPEND_VALUE = 0L;
   public static Date DEFAULT_LAST_ORDER_DATE = null;
   public static String DEFAULT_PRODUCT_TYPES = "";
   public static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -67,8 +67,8 @@ public class Constants {
   public static final String[] CUSTOMER_SEGMENT_HEADER = new String[]{"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
-  public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"NAME", "EMAIL", "PHONE",
-          "STORE AOV","AVERAGE ORDER VALUE","ORDERS","REVENUE", "LAST_ORDER_DATE", "PRODUCT TYPES"};
+  public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
+          "STORE AOV","CUSTOMER AOV","ORDERS","SPEND", "LAST_ORDER_DATE", "PRODUCT_TYPES"};
   public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
       + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
       + "        {\n" + "            \"isOrCondition\": false,\n"

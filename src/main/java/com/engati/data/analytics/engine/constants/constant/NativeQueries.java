@@ -159,7 +159,7 @@ public class NativeQueries {
             "and (created_date between '_startdate_' and '_enddate_') " +
             "and created_date>=CURRENT_DATE - INTERVAL gap day";
 
-  public static final String REVENUE_CUSTOM_SEGMENT = "select customer_id from\n" +
+  public static final String SPEND_CUSTOM_SEGMENT = "select customer_id from\n" +
             "(select customer_id,sum(total_price)as revenue from\n" +
             "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
             "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
@@ -195,7 +195,7 @@ public class NativeQueries {
                       "group by customer_id,order_id,total_price)as a\n" +
                       "group by customer_id)as b)";
 
-  public static final String CUSTOMER_REVENUE = "select customer_id,round(revenue,2) as revenue from\n" +
+  public static final String CUSTOMER_SPEND = "select customer_id,round(revenue,2) as spend from\n" +
           "(select customer_id,sum(total_price)as revenue from\n" +
           "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
           "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
@@ -281,14 +281,14 @@ public class NativeQueries {
       + "and sentiment_label not like 'None'"
       + "group by sentiment_label ";
 
-  public static final String GET_TRANSACTIONS_FROM_ENGATI = "select coalesce(count(distinct transactionId), 0) as transactions "
-      + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
-      + "where source like '%engati%' \n"
-      + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
+
+    public static final String GET_TRANSACTIONS_FROM_ENGATI = "select coalesce(count(distinct transactionId), 0) as transactions "
+            + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
+            + "where source like '%engati%' \n";
 
   public static final String GET_TRANSACTION_REVENUE_FROM_ENGATI = "select round(sum(coalesce(transactionRevenue, 0)),2)as transaction_revenue "
-      + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
-      + "where source like '%engati%' \n"
+          + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
+          + "where source like '%engati%' \n"
       + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
   public static final String MOST_ABANDONED_PRODUCTS =

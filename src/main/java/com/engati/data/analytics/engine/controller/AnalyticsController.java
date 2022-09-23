@@ -53,4 +53,10 @@ public class AnalyticsController {
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
+  @GetMapping(value = "/test")
+  public void testSlackAlert() {
+    prometheusManagementService.apiRequestFailureEvent("test_event", 3456L,
+        "java.Execption.test", "{...}");
+  }
+
 }

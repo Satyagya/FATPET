@@ -130,7 +130,7 @@ public class SegmentServiceImpl implements SegmentService {
     storeAOV = getStoreAOV(botRef);
     Map<Long,Map<String,Long>> customerOrders = getCustomerOrdersCustomSegment(customerList,botRef,startDate,endDate);
     Map<Long,Map<String,Object>> customerAOV = getCustomerAOVCustomSegment(customerList,botRef,startDate,endDate);
-    Map<Long,Map<String,Object>> customerRevenue = getCustomerRevenueCustomerSegment(customerList,botRef,startDate,endDate);
+    Map<Long,Map<String,Object>> customerSpend = getCustomerSpendCustomerSegment(customerList,botRef,startDate,endDate);
     Map<Long,Map<String,Date>> customerLastOrderDate = getCustomerLastOrderDateCustomerSegment(customerList,botRef,startDate,endDate) ;
     Map<Long,Map<String,String>> customerProductType = getCustomerProductTypeCustomerSegment(customerList,botRef,startDate,endDate);
     for (Long customerId : customerList) {
@@ -159,9 +159,9 @@ public class SegmentServiceImpl implements SegmentService {
       }
 
       try {
-        customerSegmentationCustomSegmentResponse.setCustomerRevenue((Double) customerRevenue.get(customerId).getOrDefault(QueryConstants.REVENUE, Constants.DEFAULT_REVENUE_VALUE));
+        customerSegmentationCustomSegmentResponse.setCustomerSpend((Double) customerSpend.get(customerId).getOrDefault(QueryConstants.SPEND, Constants.DEFAULT_SPEND_VALUE));
       } catch (NullPointerException e) {
-        customerSegmentationCustomSegmentResponse.setCustomerRevenue(Double.valueOf(Constants.DEFAULT_REVENUE_VALUE));
+        customerSegmentationCustomSegmentResponse.setCustomerSpend(Double.valueOf(Constants.DEFAULT_SPEND_VALUE));
       }
 
       try {
@@ -209,10 +209,10 @@ public class SegmentServiceImpl implements SegmentService {
     return customerLastOrderDate;
   }
 
-  private Map<Long,Map<String,Object>> getCustomerRevenueCustomerSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
+  private Map<Long,Map<String,Object>> getCustomerSpendCustomerSegment(Set<Long> customerIds, Long botRef, String startDate, String endDate) {
     Map<Long,Map<String,Object>> customerRevenue = new HashMap<>();
     try {
-      String query = NativeQueries.CUSTOMER_REVENUE;
+      String query = NativeQueries.CUSTOMER_SPEND;
       query = query.replace(Constants.BOT_REF,botRef.toString());
       query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
       query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
@@ -231,7 +231,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
 
     } catch (Exception e) {
-      log.error("Error while getting Customer Revenue for: botRef:{}", botRef, e);
+      log.error("Error while getting Customer Spend for: botRef:{}", botRef, e);
     }
     return customerRevenue;
   }
@@ -733,8 +733,8 @@ public class SegmentServiceImpl implements SegmentService {
       } else if(operand.contains("LAST_ORDER")) {
         query_for_operand = generateQueryForLastOrderDaysCustomSegment(botRef,operand,startDate,endDate);
 
-      } else if(operand.contains("REVENUE")) {
-        query_for_operand = generateQueryForRevenueCustomSegment(botRef,operand,startDate,endDate);
+      } else if(operand.contains("SPEND")) {
+        query_for_operand = generateQueryForSpendCustomSegment(botRef,operand,startDate,endDate);
 
       } else if(operand.contains("PRODUCT_TYPE")) {
         String productType = operand.split("IN")[1];
@@ -937,8 +937,8 @@ public class SegmentServiceImpl implements SegmentService {
     }
   }
 
-  public String generateQueryForRevenueCustomSegment(Long botRef,String operand,String startDate,String endDate) {
-    String query = NativeQueries.REVENUE_CUSTOM_SEGMENT;
+  public String generateQueryForSpendCustomSegment(Long botRef,String operand,String startDate,String endDate) {
+    String query = NativeQueries.SPEND_CUSTOM_SEGMENT;
     query = query.replace(Constants.BOT_REF, botRef.toString());
     String[] operand_params = operand.split(" ");
 
@@ -950,7 +950,7 @@ public class SegmentServiceImpl implements SegmentService {
 
       return query;
     } else {
-      log.error("Error while generating query for Revenue for botRef: {}", botRef);
+      log.error("Error while generating query for Spend for botRef: {}", botRef);
       return "";
     }
   }
@@ -969,7 +969,6 @@ public class SegmentServiceImpl implements SegmentService {
     return query;
   }
 
-
   @Override
   public DataAnalyticsResponse<List<String>> getProductType(Long botRef) {
     Map<String, List<String>> productTypes = new HashMap<>();
@@ -987,7 +986,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     } catch (Exception e) {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      log.error("Error while getting Customer AOV for: botRef:{}", botRef, e);
+      log.info("Error while getting List of ProductTypes for: botRef:{}", botRef, e);
     }
     response.setResponseObject(productTypes.get("product_type"));
     response.setStatus(ResponseStatusCode.SUCCESS);
