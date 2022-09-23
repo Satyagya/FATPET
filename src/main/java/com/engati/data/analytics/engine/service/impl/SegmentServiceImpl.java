@@ -210,7 +210,7 @@ public class SegmentServiceImpl implements SegmentService {
   }
 
   private Map<Long,Map<String,Object>> getCustomerSpendCustomerSegment(Set<Long> customerIds, Long botRef, String startDate, String endDate) {
-    Map<Long,Map<String,Object>> customerRevenue = new HashMap<>();
+    Map<Long,Map<String,Object>> customerSpend = new HashMap<>();
     try {
       String query = NativeQueries.CUSTOMER_SPEND;
       query = query.replace(Constants.BOT_REF,botRef.toString());
@@ -226,14 +226,14 @@ public class SegmentServiceImpl implements SegmentService {
       log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
-        customerRevenue = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
+        customerSpend = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<Long, Map<String, Object>>>() {
         });
       }
 
     } catch (Exception e) {
       log.error("Error while getting Customer Spend for: botRef:{}", botRef, e);
     }
-    return customerRevenue;
+    return customerSpend;
   }
 
   private Map<Long,Map<String,String>> getCustomerProductTypeCustomerSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
