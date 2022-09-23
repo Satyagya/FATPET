@@ -7,8 +7,8 @@ import java.util.Locale;
 public class Constants {
 
   public static final String RESPONSE_OBJECT = "response";
-  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
-  public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
+  public static final String CSV_BASE_PATH_FORMAT = "/Users/aniketmodi/Documents/customer_segmentsV2/%s";
+  public static final String CSV_PATH_FORMAT = "/Users/aniketmodi/Documents/customer_segmentsV2/%s/%s.csv";
   public static final String PDE_PREFIX = "pde";
   public static final String RETROFIT_PDE_API = "retrofitPDEApi";
   public static final String PDE_CLIENT = "pdeHttpClient";
@@ -28,7 +28,7 @@ public class Constants {
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-  public static String PARQUET_FILE_PATH = "/opt/engati/parquet_store";
+  public static String PARQUET_FILE_PATH = "/Users/aniketmodi/Documents/engati-service/shopify-etl-engine/parquet_store";
 
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
@@ -68,7 +68,7 @@ public class Constants {
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
   public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
-          "STORE AOV", "CUSTOMER ORDERS","CUSTOMER AOV","CUSTOMER REVENUE", "CUSTOMER LAST_ORDER_DATE", "PRODUCT TYPES"};
+          "STORE AOV","CUSTOMER AOV","ORDERS","SPEND", "LAST_ORDER_DATE", "PRODUCT_TYPES"};
   public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
       + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
       + "        {\n" + "            \"isOrCondition\": false,\n"

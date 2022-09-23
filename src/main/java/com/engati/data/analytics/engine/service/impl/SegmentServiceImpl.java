@@ -714,7 +714,7 @@ public class SegmentServiceImpl implements SegmentService {
       } else if(operand.contains("LAST_ORDER")) {
         query_for_operand = generateQueryForLastOrderDaysCustomSegment(botRef,operand,startDate,endDate);
 
-      } else if(operand.contains("REVENUE")) {
+      } else if(operand.contains("SPEND")) {
         query_for_operand = generateQueryForRevenueCustomSegment(botRef,operand,startDate,endDate);
 
       } else if(operand.contains("PRODUCT_TYPE")) {
