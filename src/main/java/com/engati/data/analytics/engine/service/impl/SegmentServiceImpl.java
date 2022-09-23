@@ -130,9 +130,9 @@ public class SegmentServiceImpl implements SegmentService {
     storeAOV = getStoreAOV(botRef);
     Map<Long,Map<String,Long>> customerOrders = getCustomerOrdersCustomSegment(customerList,botRef,startDate,endDate);
     Map<Long,Map<String,Object>> customerAOV = getCustomerAOVCustomSegment(customerList,botRef,startDate,endDate);
-    Map<Long,Map<String,Object>> customerSpend = getCustomerSpendCustomerSegment(customerList,botRef,startDate,endDate);
-    Map<Long,Map<String,Date>> customerLastOrderDate = getCustomerLastOrderDateCustomerSegment(customerList,botRef,startDate,endDate) ;
-    Map<Long,Map<String,String>> customerProductType = getCustomerProductTypeCustomerSegment(customerList,botRef,startDate,endDate);
+    Map<Long,Map<String,Object>> customerSpend = getCustomerSpendCustomSegment(customerList,botRef,startDate,endDate);
+    Map<Long,Map<String,Date>> customerLastOrderDate = getCustomerLastOrderDateCustomSegment(customerList,botRef,startDate,endDate) ;
+    Map<Long,Map<String,String>> customerProductType = getCustomerProductTypeCustomSegment(customerList,botRef,startDate,endDate);
     for (Long customerId : customerList) {
       CustomerSegmentationCustomSegmentResponse customerSegmentationCustomSegmentResponse = new CustomerSegmentationCustomSegmentResponse();
 
@@ -182,7 +182,7 @@ public class SegmentServiceImpl implements SegmentService {
     return customerSegmentationResponseList;
   }
 
-  private Map<Long,Map<String,Date>> getCustomerLastOrderDateCustomerSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
+  private Map<Long,Map<String,Date>> getCustomerLastOrderDateCustomSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
     Map<Long,Map<String,Date>> customerLastOrderDate = new HashMap<>();
     try {
       String query = NativeQueries.CUSTOMER_LAST_ORDER_DATE;
@@ -209,7 +209,7 @@ public class SegmentServiceImpl implements SegmentService {
     return customerLastOrderDate;
   }
 
-  private Map<Long,Map<String,Object>> getCustomerSpendCustomerSegment(Set<Long> customerIds, Long botRef, String startDate, String endDate) {
+  private Map<Long,Map<String,Object>> getCustomerSpendCustomSegment(Set<Long> customerIds, Long botRef, String startDate, String endDate) {
     Map<Long,Map<String,Object>> customerSpend = new HashMap<>();
     try {
       String query = NativeQueries.CUSTOMER_SPEND;
@@ -236,7 +236,7 @@ public class SegmentServiceImpl implements SegmentService {
     return customerSpend;
   }
 
-  private Map<Long,Map<String,String>> getCustomerProductTypeCustomerSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
+  private Map<Long,Map<String,String>> getCustomerProductTypeCustomSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
     Map<Long,Map<String,String>> customerProductType = new HashMap<>();
     try{
       String query = NativeQueries.CUSTOMER_PRODUCT_TYPE;
