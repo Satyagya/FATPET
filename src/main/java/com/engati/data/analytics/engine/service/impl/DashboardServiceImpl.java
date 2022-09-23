@@ -604,9 +604,7 @@ public class DashboardServiceImpl implements DashboardService {
       log.error("Error while getting Product Details from PDE for BotRef: {}", botRef);
       return null;
     }
-    return dashboardProductResponseList.stream().collect(collectingAndThen(toCollection(
-            () -> new TreeSet<>(comparingLong(DashboardProductResponse::getPRODUCT_productId))),
-        ArrayList::new));
+    return dashboardProductResponseList;
   }
 
   @Override
