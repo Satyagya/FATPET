@@ -93,8 +93,8 @@ public class CommonUtils {
         String value = "";
         try {
             value = MAPPER.writeValueAsString(object);
-        } catch (Exception e) {
-            log.debug("Error while getting value from Object: {} with exception:{}", object,
+        } catch (IOException e) {
+            log.error("Error while getting value from Object: {} with exception:{}", object,
                 e.getMessage());
         }
         return value;
