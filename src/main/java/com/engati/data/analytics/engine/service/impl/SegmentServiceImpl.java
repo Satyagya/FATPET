@@ -927,8 +927,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     //Input will be LAST_ORDER IN 30 day
     if (operand_params.length == 4) {
-      query = query.replace(QueryConstants.GAP, operand_params[2]);
-      query = query.replace(QueryConstants.START_DATE, startDate);
+      query = query.replace(QueryConstants.GAP, String.valueOf(operand_params[2]));
       query = query.replace(QueryConstants.END_DATE, endDate);
       return query;
     } else {

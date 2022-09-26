@@ -51,7 +51,8 @@ public class NativeQueries {
        "group by customer_id)as b)as c" ;
 
   public static String PRODUCT_TYPE_QUERY = "select distinct(product_type)\n" +
-      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_products_*.parquet') ";
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_products_*.parquet')\n" +
+      "where product_type <> ''"    ;
 
    public static String ORDERS_FOR_X_MONTHS = "select customer_id, count(distinct order_id)as orders__last_gap_months \n" +
        "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet') " +
@@ -156,8 +157,7 @@ public class NativeQueries {
   public static final String LAST_ORDER_DAYS_CUSTOM_SEGMENT = "select distinct(customer_id) from\n" +
             "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
             "where cancelled_at like 'None'\n" +
-            "and (created_date between '_startdate_' and '_enddate_') " +
-            "and created_date>=CURRENT_DATE - INTERVAL gap day";
+            "and (created_date between date '_enddate_'- interval 'gap' day and date '_enddate_') ";
 
   public static final String SPEND_CUSTOM_SEGMENT = "select customer_id from\n" +
             "(select customer_id,sum(total_price)as revenue from\n" +
