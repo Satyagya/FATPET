@@ -1,6 +1,8 @@
 package com.engati.data.analytics.engine.constants.constant;
 
+import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class Constants {
 
@@ -17,6 +19,11 @@ public class Constants {
   public static final String RESPONSE = "responseObject";
   public static final String ABANDONED_CHECKOUTS = "abandoned_checkouts";
   public static final String ABANDONED_CHECKOUTS_PARQUET_PATH = "/%d/abandoned_checkouts_*.parquet";
+  public static final String PROMETHEUS_API_REQUEST_COUNTER_NAME = "dae_api_request";
+  public static final String PROMETHEUS_BOT_REF = "bot_ref";
+  public static final String PROMETHEUS_SHOPIFY_EVENT = "shopify_event";
+  public static final String PROMETHEUS_CAUSE_OF_FAILURE = "cause_of_failure";
+  public static final String PROMETHEUS_REQUEST_PAYLOAD = "payload";
 
 
   //  DuckDB Connection URL
@@ -27,6 +34,9 @@ public class Constants {
   public static Long DEFAULT_BOTREF = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;
+  public static Long DEFAULT_REVENUE_VALUE = 0L;
+  public static Date DEFAULT_LAST_ORDER_DATE = null;
+  public static String DEFAULT_PRODUCT_TYPES = "";
   public static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   //  Generic Constants
@@ -41,7 +51,7 @@ public class Constants {
   public static String CREATED_DATE = "created_date";
   public static String QUERIES_ASKED = "queries_asked";
   public static String QUERIES_UNANSWERED= "queries_unanswered";
-
+  public static Integer MAXIMUM_NUMBER_OF_OPERATORS = 4;
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";
@@ -57,17 +67,17 @@ public class Constants {
   public static final String[] CUSTOMER_SEGMENT_HEADER = new String[]{"CUSTOMER NAME", "CUSTOMER EMAIL", "CUSTOMER PHONE",
           "STORE AOV", "CUSTOMER AOV", "ORDERS IN LAST ONE MONTH", "ORDERS IN LAST SIX MONTH", "ORDERS IN LAST TWELVE MONTH"};
 
-
-  public static final String PRODUCT_DETAILS_REQUEST = "{\n" + "    \"entities\": [ \n"
-      + "        \"PRODUCT\",\n" + "        \"IMAGE\"\n" + "    ],\n" + "    \"searchFilters\": [\n"
-      + "        {\n" + "            \"isOrCondition\": false,\n"
-      + "            \"fieldName\": \"PRODUCT_productId\",\n" + "            \"value\": null,\n"
-      + "            \"values\": %s,\n"
-      + "            \"condition\": \"IN\"\n" + "        }\n" + "    ],\n" + "    \"fields\": [\n"
-      + "        \"PRODUCT_productId\",\n" + "        \"PRODUCT_title\",\n"
-      + "        \"IMAGE_url\"\n" + "    ],\n" + "    \"customSort\": [\n" + "        {\n"
-      + "            \"name\": \"PRODUCT_productId\",\n" + "            \"isAsc\": true\n"
-      + "        }\n" + "    ],\n" + "    \"pageNumber\": 1,\n" + "    \"pageSize\": 10\n" + "}";
+  public static final String[] CUSTOMER_CUSTOM_SEGMENT_HEADER= new String[] {"NAME", "EMAIL", "PHONE",
+          "STORE AOV","AVERAGE ORDER VALUE","ORDERS","REVENUE", "LAST_ORDER_DATE", "PRODUCT TYPES"};
+  public static final String PRODUCT_DETAILS_REQUEST =
+      "{\n" + "\t\"entities\": [\n" + "\t\t\"PRODUCT\",\n" + "\t\t\"IMAGE\"\n" + "\t],\n"
+      + "\t\"searchFilters\": [{\n" + "\t\t\"isOrCondition\": false,\n"
+      + "\t\t\"fieldName\": \"PRODUCT_productId\",\n" + "\t\t\"value\": null,\n"
+      + "\t\t\"values\": %s,\n" + "\t\t\"condition\": \"IN\"\n" + "\t}],\n" + "\t\"fields\": [\n"
+      + "\t\t\"PRODUCT_productId\",\n" + "\t\t\"PRODUCT_title\",\n" + "\t\t\"IMAGE_url\"\n"
+      + "\t],\n" + "\t\"customSort\": [{\n" + "\t\t\"name\": \"PRODUCT_productId\",\n"
+      + "\t\t\"isAsc\": true\n" + "\t}],\n" + "\t\"is_unique_variants\": true,\n"
+      + "\t\"pageNumber\": 0,\n" + "\t\"pageSize\": 10\n" + "}";
 
   public static final String[] INTENT_LIST = new String[]{"ORDER_ENQUIRY", "PURCHASE_ENQUIRY", "RETURN_AND_EXCHANGE",
                                                           "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};

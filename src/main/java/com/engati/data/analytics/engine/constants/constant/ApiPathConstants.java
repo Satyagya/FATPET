@@ -11,6 +11,7 @@ public class ApiPathConstants {
   public static final String API_BASE_PATH_FOR_VARIANTS_BY_UNIT_SALES = "/botRef/{botRef}/getVariantsByUnitSales";
   public static final String API_BASE_PATH_FOR_FETCHING_PURCHASE_HISTORY = "/getPurchaseHistory";
   public static final String GET_CUSTOM_SEGMENT = "/botRef/{botRef}/getCustomSegment";
+  public static final String GET_CUSTOM_SEGMENT_V2 = "/botRef/{botRef}/getCustomSegmentV2";
   public static final String SEGMENT_CONDITION = "segmentCondition";
   public static final String ENGAGED_USERS ="/{botRef}/getEngagedUsers";
   public static final String ORDER_COUNT ="/{botRef}/getOrderCount";
@@ -29,6 +30,7 @@ public class ApiPathConstants {
   public static final String MANAGE_GA_CREDS = "shopify/dashboard/ga-creds";
   public static final String AUTH_JSON = "authJson";
   public static final String PROPERTY_ID = "propertyId";
+  public static final String GET_PRODUCT_TYPE = "/botRef/{botRef}/getProductType";
  
 
 }

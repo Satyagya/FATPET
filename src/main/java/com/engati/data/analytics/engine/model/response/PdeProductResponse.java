@@ -10,7 +10,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PdeProductResponse {
 
-  private Long PRODUCT_productId;
-  private String PRODUCT_title;
-  private String IMAGE_url;
+  private Long product_id;
+  private String title;
+  private String image_url;
 }

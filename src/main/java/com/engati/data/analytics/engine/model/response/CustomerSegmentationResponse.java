@@ -9,7 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @ToString(doNotUseGetters = true)
 public class CustomerSegmentationResponse implements Comparable<CustomerSegmentationResponse>{
-
   @CsvBindByName(column = "CUSTOMER NAME")
   private String customerName;
 

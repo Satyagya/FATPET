@@ -12,11 +12,13 @@ import com.engati.data.analytics.engine.model.request.PurchaseHistoryRequest;
 import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
+import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
@@ -38,6 +40,10 @@ public class AnalyticsServiceImpl implements AnalyticsService {
   private EtlEngineRestUtility etlEngineRestUtility;
 
   public static final ObjectMapper MAPPER = new ObjectMapper();
+
+  @Autowired
+  @Qualifier("com.engati.data.analytics.engine.service.impl.PrometheusManagementServiceImpl")
+  private PrometheusManagementService prometheusManagementService;
 
   @Override
   public DataAnalyticsResponse<List<ProductVariantResponse>> getVariantsByUnitSales(Long botRef, ProductDiscoveryRequest productDiscoveryRequest) {
@@ -104,6 +110,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       response.setResponseObject(responseList);
       response.setStatus(ResponseStatusCode.SUCCESS);
     }catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getVariantsByUnitSales", botRef,
+          e.getMessage(), CommonUtils.getStringValueFromObject(productDiscoveryRequest));
       log.error("Exception encountered while fetching variants by Unit Sales for botRef: {}",botRef, e);
       response.setResponseObject(null);
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
@@ -176,6 +184,9 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       response.setResponseObject(responseList);
       response.setStatus(ResponseStatusCode.SUCCESS);
     }catch (Exception e){
+      prometheusManagementService.apiRequestFailureEvent("getPurchaseHistory",
+          purchaseHistoryRequest.getBotRef(), e.getMessage(),
+          CommonUtils.getStringValueFromObject(purchaseHistoryRequest));
       log.error("Exception encountered while fetching purchase history for botRef: {}",purchaseHistoryRequest.getBotRef(), e);
       response.setResponseObject(null);
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);

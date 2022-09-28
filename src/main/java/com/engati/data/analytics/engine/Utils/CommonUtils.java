@@ -3,6 +3,7 @@ package com.engati.data.analytics.engine.Utils;
 import com.engati.data.analytics.engine.configuration.csv.OrderedComparatorIgnoringCase;
 import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.constants.constant.TableConstants;
+import com.engati.data.analytics.engine.model.response.CustomerSegmentationCustomSegmentResponse;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
@@ -49,6 +50,30 @@ public class CommonUtils {
         return isCsvCreated;
     }
 
+    public static Boolean createCustomSegmentCsv(List<CustomerSegmentationCustomSegmentResponse> customerDetail, Long botRef,
+                                                 String segmentName, String fileName) {
+        Boolean isCsvCreated = Boolean.TRUE;
+        log.info("Creating CSV file for SegmentName: {} for BotRef: {}", segmentName, botRef);
+        try (FileWriter writer = new FileWriter(fileName)) {
+            HeaderColumnNameMappingStrategy<CustomerSegmentationCustomSegmentResponse> mappingStrategy =
+                    new HeaderColumnNameMappingStrategy<>();
+            mappingStrategy.setType(CustomerSegmentationCustomSegmentResponse.class);
+            mappingStrategy.setColumnOrderOnWrite(new OrderedComparatorIgnoringCase(Constants.CUSTOMER_CUSTOM_SEGMENT_HEADER));
+
+            StatefulBeanToCsv statefulBeanToCsv = new StatefulBeanToCsvBuilder(writer)
+                    .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+                    .withMappingStrategy(mappingStrategy)
+                    .build();
+            statefulBeanToCsv.write(customerDetail);
+
+        } catch (Exception e) {
+            log.error("Error while creating CSV file for SegmentName: {} for BotRef: {}", segmentName, botRef, e);
+            isCsvCreated = Boolean.FALSE;
+
+        }
+        return isCsvCreated;
+    }
+
     public static JSONObject removeUnnecessaryKeys(JSONObject jsonObject) {
         jsonObject.remove(TableConstants.AUTH_URI);
         jsonObject.remove(TableConstants.TOKEN_URI);
@@ -62,6 +87,17 @@ public class CommonUtils {
             TableConstants.PROJECT_ID) && jsonObject.containsKey(TableConstants.PRIVATE_KEY_ID)
             && jsonObject.containsKey(TableConstants.PRIVATE_KEY) && jsonObject.containsKey(
             TableConstants.CLIENT_EMAIL) && jsonObject.containsKey(TableConstants.CLIENT_ID);
+    }
+
+    public static String getStringValueFromObject(Object object) {
+        String value = "";
+        try {
+            value = MAPPER.writeValueAsString(object);
+        } catch (IOException e) {
+            log.error("Error while getting value from Object: {} with exception:{}", object,
+                e.getMessage());
+        }
+        return value;
     }
 
 }
