@@ -19,8 +19,10 @@ import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.engati.data.analytics.engine.service.SegmentService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,7 @@ import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -74,7 +77,7 @@ public class SegmentServiceImpl implements SegmentService {
   private List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList, Long botRef) {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
-    List<Map<Long, Object>> customerDetails = segmentRepository.findByShopifyCustomerId(customerList);
+    Map<Long,Map<String,String>> customerDetails = getCustomerDetails(customerList, botRef);
 
     String storeAOV = null;
     storeAOV = getStoreAOV(botRef);
@@ -85,14 +88,24 @@ public class SegmentServiceImpl implements SegmentService {
     for (Long customerId : customerList) {
       CustomerSegmentationResponse customerSegmentationResponse = new CustomerSegmentationResponse();
 
-      for (Map<Long, Object> row : customerDetails) {
-        if ((row.get(Constants.CUSTOMER_ID)).toString().equals(customerId.toString())) {
-          customerSegmentationResponse.setCustomerEmail(String.valueOf(row.get(Constants.CUSTOMER_EMAIL)));
-          customerSegmentationResponse.setCustomerPhone(String.valueOf(row.get(Constants.CUSTOMER_PHONE)));
-          customerSegmentationResponse.setCustomerName(String.valueOf(row.get(Constants.CUSTOMER_NAME)));
-        }
-        continue;
+      try {
+        customerSegmentationResponse.setCustomerEmail(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_EMAIL, Constants.DEFAULT_EMAIL));
+      } catch (NullPointerException e) {
+        customerSegmentationResponse.setCustomerEmail(Constants.DEFAULT_EMAIL);
       }
+
+      try {
+        customerSegmentationResponse.setCustomerPhone(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_PHONE,Constants.DEFAULT_PHONE));
+      } catch (NullPointerException e) {
+        customerSegmentationResponse.setCustomerPhone(Constants.DEFAULT_PHONE);
+      }
+
+      try{
+        customerSegmentationResponse.setCustomerName(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_NAME,Constants.DEFAULT_NAME));
+      } catch (NullPointerException e) {
+        customerSegmentationResponse.setCustomerName(Constants.DEFAULT_NAME);
+      }
+
       customerSegmentationResponse.setStoreAOV(Double.valueOf(storeAOV));
       try {
         customerSegmentationResponse.setCustomerAOV((Double) customerAOV.get(customerId).getOrDefault(QueryConstants.AOV, Constants.DEFAULT_AOV_VALUE));
@@ -124,26 +137,36 @@ public class SegmentServiceImpl implements SegmentService {
   private List<CustomerSegmentationCustomSegmentResponse> getDetailsforCustomerCustomSegments(Set<Long> customerList, Long botRef,String startDate,String endDate) {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationCustomSegmentResponse> customerSegmentationResponseList = new ArrayList<>();
-    List<Map<Long, Object>> customerDetails = segmentRepository.findByShopifyCustomerId(customerList);
+    Map<Long,Map<String,String>> customerDetails = getCustomerDetails(customerList, botRef);
 
     String storeAOV = null;
     storeAOV = getStoreAOV(botRef);
     Map<Long,Map<String,Long>> customerOrders = getCustomerOrdersCustomSegment(customerList,botRef,startDate,endDate);
     Map<Long,Map<String,Object>> customerAOV = getCustomerAOVCustomSegment(customerList,botRef,startDate,endDate);
-    Map<Long,Map<String,Object>> customerSpend = getCustomerSpendCustomSegment(customerList,botRef,startDate,endDate);
+    Map<Long,Map<String,Object>> customerAmountSpent = getCustomerAmountSpentCustomSegment(customerList,botRef,startDate,endDate);
     Map<Long,Map<String,Date>> customerLastOrderDate = getCustomerLastOrderDateCustomSegment(customerList,botRef,startDate,endDate) ;
     Map<Long,Map<String,String>> customerProductType = getCustomerProductTypeCustomSegment(customerList,botRef,startDate,endDate);
     for (Long customerId : customerList) {
       CustomerSegmentationCustomSegmentResponse customerSegmentationCustomSegmentResponse = new CustomerSegmentationCustomSegmentResponse();
 
-      for (Map<Long, Object> row : customerDetails) {
-        if ((row.get(Constants.CUSTOMER_ID)).toString().equals(customerId.toString())) {
-          customerSegmentationCustomSegmentResponse.setCustomerEmail(String.valueOf(row.get(Constants.CUSTOMER_EMAIL)));
-          customerSegmentationCustomSegmentResponse.setCustomerPhone(String.valueOf(row.get(Constants.CUSTOMER_PHONE)));
-          customerSegmentationCustomSegmentResponse.setCustomerName(String.valueOf(row.get(Constants.CUSTOMER_NAME)));
-        }
-        continue;
+      try {
+        customerSegmentationCustomSegmentResponse.setCustomerEmail(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_EMAIL, Constants.DEFAULT_EMAIL));
+      } catch (NullPointerException e) {
+        customerSegmentationCustomSegmentResponse.setCustomerEmail(Constants.DEFAULT_EMAIL);
       }
+
+      try {
+        customerSegmentationCustomSegmentResponse.setCustomerPhone(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_PHONE,Constants.DEFAULT_PHONE));
+      } catch (NullPointerException e) {
+        customerSegmentationCustomSegmentResponse.setCustomerPhone(Constants.DEFAULT_PHONE);
+      }
+
+      try{
+        customerSegmentationCustomSegmentResponse.setCustomerName(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_NAME,Constants.DEFAULT_NAME));
+      } catch (NullPointerException e) {
+        customerSegmentationCustomSegmentResponse.setCustomerName(Constants.DEFAULT_NAME);
+      }
+
       customerSegmentationCustomSegmentResponse.setStoreAOV(Double.valueOf(storeAOV));
 
       try {
@@ -159,9 +182,9 @@ public class SegmentServiceImpl implements SegmentService {
       }
 
       try {
-        customerSegmentationCustomSegmentResponse.setCustomerSpend((Double) customerSpend.get(customerId).getOrDefault(QueryConstants.SPEND, Constants.DEFAULT_SPEND_VALUE));
+        customerSegmentationCustomSegmentResponse.setCustomerAmountSpent((Double) customerAmountSpent.get(customerId).getOrDefault(QueryConstants.AMOUNT_SPENT, Constants.DEFAULT_AMOUNT_SPENT_VALUE));
       } catch (NullPointerException e) {
-        customerSegmentationCustomSegmentResponse.setCustomerSpend(Double.valueOf(Constants.DEFAULT_SPEND_VALUE));
+        customerSegmentationCustomSegmentResponse.setCustomerAmountSpent(Double.valueOf(Constants.DEFAULT_AMOUNT_SPENT_VALUE));
       }
 
       try {
@@ -180,6 +203,30 @@ public class SegmentServiceImpl implements SegmentService {
       customerSegmentationResponseList.sort(Collections.reverseOrder());
     }
     return customerSegmentationResponseList;
+  }
+
+  private Map<Long,Map<String,String>> getCustomerDetails(Set<Long> customerIds, Long botRef) {
+    Map<Long,Map<String,String>> customerDetails = new HashMap<>();
+    try{
+      String query = NativeQueries.GET_CUSTOMER_DETAILS;
+      query = query.replace(Constants.BOT_REF,botRef.toString());
+      query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
+      query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
+      query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET, QueryConstants.CLOSING_ROUND_BRACKET);
+
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      requestBody.put(Constants.KEY, Constants.CUSTOMER_ID);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JSONObject> etlResponse = etlEngineRestUtility.executeQueryDetails(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        customerDetails = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)),new TypeReference<Map<Long,Map<String,String>>>(){
+        });
+      }
+    } catch (Exception e) {
+      log.error("Error while getting Customer Details for: botRef:{}", botRef, e);
+    }
+    return customerDetails;
   }
 
   private Map<Long,Map<String,Date>> getCustomerLastOrderDateCustomSegment(Set<Long> customerIds, Long botRef,String startDate,String endDate) {
@@ -209,10 +256,10 @@ public class SegmentServiceImpl implements SegmentService {
     return customerLastOrderDate;
   }
 
-  private Map<Long,Map<String,Object>> getCustomerSpendCustomSegment(Set<Long> customerIds, Long botRef, String startDate, String endDate) {
+  private Map<Long,Map<String,Object>> getCustomerAmountSpentCustomSegment(Set<Long> customerIds, Long botRef, String startDate, String endDate) {
     Map<Long,Map<String,Object>> customerSpend = new HashMap<>();
     try {
-      String query = NativeQueries.CUSTOMER_SPEND;
+      String query = NativeQueries.CUSTOMER_AMOUNT_SPENT;
       query = query.replace(Constants.BOT_REF,botRef.toString());
       query = query.replace(QueryConstants.CUSTOMER_SET, customerIds.toString());
       query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET, QueryConstants.OPENING_ROUND_BRACKET);
@@ -268,6 +315,12 @@ public class SegmentServiceImpl implements SegmentService {
   @Override
   public DataAnalyticsResponse<List<CustomerSegmentationResponse>> getCustomersForSystemSegment(Long botRef, String segmentName) {
     log.info("Entered getQueryForCustomerSegment while getting config for botRef: {}, segment: {}", botRef, segmentName);
+
+    KafkaPayloadForSegmentStatus kafkaPayload = new KafkaPayloadForSegmentStatus();
+    kafkaPayload.setSegmentName(segmentName);
+    kafkaPayload.setBotRef(botRef);
+    kafkaPayload.setSegmentType(Constants.SYSTEM_SEGMENT);
+
     DataAnalyticsResponse<List<CustomerSegmentationResponse>> response = new DataAnalyticsResponse<>();
     response.setStatus(ResponseStatusCode.SUCCESS);
     DataAnalyticsResponse<CustomerSegmentationConfigurationResponse> configDetails = customerSegmentationConfigurationService.getSystemSegmentConfigByBotRefAndSegment(botRef, segmentName);
@@ -291,11 +344,17 @@ public class SegmentServiceImpl implements SegmentService {
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
     try {
       String fileName = getOutputFileName(botRef, segmentName);
+      kafkaPayload.setFileName(fileName);
       if (Objects.nonNull(fileName)) {
+        kafkaPayload.setStatus("SUCCESS");
+        kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         if (!CollectionUtils.isEmpty(resultSet)) {
           List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet, botRef);
+          kafkaPayload.setCustomerCount(customerDetail.size());
           if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
             response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+            kafkaPayload.setStatus("FAILURE - CSV_CREATION_FAILURE");
+            kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
           }
         } else {
           File emptyFile = new File(fileName);
@@ -306,6 +365,8 @@ public class SegmentServiceImpl implements SegmentService {
             log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
           }
           response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
+          kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
+          kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         }
       }
     } catch (Exception e) {
@@ -313,6 +374,15 @@ public class SegmentServiceImpl implements SegmentService {
           e.getMessage(), segmentName);
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
+      kafkaPayload.setStatus("FAILURE - PROCESSING ERROR");
+      kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+    }
+    try {
+      log.info("Pushing to the response kafka topic, payload : {}", kafkaPayload);
+      kafka.send(segmentResponseTopic, CommonUtils.MAPPER.writeValueAsString(kafkaPayload));
+    } catch (JsonProcessingException e) {
+      log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
+      e.printStackTrace();
     }
     return response;
   }
@@ -665,6 +735,7 @@ public class SegmentServiceImpl implements SegmentService {
     kafkaPayload.setSegmentName(customSegmentRequest.getSegmentName());
     kafkaPayload.setFileName(customSegmentRequest.getFileName());
     kafkaPayload.setBotRef(botRef);
+    kafkaPayload.setSegmentType(Constants.CUSTOM_SEGMENT);
 
     DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> response = new DataAnalyticsResponse<>();
     response.setStatus(ResponseStatusCode.SUCCESS);
@@ -674,24 +745,28 @@ public class SegmentServiceImpl implements SegmentService {
     String startDate="";
     String endDate="";
 
-    if(Objects.nonNull(customSegmentRequest.getStartDate())) {
-       startDate = formatter.format(customSegmentRequest.getStartDate());
-    } else {
-      response.setResponseObject(null);
-      response.setStatus(ResponseStatusCode.START_DATE_IS_NULL);
-      kafkaPayload.setStatus("FAILURE - START_DATE_IS_NULL");
-      kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
-      kafka.send(segmentResponseTopic, kafkaPayload.toString());
-      return response;
-    }
+    if(Objects.nonNull(customSegmentRequest.getDateRange())) {
 
-    if(Objects.nonNull(customSegmentRequest.getEndDate())) {
-      endDate = formatter.format(customSegmentRequest.getEndDate());
+      ArrayList<Date> dateRange = customSegmentRequest.getDateRange();
+
+      if(dateRange.size()!=2 )
+      {
+        response.setResponseObject(null);
+        response.setStatus(ResponseStatusCode.DATE_RANGE_IS_NOT_VALID);
+        kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+        kafkaPayload.setStatus("FAILURE - DATE_RANGE_IS_NOT_VALID");
+        kafka.send(segmentResponseTopic, kafkaPayload.toString());
+        return response;
+      }
+
+      startDate = formatter.format(dateRange.get(0));
+      endDate = formatter.format(dateRange.get(1));
+
     } else {
       response.setResponseObject(null);
-      response.setStatus(ResponseStatusCode.END_DATE_IS_NULL);
-      kafkaPayload.setStatus("FAILURE - END_DATE_IS_NULL");
+      response.setStatus(ResponseStatusCode.DATE_RANGE_IS_NOT_VALID);
       kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+      kafkaPayload.setStatus("FAILURE - DATE_RANGE_IS_NOT_VALID");
       kafka.send(segmentResponseTopic, kafkaPayload.toString());
       return response;
     }
@@ -733,8 +808,8 @@ public class SegmentServiceImpl implements SegmentService {
       } else if(operand.contains("LAST_ORDER")) {
         query_for_operand = generateQueryForLastOrderDaysCustomSegment(botRef,operand,startDate,endDate);
 
-      } else if(operand.contains("SPEND")) {
-        query_for_operand = generateQueryForSpendCustomSegment(botRef,operand,startDate,endDate);
+      } else if(operand.contains("AMOUNT_SPENT")) {
+        query_for_operand = generateQueryForAmountSpentCustomSegment(botRef,operand,startDate,endDate);
 
       } else if(operand.contains("PRODUCT_TYPE")) {
         String productType = operand.split("IN")[1];
@@ -793,6 +868,7 @@ public class SegmentServiceImpl implements SegmentService {
         kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         if (!CollectionUtils.isEmpty(resultSet)) {
           List<CustomerSegmentationCustomSegmentResponse> customerDetail = getDetailsforCustomerCustomSegments(resultSet,botRef,startDate,endDate);
+          kafkaPayload.setCustomerCount(customerDetail.size());
           if (!CommonUtils.createCustomSegmentCsv(customerDetail, botRef, segmentName, fileName)) {
             response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
             kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
@@ -925,8 +1001,7 @@ public class SegmentServiceImpl implements SegmentService {
     query = query.replace(Constants.BOT_REF, botRef.toString());
     String[] operand_params = operand.split(" ");
 
-    //Input will be LAST_ORDER IN 30 day
-    if (operand_params.length == 4) {
+    if (operand_params.length == 3) {
       query = query.replace(QueryConstants.GAP, String.valueOf(operand_params[2]));
       query = query.replace(QueryConstants.END_DATE, endDate);
       return query;
@@ -936,8 +1011,8 @@ public class SegmentServiceImpl implements SegmentService {
     }
   }
 
-  public String generateQueryForSpendCustomSegment(Long botRef,String operand,String startDate,String endDate) {
-    String query = NativeQueries.SPEND_CUSTOM_SEGMENT;
+  public String generateQueryForAmountSpentCustomSegment(Long botRef,String operand,String startDate,String endDate) {
+    String query = NativeQueries.AMOUNT_SPENT_CUSTOM_SEGMENT;
     query = query.replace(Constants.BOT_REF, botRef.toString());
     String[] operand_params = operand.split(" ");
 

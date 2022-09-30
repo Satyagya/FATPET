@@ -30,8 +30,8 @@ public class CustomerSegmentationCustomSegmentResponse implements Comparable<Cus
     @CsvBindByName(column = "ORDERS")
     private Long customerOrders;
 
-    @CsvBindByName(column = "SPEND")
-    private Double customerSpend;
+    @CsvBindByName(column = "AMOUNT_SPENT")
+    private Double customerAmountSpent;
 
     @CsvBindByName(column = "LAST_ORDER_DATE")
     private Date customerLastOrderDate;
