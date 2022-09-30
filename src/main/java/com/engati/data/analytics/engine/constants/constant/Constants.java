@@ -77,7 +77,7 @@ public class Constants {
       + "\t\t\"PRODUCT_productId\",\n" + "\t\t\"PRODUCT_title\",\n" + "\t\t\"IMAGE_url\"\n"
       + "\t],\n" + "\t\"customSort\": [{\n" + "\t\t\"name\": \"PRODUCT_productId\",\n"
       + "\t\t\"isAsc\": true\n" + "\t}],\n" + "\t\"is_unique_variants\": true,\n"
-      + "\t\"pageNumber\": 0,\n" + "\t\"pageSize\": 10\n" + "}";
+      + "\t\"pageNumber\": 0,\n" + "\t\"pageSize\": 100\n" + "}";
 
   public static final String[] INTENT_LIST = new String[]{"ORDER_ENQUIRY", "PURCHASE_ENQUIRY", "RETURN_AND_EXCHANGE",
                                                           "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};
