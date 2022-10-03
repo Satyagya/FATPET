@@ -35,4 +35,5 @@ public class CustomSegmentDTO {
 
   @JsonProperty(value = KafkaConstants.DATE_RANGE)
   private ArrayList<Date> dateRange;
+
 }
