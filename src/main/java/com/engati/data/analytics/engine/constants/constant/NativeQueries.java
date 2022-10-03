@@ -145,17 +145,7 @@ public class NativeQueries {
           "when billing_address_phone<>'None' then billing_address_phone " +
           "else '' " +
           "end as customer_phone, " +
-          "concat " +
-          "(case " +
-          "when first_name<>'None' then first_name " +
-          "else '' " +
-          "end, " +
-          "' ', " +
-          "case " +
-          "when last_name<>'None' then last_name " +
-          "else '' " +
-          "end " +
-          ")as customer_name\n" +
+          "customer_name\n" +
           "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_customer_*.parquet')\n" +
           "where customer_id in customerSet";
   public static final String CUSTOMER_AOV_QUERY_CUSTOM_SEGMENT = "select customer_id from\n" +
