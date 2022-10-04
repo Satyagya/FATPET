@@ -31,7 +31,7 @@ public class SegmentController {
 
   @GetMapping(value = ApiPathConstants.GET_CUSTOM_SEGMENT)
   public ResponseEntity<DataAnalyticsResponse> getCustomSegment(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef, @RequestBody CustomSegmentRequest customSegmentRequest) {
-      log.info("Got call for getCustomerSegmentV2 for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
+      log.info("Got call for getCustomerSegment for botRef: {}, customSegmentRequest: {}", botRef, customSegmentRequest);
       DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> response = segmentService.getCustomersForCustomSegment(botRef, customSegmentRequest);
       return new ResponseEntity<>(response, response.getStatusCode());
   }
