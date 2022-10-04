@@ -88,22 +88,14 @@ public class SegmentServiceImpl implements SegmentService {
     for (Long customerId : customerList) {
       CustomerSegmentationResponse customerSegmentationResponse = new CustomerSegmentationResponse();
 
-      try {
-        customerSegmentationResponse.setCustomerEmail(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_EMAIL, Constants.DEFAULT_EMAIL));
-      } catch (NullPointerException e) {
-        customerSegmentationResponse.setCustomerEmail(Constants.DEFAULT_EMAIL);
-      }
+      customerSegmentationResponse.setCustomerEmail(Constants.DEFAULT_EMAIL);
+      customerSegmentationResponse.setCustomerPhone(Constants.DEFAULT_PHONE);
+      customerSegmentationResponse.setCustomerName(Constants.DEFAULT_NAME);
 
-      try {
+      if(Objects.nonNull(customerDetails) && Objects.nonNull(customerDetails.get(customerId))) {
+        customerSegmentationResponse.setCustomerEmail(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_EMAIL,Constants.DEFAULT_EMAIL));
         customerSegmentationResponse.setCustomerPhone(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_PHONE,Constants.DEFAULT_PHONE));
-      } catch (NullPointerException e) {
-        customerSegmentationResponse.setCustomerPhone(Constants.DEFAULT_PHONE);
-      }
-
-      try{
         customerSegmentationResponse.setCustomerName(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_NAME,Constants.DEFAULT_NAME));
-      } catch (NullPointerException e) {
-        customerSegmentationResponse.setCustomerName(Constants.DEFAULT_NAME);
       }
 
       customerSegmentationResponse.setStoreAOV(Double.valueOf(storeAOV));
@@ -149,22 +141,14 @@ public class SegmentServiceImpl implements SegmentService {
     for (Long customerId : customerList) {
       CustomerSegmentationCustomSegmentResponse customerSegmentationCustomSegmentResponse = new CustomerSegmentationCustomSegmentResponse();
 
-      try {
-        customerSegmentationCustomSegmentResponse.setCustomerEmail(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_EMAIL, Constants.DEFAULT_EMAIL));
-      } catch (NullPointerException e) {
-        customerSegmentationCustomSegmentResponse.setCustomerEmail(Constants.DEFAULT_EMAIL);
-      }
+      customerSegmentationCustomSegmentResponse.setCustomerEmail(Constants.DEFAULT_EMAIL);
+      customerSegmentationCustomSegmentResponse.setCustomerPhone(Constants.DEFAULT_PHONE);
+      customerSegmentationCustomSegmentResponse.setCustomerName(Constants.DEFAULT_NAME);
 
-      try {
+      if(Objects.nonNull(customerDetails) && Objects.nonNull(customerDetails.get(customerId))) {
+        customerSegmentationCustomSegmentResponse.setCustomerEmail(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_EMAIL,Constants.DEFAULT_EMAIL));
         customerSegmentationCustomSegmentResponse.setCustomerPhone(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_PHONE,Constants.DEFAULT_PHONE));
-      } catch (NullPointerException e) {
-        customerSegmentationCustomSegmentResponse.setCustomerPhone(Constants.DEFAULT_PHONE);
-      }
-
-      try{
         customerSegmentationCustomSegmentResponse.setCustomerName(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_NAME,Constants.DEFAULT_NAME));
-      } catch (NullPointerException e) {
-        customerSegmentationCustomSegmentResponse.setCustomerName(Constants.DEFAULT_NAME);
       }
 
       customerSegmentationCustomSegmentResponse.setStoreAOV(Double.valueOf(storeAOV));
@@ -378,11 +362,10 @@ public class SegmentServiceImpl implements SegmentService {
       kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
     }
     try {
-      log.info("Pushing to the response kafka topic, payload : {}", kafkaPayload);
+      log.debug("Pushing to the response kafka topic, payload : {}", kafkaPayload);
       kafka.send(segmentResponseTopic, CommonUtils.MAPPER.writeValueAsString(kafkaPayload));
     } catch (JsonProcessingException e) {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
-      e.printStackTrace();
     }
     return response;
   }
@@ -797,11 +780,10 @@ public class SegmentServiceImpl implements SegmentService {
       kafkaPayload.setStatus("FAILURE - PROCESSING ERROR");
     }
     try {
-      log.info("Pushing to the response kafka topic, payload : {}", kafkaPayload);
+      log.debug("Pushing to the response kafka topic, payload : {}", kafkaPayload);
       kafka.send(segmentResponseTopic, CommonUtils.MAPPER.writeValueAsString(kafkaPayload));
     } catch (JsonProcessingException e) {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
-      e.printStackTrace();
     }
     return response;
   }
