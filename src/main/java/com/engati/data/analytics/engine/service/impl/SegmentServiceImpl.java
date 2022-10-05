@@ -688,7 +688,7 @@ public class SegmentServiceImpl implements SegmentService {
       if(operand.contains("ORDERS")) {
         query_for_operand = generateQueryForOrdersCustomSegment(botRef,operand,startDate,endDate);
 
-      } else if(operand.contains("AOV")) {
+      } else if(operand.contains("AVERAGE_ORDER_VALUE")) {
         query_for_operand = generateQueryForCustomerAOVCustomSegment(botRef,operand,startDate,endDate);
 
       } else if(operand.contains("LAST_ORDER")) {
@@ -707,6 +707,8 @@ public class SegmentServiceImpl implements SegmentService {
         response.setStatus(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
         kafkaPayload.setStatus("FAILURE - INVALID_ATTRIBUTES");
         kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+        kafka.send(segmentResponseTopic, kafkaPayload.toString());
+        return response;
       }
 
       Map<String, Object> query_operand_parameter_response = getCustomerListForParameter(query_for_operand);
