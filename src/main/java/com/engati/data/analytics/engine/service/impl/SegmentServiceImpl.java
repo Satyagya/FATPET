@@ -765,7 +765,9 @@ public class SegmentServiceImpl implements SegmentService {
         } else {
           File emptyFile = new File(fileName);
           if (emptyFile.exists()) {
-            emptyFile.delete();
+            if(!emptyFile.delete()) {
+              log.error("Error deleting empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
+            }
           }
           if (!emptyFile.createNewFile()) {
             log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
