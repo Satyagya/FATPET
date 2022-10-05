@@ -698,7 +698,7 @@ public class SegmentServiceImpl implements SegmentService {
         query_for_operand = generateQueryForAmountSpentCustomSegment(botRef,operand,startDate,endDate);
 
       } else if(operand.contains("PRODUCT_TYPE")) {
-        String productType = operand.split("IN")[1];
+        String productType = operand.split("IN", 2)[1];
         Set<String> productTypes = Arrays.stream(productType.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
         query_for_operand = generateQueryForProductTypeCustomSegment(botRef,operand,startDate,endDate,productTypes);
 
