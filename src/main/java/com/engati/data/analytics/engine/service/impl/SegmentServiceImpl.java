@@ -341,12 +341,12 @@ public class SegmentServiceImpl implements SegmentService {
             kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
           }
         } else {
-          File emptyFile = new File(fileName);
-          if (emptyFile.exists()) {
-            emptyFile.delete();
-          }
-          if (!emptyFile.createNewFile()) {
-            log.error("Error creating empty file for empty segment for botRef: {} for segmentName: {}", botRef, segmentName);
+          List<CustomerSegmentationResponse> customerDetail = getDetailsforCustomerSegments(resultSet,botRef);
+          kafkaPayload.setCustomerCount(customerDetail.size());
+          if (!CommonUtils.createCsv(customerDetail, botRef, segmentName, fileName)) {
+            response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
+            kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+            kafkaPayload.setStatus("FAILURE - CSV_CREATION_FAILURE");
           }
           response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
           kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
