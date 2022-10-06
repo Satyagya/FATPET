@@ -762,7 +762,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     try {
-      String fileName = getOutputFileName(botRef, segmentName);
+      String fileName = getOutputFileName(botRef, customSegmentRequest.getFileName());
       if (Objects.nonNull(fileName)) {
         kafkaPayload.setStatus("SUCCESS");
         kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
