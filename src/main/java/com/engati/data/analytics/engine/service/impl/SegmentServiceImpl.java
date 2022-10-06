@@ -743,6 +743,7 @@ public class SegmentServiceImpl implements SegmentService {
           response.setStatus(ResponseStatusCode.INVALID_EXPRESSION_CONDITION_PROVIDED);
           kafkaPayload.setStatus("FAILURE - INVALID_EXPRESSION_CONDITION_PROVIDED");
           kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
+          kafka.send(segmentResponseTopic, kafkaPayload.toString());
           return response;
         }
 
