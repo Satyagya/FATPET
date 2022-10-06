@@ -77,6 +77,11 @@ public class SegmentServiceImpl implements SegmentService {
   private List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList, Long botRef) {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
+
+    if(Objects.isNull(customerList)) {
+      customerList = new HashSet<>();
+    }
+
     Map<Long,Map<String,String>> customerDetails = getCustomerDetails(customerList, botRef);
 
     String storeAOV = null;
@@ -129,6 +134,11 @@ public class SegmentServiceImpl implements SegmentService {
   private List<CustomerSegmentationCustomSegmentResponse> getDetailsforCustomerCustomSegments(Set<Long> customerList, Long botRef,String startDate,String endDate) {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationCustomSegmentResponse> customerSegmentationResponseList = new ArrayList<>();
+
+    if(Objects.isNull(customerList)) {
+      customerList = new HashSet<>();
+    }
+
     Map<Long,Map<String,String>> customerDetails = getCustomerDetails(customerList, botRef);
 
     String storeAOV = null;
