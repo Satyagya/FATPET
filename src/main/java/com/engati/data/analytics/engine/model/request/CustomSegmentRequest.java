@@ -10,7 +10,6 @@ import java.util.Optional;
 
 @Data
 @Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomSegmentRequest {
   private String segmentCondition;
   private String segmentName;

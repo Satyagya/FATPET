@@ -145,17 +145,7 @@ public class NativeQueries {
           "when billing_address_phone<>'None' then billing_address_phone " +
           "else '' " +
           "end as customer_phone, " +
-          "concat " +
-          "(case " +
-          "when first_name<>'None' then first_name " +
-          "else '' " +
-          "end, " +
-          "' ', " +
-          "case " +
-          "when last_name<>'None' then last_name " +
-          "else '' " +
-          "end " +
-          ")as customer_name\n" +
+          "customer_name\n" +
           "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_customer_*.parquet')\n" +
           "where customer_id in customerSet";
   public static final String CUSTOMER_AOV_QUERY_CUSTOM_SEGMENT = "select customer_id from\n" +
@@ -307,9 +297,9 @@ public class NativeQueries {
       + "group by sentiment_label ";
 
   public static final String GET_TRANSACTIONS_FROM_ENGATI = "select coalesce(count(distinct transactionId), 0) as transactions "
-            + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
-            + "where source like '%engati%' \n"
-            + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
+          + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
+          + "where source like '%engati%' \n"
+          + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
   public static final String GET_TRANSACTION_REVENUE_FROM_ENGATI = "select round(sum(coalesce(transactionRevenue, 0)),2)as transaction_revenue "
             + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
