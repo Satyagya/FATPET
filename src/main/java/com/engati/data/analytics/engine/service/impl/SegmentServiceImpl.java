@@ -79,7 +79,7 @@ public class SegmentServiceImpl implements SegmentService {
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
 
     if(Objects.isNull(customerList)) {
-      customerList = new HashSet<>();
+      return customerSegmentationResponseList;
     }
 
     Map<Long,Map<String,String>> customerDetails = getCustomerDetails(customerList, botRef);
@@ -136,7 +136,7 @@ public class SegmentServiceImpl implements SegmentService {
     List<CustomerSegmentationCustomSegmentResponse> customerSegmentationResponseList = new ArrayList<>();
 
     if(Objects.isNull(customerList)) {
-      customerList = new HashSet<>();
+      return customerSegmentationResponseList;
     }
 
     Map<Long,Map<String,String>> customerDetails = getCustomerDetails(customerList, botRef);
@@ -357,10 +357,11 @@ public class SegmentServiceImpl implements SegmentService {
             response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
             kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
             kafkaPayload.setStatus("FAILURE - CSV_CREATION_FAILURE");
+          } else {
+            response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
+            kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
+            kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
           }
-          response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
-          kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
-          kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         }
       }
     } catch (Exception e) {
@@ -781,10 +782,11 @@ public class SegmentServiceImpl implements SegmentService {
             response.setStatus(ResponseStatusCode.CSV_CREATION_EXCEPTION);
             kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
             kafkaPayload.setStatus("FAILURE - CSV_CREATION_FAILURE");
+          } else {
+            response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
+            kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
+            kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
           }
-          response.setStatus(ResponseStatusCode.EMPTY_SEGMENT);
-          kafkaPayload.setStatus("SUCCESS - EMPTY_CSV");
-          kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
         }
       }
     } catch (Exception e) {
