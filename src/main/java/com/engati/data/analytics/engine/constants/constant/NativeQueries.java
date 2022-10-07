@@ -297,16 +297,16 @@ public class NativeQueries {
       + "group by sentiment_label ";
 
   public static final String GET_TRANSACTIONS_FROM_ENGATI = "select coalesce(count(distinct transactionId), 0) as transactions "
-          + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
-          + "where source like '%engati%' \n"
-          + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
+      + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
+      + "where source like '%engati%' \n"
+      + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
   public static final String GET_TRANSACTION_REVENUE_FROM_ENGATI = "select round(sum(coalesce(transactionRevenue, 0)),2)as transaction_revenue "
-            + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
-            + "where source like '%engati%' \n"
-            + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
+      + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/ga_transactions_*.parquet') \n "
+      + "where source like '%engati%' \n"
+      + "and created_date between date '_date_' - interval 'gap' day and date '_date_'";
 
-    public static final String MOST_ABANDONED_PRODUCTS =
+  public static final String MOST_ABANDONED_PRODUCTS =
       "SELECT product_id FROM "
           + "PARQUET_SCAN('%s') WHERE created_date BETWEEN DATE '%s' AND DATE '%s' GROUP BY "
           + "product_id ORDER BY COUNT(product_id) DESC LIMIT 3";
