@@ -12,28 +12,28 @@ import java.sql.Date;
 @ToString(doNotUseGetters = true)
 
 public class CustomerSegmentationCustomSegmentResponse implements Comparable<CustomerSegmentationCustomSegmentResponse>{
-    @CsvBindByName(column = "NAME")
+    @CsvBindByName(column = "CUSTOMER NAME")
     private String customerName;
 
-    @CsvBindByName(column = "EMAIL")
+    @CsvBindByName(column = "CUSTOMER EMAIL")
     private String customerEmail;
 
-    @CsvBindByName(column = "PHONE")
+    @CsvBindByName(column = "CUSTOMER PHONE")
     private String customerPhone;
 
     @CsvBindByName(column = "STORE AOV")
     private Double storeAOV;
 
+    @CsvBindByName(column = "CUSTOMER AOV")
+    private Double customerAOV;
+
     @CsvBindByName(column = "ORDERS")
     private Long customerOrders;
 
-    @CsvBindByName(column = "AVERAGE ORDER VALUE")
-    private Double customerAOV;
+    @CsvBindByName(column = "AMOUNT SPENT")
+    private Double customerAmountSpent;
 
-    @CsvBindByName(column = "REVENUE")
-    private Double customerRevenue;
-
-    @CsvBindByName(column = "LAST_ORDER_DATE")
+    @CsvBindByName(column = "LAST ORDER DATE")
     private Date customerLastOrderDate;
 
     @CsvBindByName(column = "PRODUCT TYPES")

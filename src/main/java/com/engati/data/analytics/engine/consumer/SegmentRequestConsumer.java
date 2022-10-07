@@ -27,7 +27,7 @@ public class SegmentRequestConsumer {
       log.info("Request received for segmentation with payload: {}", payload);
       if (payload.contains("CUSTOM")) {
         CustomSegmentDTO customSegmentDTO = CommonUtils.MAPPER.readValue(payload, CustomSegmentDTO.class);
-        CustomSegmentRequest customSegmentRequest = CustomSegmentRequest.builder().segmentName(customSegmentDTO.getSegmentName()).segmentCondition(customSegmentDTO.getSegmentCondition()).fileName(customSegmentDTO.getFileName()).build();
+        CustomSegmentRequest customSegmentRequest = CustomSegmentRequest.builder().segmentName(customSegmentDTO.getSegmentName()).segmentCondition(customSegmentDTO.getSegmentCondition()).fileName(customSegmentDTO.getFileName()).dateRange(customSegmentDTO.getDateRange()).build();
         segmentService.getCustomersForCustomSegment(customSegmentDTO.getBotRef().longValue(), customSegmentRequest);
       } else if (payload.contains("SYSTEM")) {
         SystemSegmentDTO systemSegmentDTO = CommonUtils.MAPPER.readValue(payload, SystemSegmentDTO.class);
