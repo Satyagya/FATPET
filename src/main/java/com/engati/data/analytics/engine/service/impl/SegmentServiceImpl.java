@@ -373,7 +373,7 @@ public class SegmentServiceImpl implements SegmentService {
       kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
     }
     try {
-      log.debug("Pushing to the response kafka topic, payload : {}", kafkaPayload);
+      log.info("Pushing to the response kafka topic, payload : {}", kafkaPayload);
       kafka.send(segmentResponseTopic, CommonUtils.MAPPER.writeValueAsString(kafkaPayload));
     } catch (JsonProcessingException e) {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
@@ -796,7 +796,7 @@ public class SegmentServiceImpl implements SegmentService {
       kafkaPayload.setStatus("FAILURE - PROCESSING ERROR");
     }
     try {
-      log.debug("Pushing to the response kafka topic, payload : {}", kafkaPayload);
+      log.info("Pushing to the response kafka topic, payload : {}", kafkaPayload);
       kafka.send(segmentResponseTopic, CommonUtils.MAPPER.writeValueAsString(kafkaPayload));
     } catch (JsonProcessingException e) {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
