@@ -82,7 +82,11 @@ public class SegmentServiceImpl implements SegmentService {
       return customerSegmentationResponseList;
     }
 
+    log.info("Customer List:{}",customerList);
+
     Map<Long,Map<String,String>> customerDetails = getCustomerDetails(customerList, botRef);
+
+    log.info("Customer Details of Segment:{}",customerDetails);
 
     String storeAOV = null;
     storeAOV = getStoreAOV(botRef);
@@ -102,6 +106,11 @@ public class SegmentServiceImpl implements SegmentService {
         customerSegmentationResponse.setCustomerPhone(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_PHONE,Constants.DEFAULT_PHONE));
         customerSegmentationResponse.setCustomerName(customerDetails.get(customerId).getOrDefault(Constants.CUSTOMER_NAME,Constants.DEFAULT_NAME));
       }
+
+      log.info("customerId:{}",customerId);
+      log.info("customerName:{}", customerSegmentationResponse.getCustomerName());
+      log.info("customerEmail:{}",customerSegmentationResponse.getCustomerEmail());
+      log.info("customerPhone:{}",customerSegmentationResponse.getCustomerPhone());
 
       customerSegmentationResponse.setStoreAOV(Double.valueOf(storeAOV));
       try {
