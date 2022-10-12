@@ -3,7 +3,7 @@
 gradleVersion='6.8.1'
 gradle="/opt/gradle/gradle-${gradleVersion}/bin/gradle"
 appName="data-analytics-engine"
-ansibleGitLocation="git@gitlab.com:engati/engati-infrastructure/deployment-ansible.git"
+ansibleGitLocation="git@gitlab.engati.ops:engati/engati-infrastructure/deployment-ansible.git"
 
 pipeline {
   agent any
