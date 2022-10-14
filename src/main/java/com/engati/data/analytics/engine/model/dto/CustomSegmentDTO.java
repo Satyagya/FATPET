@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
+import java.util.ArrayList;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,5 +32,8 @@ public class CustomSegmentDTO {
 
   @JsonProperty(value = KafkaConstants.FILE_NAME)
   private String fileName;
+
+  @JsonProperty(value = KafkaConstants.DATE_RANGE)
+  private ArrayList<Date> dateRange;
 
 }

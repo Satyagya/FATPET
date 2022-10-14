@@ -51,7 +51,8 @@ public class NativeQueries {
        "group by customer_id)as b)as c" ;
 
   public static String PRODUCT_TYPE_QUERY = "select distinct(product_type)\n" +
-      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_products_*.parquet') ";
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_products_*.parquet')\n" +
+      "where product_type <> ''"    ;
 
    public static String ORDERS_FOR_X_MONTHS = "select customer_id, count(distinct order_id)as orders__last_gap_months \n" +
        "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet') " +
@@ -133,6 +134,20 @@ public class NativeQueries {
       "group by customer_id)as b)as c)\n" +
       "where AOV operator value \n";
 
+  public static final String GET_CUSTOMER_DETAILS = "select customer_id, " +
+          "case " +
+          "when customer_email<>'None' then customer_email " +
+          "else '' " +
+          "end as customer_email, " +
+          "case "+
+          "when customer_phone<>'None' then customer_phone "+
+          "when shipping_address_phone<>'None' then shipping_address_phone " +
+          "when billing_address_phone<>'None' then billing_address_phone " +
+          "else '' " +
+          "end as customer_phone, " +
+          "customer_name\n" +
+          "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_customer_*.parquet')\n" +
+          "where customer_id in customerSet";
   public static final String CUSTOMER_AOV_QUERY_CUSTOM_SEGMENT = "select customer_id from\n" +
             "(select customer_id,coalesce(round(AOV,2),0) as AOV from\n" +
             "(select customer_id,((sum_total)*1.0/(number_of_orders)) as AOV from\n" +
@@ -156,17 +171,16 @@ public class NativeQueries {
   public static final String LAST_ORDER_DAYS_CUSTOM_SEGMENT = "select distinct(customer_id) from\n" +
             "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
             "where cancelled_at like 'None'\n" +
-            "and (created_date between '_startdate_' and '_enddate_') " +
-            "and created_date>=CURRENT_DATE - INTERVAL gap day";
+            "and (created_date between date '_enddate_'- interval 'gap' day and date '_enddate_') ";
 
-  public static final String REVENUE_CUSTOM_SEGMENT = "select customer_id from\n" +
-            "(select customer_id,sum(total_price)as revenue from\n" +
+  public static final String AMOUNT_SPENT_CUSTOM_SEGMENT = "select customer_id from\n" +
+            "(select customer_id,sum(total_price)as amount_spent from\n" +
             "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
             "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
             "where cancelled_at like 'None'\n" +
             "and created_date between '_startdate_' and '_enddate_'\n" +
             "group by customer_id,order_id,total_price)as a\n" +
-            "group by customer_id)as b where revenue operator value";
+            "group by customer_id)as b where amount_spent operator value";
 
   public static final String GET_CUSTOMERS_FOR_PRODUCT_TYPE = "select distinct(customer_id) from\n" +
           "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
@@ -195,8 +209,8 @@ public class NativeQueries {
                       "group by customer_id,order_id,total_price)as a\n" +
                       "group by customer_id)as b)";
 
-  public static final String CUSTOMER_REVENUE = "select customer_id,round(revenue,2) as revenue from\n" +
-          "(select customer_id,sum(total_price)as revenue from\n" +
+  public static final String CUSTOMER_AMOUNT_SPENT = "select customer_id,round(amount_spent,2) as amount_spent from\n" +
+          "(select customer_id,sum(total_price)as amount_spent from\n" +
           "(select customer_id,order_id,cast(total_price as float)as total_price\n" +
           "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
           "where cancelled_at like 'None'\n" +
@@ -221,6 +235,7 @@ public class NativeQueries {
           "group by customer_id,product_id) as orders\n" +
           "natural join (select product_type,product_id from\n" +
           "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_products_*.parquet')) as products\n" +
+          "where product_type<>'' " +
           "group by customer_id";
   public static final String GET_ENGAGED_USERS = "select coalesce(count(distinct  user_id), 0)as users\n"
       + "from  parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/users_*.parquet')\n "
