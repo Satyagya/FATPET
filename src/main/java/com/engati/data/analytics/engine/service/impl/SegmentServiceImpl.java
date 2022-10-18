@@ -78,7 +78,7 @@ public class SegmentServiceImpl implements SegmentService {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
 
-    if(Objects.isNull(customerList)) {
+    if(CollectionUtils.isEmpty(customerList)) {
       return customerSegmentationResponseList;
     }
 
@@ -135,7 +135,7 @@ public class SegmentServiceImpl implements SegmentService {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationCustomSegmentResponse> customerSegmentationResponseList = new ArrayList<>();
 
-    if(Objects.isNull(customerList)) {
+    if(CollectionUtils.isEmpty(customerList)) {
       return customerSegmentationResponseList;
     }
 
