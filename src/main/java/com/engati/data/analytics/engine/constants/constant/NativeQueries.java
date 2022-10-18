@@ -54,6 +54,27 @@ public class NativeQueries {
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_products_*.parquet')\n" +
       "where product_type <> ''"    ;
 
+  public static String COLLECTION_QUERY = "select distinct(title) as collections\n" +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_collection_*.parquet')\n" +
+      "where collection_id in\n" +
+      "(select distinct(collection_id) " +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
+      ")"  ;
+
+  public static final String COUNTRY_QUERY = "select distinct(shipping_address_country) as countries\n" +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
+      "where shipping_address_country<>'None' and shipping_address_country<>''\n" +
+      "and order_id in\n" +
+      "(select distinct(order_id) " +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
+      ")"  ;
+
+  public static String CITY_QUERY = "select distinct(shipping_address_city) as cities\n" +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+      "where cancelled_at like 'None'\n" +
+      "and created_date between '_startdate_' and '_enddate_'" +
+      "and shipping_address_city <> '' and shipping_address_city <> 'None'" ;
+
    public static String ORDERS_FOR_X_MONTHS = "select customer_id, count(distinct order_id)as orders__last_gap_months \n" +
        "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet') " +
        "       where cancelled_at like 'None'\n" +
@@ -188,6 +209,26 @@ public class NativeQueries {
           "(select product_id from\n" +
           "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_products_*.parquet')\n" +
           "where product_type in ProductTypes)\n" +
+          "and cancelled_at like 'None'\n" +
+          "and created_date between '_startdate_' and '_enddate_'";
+
+  public static final String GET_CUSTOMERS_FOR_COLLECTION = "select distinct(customer_id) from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+          "where collection_id in\n" +
+          "(select distinct(collection_id) from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_collection_*.parquet')\n" +
+          "where title in collections)\n" +
+          "and cancelled_at like 'None'\n" +
+          "and created_date between '_startdate_' and '_enddate_'";
+
+ public static final String GET_CUSTOMERS_FOR_COUNTRY = "select distinct(customer_id) from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
+          "where shipping_address_country in countries\n" +
+          "and created_date between '_startdate_' and '_enddate_'";
+
+  public static final String GET_CUSTOMERS_FOR_CITIES = "select distinct(customer_id) from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+          "where shipping_address_city in cities and\n" +
           "and cancelled_at like 'None'\n" +
           "and created_date between '_startdate_' and '_enddate_'";
 
