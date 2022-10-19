@@ -1120,8 +1120,10 @@ public class SegmentServiceImpl implements SegmentService {
     return response;
   }
 
-  public List<String> getCity(Long botRef) {
+  @Override
+  public DataAnalyticsResponse<List<String>> getCity(Long botRef) {
     Map<String,List<String>> cityList = new HashMap<>();
+    DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
     try {
       String query = NativeQueries.CITY_QUERY;
       query = query.replace(Constants.BOT_REF,botRef.toString());
@@ -1134,9 +1136,12 @@ public class SegmentServiceImpl implements SegmentService {
         });
       }
     } catch (Exception e) {
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.info("Error while getting List of Cities for: botRef:{}", botRef, e);
     }
-    return cityList.get("cities").stream().map(str->'\''+str + '\'').collect(Collectors.toList());
+    response.setResponseObject(cityList.get(QueryConstants.CITIES));
+    response.setStatus(ResponseStatusCode.SUCCESS);
+    return response;
   }
 
 }
