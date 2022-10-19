@@ -63,11 +63,8 @@ public class NativeQueries {
 
   public static final String COUNTRY_QUERY = "select distinct(shipping_address_country) as countries\n" +
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
-      "where shipping_address_country<>'None' and shipping_address_country<>''\n" +
-      "and order_id in\n" +
-      "(select distinct(order_id) " +
-      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
-      ")"  ;
+      "where cancelled_at like 'None'\n" +
+      "and shipping_address_country <> '' and shipping_address_country <> 'None'" ;
 
   public static String CITY_QUERY = "select distinct(shipping_address_city) as cities\n" +
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
