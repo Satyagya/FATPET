@@ -221,7 +221,7 @@ public class NativeQueries {
           "and created_date between '_startdate_' and '_enddate_'";
 
   public static final String GET_CUSTOMERS_FOR_CITIES = "select distinct(customer_id) from\n" +
-          "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
           "where shipping_address_city in cities and\n" +
           "and cancelled_at like 'None'\n" +
           "and created_date between '_startdate_' and '_enddate_'";
