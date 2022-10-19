@@ -70,9 +70,8 @@ public class NativeQueries {
       ")"  ;
 
   public static String CITY_QUERY = "select distinct(shipping_address_city) as cities\n" +
-      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
       "where cancelled_at like 'None'\n" +
-      "and created_date between '_startdate_' and '_enddate_'" +
       "and shipping_address_city <> '' and shipping_address_city <> 'None'" ;
 
    public static String ORDERS_FOR_X_MONTHS = "select customer_id, count(distinct order_id)as orders__last_gap_months \n" +

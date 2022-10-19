@@ -34,6 +34,7 @@ import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
+import javax.swing.text.Document;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Date;
@@ -717,20 +718,43 @@ public class SegmentServiceImpl implements SegmentService {
       } else if(operand.contains("CITY")) {
         String inputCity = operand.split("IN", 2)[1];
         Set<String> cityList = Arrays.stream(inputCity.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
-        List<String> customerCity = getCity(botRef);
-        Set<String> cityListForQuery = new HashSet<>();
+//        List<String> customerCity = getCity(botRef);
+//
+//        cityList = cityList.stream()
+//                .map(str->str.toLowerCase())
+//                .map(str->str.replace(" ",""))
+//                .collect(Collectors.toList());
+//
+//        customerCity = customerCity.stream()
+//                .map(str->str.toLowerCase())
+//                .map(str->str.replace(" ",""))
+//                .collect(Collectors.toList());
+//
+////        Set<String> cityListForQuery = new HashSet<>();
+////
+//        LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
+//
+////        List<String> finalCityList = cityList;
+//        List<String> finalCityList = cityList;
+//        Set<String> cityListForQuery = customerCity.parallelStream()
+//                .distinct()
+//                .filter(city -> finalCityList.stream()
+//                        .anyMatch(city1 ->
+//                                levenshteinDistance.apply(city1,city)<=2))
+//                .collect(Collectors.toSet());
+//
+//        log.info("CityList:{}",cityListForQuery);
+////
+////        for(String city:cityList) {
+////            for(String parquetCity : customerCity) {
+////              if(levenshteinDistance.apply(city,parquetCity)<=2) {
+////                cityListForQuery.add('\'' + parquetCity + '\'');
+////              }
+////            }
+////        }
+//
 
-        LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
-
-        for(String city:cityList) {
-            for(String parquetCity : customerCity) {
-              if(levenshteinDistance.apply(city,parquetCity)<=2) {
-                cityListForQuery.add('\'' + parquetCity + '\'');
-              }
-            }
-        }
-
-        query_for_operand = generateQueryForCityCustomSegment(botRef,operand,startDate,endDate,cityListForQuery);
+        query_for_operand = generateQueryForCityCustomSegment(botRef,operand,startDate,endDate,cityList);
 
       }  else if(operand.contains("COUNTRY")) {
          String inputCountry = operand.split("IN",2)[1];
