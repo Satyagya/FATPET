@@ -601,7 +601,7 @@ public class DashboardServiceImpl implements DashboardService {
     } catch (Exception e) {
       prometheusManagementService.apiRequestFailureEvent("getProductDetailsFromPde", botRef,
           e.getMessage(), CommonUtils.getStringValueFromObject(productList));
-      log.error("Error while getting Product Details from PDE for BotRef: {}", botRef);
+      log.error("Error while getting Product Details from PDE for BotRef: {}", botRef, e);
       return null;
     }
     return dashboardProductResponseList;

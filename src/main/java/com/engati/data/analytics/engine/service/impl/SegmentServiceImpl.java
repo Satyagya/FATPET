@@ -32,7 +32,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 
+import javax.swing.text.Document;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Date;
@@ -78,7 +80,7 @@ public class SegmentServiceImpl implements SegmentService {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
 
-    if(Objects.isNull(customerList)) {
+    if(CollectionUtils.isEmpty(customerList)) {
       return customerSegmentationResponseList;
     }
 
@@ -144,7 +146,7 @@ public class SegmentServiceImpl implements SegmentService {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationCustomSegmentResponse> customerSegmentationResponseList = new ArrayList<>();
 
-    if(Objects.isNull(customerList)) {
+    if(CollectionUtils.isEmpty(customerList)) {
       return customerSegmentationResponseList;
     }
 
@@ -722,6 +724,57 @@ public class SegmentServiceImpl implements SegmentService {
         Set<String> productTypes = Arrays.stream(productType.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
         query_for_operand = generateQueryForProductTypeCustomSegment(botRef,operand,startDate,endDate,productTypes);
 
+      } else if(operand.contains("CITY")) {
+        String inputCity = operand.split("IN", 2)[1];
+        Set<String> cityList = Arrays.stream(inputCity.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
+//        List<String> customerCity = getCity(botRef);
+//
+//        cityList = cityList.stream()
+//                .map(str->str.toLowerCase())
+//                .map(str->str.replace(" ",""))
+//                .collect(Collectors.toList());
+//
+//        customerCity = customerCity.stream()
+//                .map(str->str.toLowerCase())
+//                .map(str->str.replace(" ",""))
+//                .collect(Collectors.toList());
+//
+////        Set<String> cityListForQuery = new HashSet<>();
+////
+//        LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
+//
+////        List<String> finalCityList = cityList;
+//        List<String> finalCityList = cityList;
+//        Set<String> cityListForQuery = customerCity.parallelStream()
+//                .distinct()
+//                .filter(city -> finalCityList.stream()
+//                        .anyMatch(city1 ->
+//                                levenshteinDistance.apply(city1,city)<=2))
+//                .collect(Collectors.toSet());
+//
+//        log.info("CityList:{}",cityListForQuery);
+////
+////        for(String city:cityList) {
+////            for(String parquetCity : customerCity) {
+////              if(levenshteinDistance.apply(city,parquetCity)<=2) {
+////                cityListForQuery.add('\'' + parquetCity + '\'');
+////              }
+////            }
+////        }
+//
+
+        query_for_operand = generateQueryForCityCustomSegment(botRef,operand,startDate,endDate,cityList);
+
+      }  else if(operand.contains("COUNTRY")) {
+         String inputCountry = operand.split("IN",2)[1];
+         Set<String> countryList = Arrays.stream(inputCountry.split(",")).map(str->str.trim()).collect(Collectors.toSet());
+         query_for_operand = generateQueryForCountryCustomSegment(botRef, operand, startDate, endDate, countryList);
+
+      }else if(operand.contains("COLLECTION")) {
+        String inputCollection = operand.split("IN",2)[1];
+        Set<String> collectionList = Arrays.stream(inputCollection.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
+        query_for_operand = generateQueryForCollectionCustomSegment(botRef, operand, startDate, endDate, collectionList);
+
       } else {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
@@ -953,6 +1006,48 @@ public class SegmentServiceImpl implements SegmentService {
     return query;
   }
 
+  public String generateQueryForCollectionCustomSegment(Long botRef, String operand,String startDate,String endDate, Set<String>collections) {
+    String query = NativeQueries.GET_CUSTOMERS_FOR_COLLECTION;
+    query = query.replace(Constants.BOT_REF,botRef.toString());
+    query = query.replace(QueryConstants.COLLECTIONS,collections.toString());
+
+    query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET,QueryConstants.OPENING_ROUND_BRACKET);
+    query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET,QueryConstants.CLOSING_ROUND_BRACKET);
+
+    query = query.replace(QueryConstants.START_DATE, startDate);
+    query = query.replace(QueryConstants.END_DATE, endDate);
+
+    return query;
+  }
+
+  public String generateQueryForCountryCustomSegment(Long botRef, String operand,String startDate,String endDate, Set<String>countries) {
+    String query = NativeQueries.GET_CUSTOMERS_FOR_COUNTRY;
+    query = query.replace(Constants.BOT_REF,botRef.toString());
+    query = query.replace(QueryConstants.COUNTRIES,countries.toString());
+
+    query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET,QueryConstants.OPENING_ROUND_BRACKET);
+    query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET,QueryConstants.CLOSING_ROUND_BRACKET);
+
+    query = query.replace(QueryConstants.START_DATE, startDate);
+    query = query.replace(QueryConstants.END_DATE, endDate);
+
+    return query;
+  }
+
+  public String generateQueryForCityCustomSegment(Long botRef,String operand,String startDate,String endDate,Set<String>cities) {
+    String query = NativeQueries.GET_CUSTOMERS_FOR_CITIES;
+    query = query.replace(Constants.BOT_REF,botRef.toString());
+    query = query.replace(QueryConstants.CITIES,cities.toString());
+
+    query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET,QueryConstants.OPENING_ROUND_BRACKET);
+    query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET,QueryConstants.CLOSING_ROUND_BRACKET);
+
+    query = query.replace(QueryConstants.START_DATE, startDate);
+    query = query.replace(QueryConstants.END_DATE, endDate);
+
+    return query;
+  }
+
   @Override
   public DataAnalyticsResponse<List<String>> getProductType(Long botRef) {
     Map<String, List<String>> productTypes = new HashMap<>();
@@ -975,6 +1070,73 @@ public class SegmentServiceImpl implements SegmentService {
     response.setResponseObject(productTypes.get("product_type"));
     response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
+  }
+
+  @Override
+  public DataAnalyticsResponse<List<String>> getCollection(Long botRef) {
+    Map<String, List<String>> collections = new HashMap<>();
+    DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
+    try {
+      String query = NativeQueries.COLLECTION_QUERY;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        collections = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String, List<String>>>() {
+        });
+      }
+    } catch (Exception e) {
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+      log.info("Error while getting List of Collections for: botRef:{}", botRef, e);
+    }
+    response.setResponseObject(collections.get(QueryConstants.COLLECTIONS));
+    response.setStatus(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  @Override
+  public DataAnalyticsResponse<List<String>> getCountry(Long botRef) {
+    Map<String, List<String>> countries = new HashMap<>();
+    DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
+    try {
+      String query = NativeQueries.COUNTRY_QUERY;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        countries = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String, List<String>>>() {
+        });
+      }
+    } catch (Exception e) {
+      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+      log.info("Error while getting List of Collections for: botRef:{}", botRef, e);
+    }
+    response.setResponseObject(countries.get(QueryConstants.COUNTRIES));
+    response.setStatus(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  public List<String> getCity(Long botRef) {
+    Map<String,List<String>> cityList = new HashMap<>();
+    try {
+      String query = NativeQueries.CITY_QUERY;
+      query = query.replace(Constants.BOT_REF,botRef.toString());
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      log.debug("Request body for query to duckDB: {}", requestBody);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        cityList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String, List<String>>>() {
+        });
+      }
+    } catch (Exception e) {
+      log.info("Error while getting List of Cities for: botRef:{}", botRef, e);
+    }
+    return cityList.get("cities").stream().map(str->'\''+str + '\'').collect(Collectors.toList());
   }
 
 }
