@@ -33,9 +33,9 @@ public class NativeQueries {
 
    public static String SUBSCRIPTION_ORDER_QUERY = "select customer_id from parquet_scan('"
        + Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet') "
-       + "where variant_id not (select variant_id "
+       + "where variant_id in (select variant_id "
        + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_variants_*.parquet') "
-       + "where title like \"%WEEKLY%\") group by customer_id";
+       + "where title like '%WEEKLY%') group by customer_id";
 
    public static String STORE_AOV_QUERY = "select coalesce(round(sum_total*1.0/number_of_orders, 2), 0)as STORE_AOV from\n" +
        "(select sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
