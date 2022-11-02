@@ -348,8 +348,9 @@ public class SegmentServiceImpl implements SegmentService {
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
     List<String> shopDomains_subscription =
         Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
-    if (shopDomains_subscription.stream()
-        .anyMatch(segmentRepository.findShopDomainByBotRef(botRef)::contains)
+    String shopDomainForBotRef = segmentRepository.findShopDomainByBotRef(botRef);
+    if (shopDomainForBotRef!=null && shopDomains_subscription.stream()
+        .anyMatch(shopDomainForBotRef::contains)
         && resultSet != null) {
       subscriptionOrdersSegment = getSubsOrderSegment(botRef);
       resultSet.retainAll(subscriptionOrdersSegment);
@@ -855,11 +856,11 @@ public class SegmentServiceImpl implements SegmentService {
     }
     List<String> shopDomains_subscription =
         Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
-    Set<Long> subscriptionOrdersSegment = null;
-    if (shopDomains_subscription.stream()
-        .anyMatch(segmentRepository.findShopDomainByBotRef(botRef)::contains)
+    String shopDomainForBotRef = segmentRepository.findShopDomainByBotRef(botRef);
+    if (shopDomainForBotRef!=null && shopDomains_subscription.stream()
+        .anyMatch(shopDomainForBotRef::contains)
         && resultSet != null) {
-      subscriptionOrdersSegment = getSubsOrderSegment(botRef);
+      Set<Long> subscriptionOrdersSegment = getSubsOrderSegment(botRef);
       resultSet.retainAll(subscriptionOrdersSegment);
     }
 
