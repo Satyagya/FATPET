@@ -19,10 +19,8 @@ import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.engati.data.analytics.engine.service.SegmentService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +30,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 
-import javax.swing.text.Document;
 import java.io.File;
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -66,6 +61,9 @@ public class SegmentServiceImpl implements SegmentService {
 
   @Value("${topic.shopify.segments.response}")
   private String segmentResponseTopic;
+
+  @Value("${segment.remove.subscribedCust.shopDomains}")
+  private String shopDomainsForSubscribedCustomers;
 
   @Autowired
   private EtlEngineRestUtility etlEngineRestUtility;
@@ -332,6 +330,7 @@ public class SegmentServiceImpl implements SegmentService {
     log.info("Checking for Config values for the segment values for {} for botRef: {}", segmentName, botRef);
     Set<Long> resultSet = null;
     Set<Long> recencySegment = null;
+    Set<Long> subscriptionOrdersSegment = null;
     if (configDetails.getResponseObject().getRecencyMetric() != null) {
       log.info("Recency configurations found for botRef: {}, segmentName {}", botRef, segmentName);
       recencySegment = getRecencySegment(configDetails);
@@ -347,6 +346,14 @@ public class SegmentServiceImpl implements SegmentService {
       monetarySegment = getMonetarySegment(configDetails);
     }
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
+    List<String> shopDomains_subscription =
+        Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
+    if (shopDomains_subscription.stream()
+        .anyMatch(segmentRepository.findShopDomainByBotRef(botRef)::contains)
+        && resultSet != null) {
+      subscriptionOrdersSegment = getSubsOrderSegment(botRef);
+      resultSet.retainAll(subscriptionOrdersSegment);
+    }
     try {
       String fileName = getOutputFileName(botRef, segmentName);
       kafkaPayload.setFileName(fileName);
@@ -390,6 +397,29 @@ public class SegmentServiceImpl implements SegmentService {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
     }
     return response;
+  }
+
+  private Set<Long> getSubsOrderSegment(Long botRef) {
+    Set<Long> subscriptionOrdersList = new HashSet<>();
+    JSONObject requestBody = new JSONObject();
+    try {
+      String query = NativeQueries.SUBSCRIPTION_ORDER_QUERY;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      requestBody.put(Constants.QUERY, query);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+          etlResponse.body())) {
+        subscriptionOrdersList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(
+                    etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)),
+                ArrayList.class).stream().map(x -> ((Number) x).longValue())
+            .collect(Collectors.toSet());
+      }
+    } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getSubscriptionOrderSegment", botRef,
+          e.getMessage(), requestBody.toString());
+      log.error("Exception while getting Subscription orders for botRef: {}", botRef.toString(), e);
+    }
+    return subscriptionOrdersList;
   }
 
   private String getOutputFileName(Long botRef, String segmentName) {
@@ -822,6 +852,15 @@ public class SegmentServiceImpl implements SegmentService {
 
       }
 
+    }
+    List<String> shopDomains_subscription =
+        Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
+    Set<Long> subscriptionOrdersSegment = null;
+    if (shopDomains_subscription.stream()
+        .anyMatch(segmentRepository.findShopDomainByBotRef(botRef)::contains)
+        && resultSet != null) {
+      subscriptionOrdersSegment = getSubsOrderSegment(botRef);
+      resultSet.retainAll(subscriptionOrdersSegment);
     }
 
     try {
