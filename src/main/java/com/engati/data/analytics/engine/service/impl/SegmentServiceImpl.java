@@ -344,7 +344,7 @@ public class SegmentServiceImpl implements SegmentService {
         .anyMatch(shopDomainForBotRef::contains)
         && resultSet != null) {
       subscriptionOrdersSegment = getSubsOrderSegment(botRef);
-      resultSet.retainAll(subscriptionOrdersSegment);
+      resultSet.removeAll(subscriptionOrdersSegment);
     }
     try {
       String fileName = getOutputFileName(botRef, segmentName);
@@ -801,7 +801,7 @@ public class SegmentServiceImpl implements SegmentService {
         .anyMatch(shopDomainForBotRef::contains)
         && resultSet != null) {
       Set<Long> subscriptionOrdersSegment = getSubsOrderSegment(botRef);
-      resultSet.retainAll(subscriptionOrdersSegment);
+      resultSet.removeAll(subscriptionOrdersSegment);
     }
 
     try {
