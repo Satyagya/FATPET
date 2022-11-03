@@ -65,18 +65,6 @@ public class QueryConstants {
   public static String TRANSACTION_REVENUE = "transaction_revenue";
   public static String AMOUNT_SPENT = "amount_spent";
   public static String PRODUCT_TYPES = "ProductTypes";
-<<<<<<< HEAD
-
-=======
-  public static String COLLECTIONS = "collections";
-  public static String CITIES = "cities";
-  public static String COUNTRIES = "countries";
   public static String SUBSCRIPTION_TITLES = "subscriptionTitles";
-
-
-
-
-
-
 
 }
