@@ -65,6 +65,9 @@ public class SegmentServiceImpl implements SegmentService {
   @Value("${segment.remove.subscribedCust.shopDomains}")
   private String shopDomainsForSubscribedCustomers;
 
+  @Value("${segment.subscription.titles}")
+  private String subscriptionTitles;
+
   @Autowired
   private EtlEngineRestUtility etlEngineRestUtility;
 
@@ -394,9 +397,13 @@ public class SegmentServiceImpl implements SegmentService {
   private Set<Long> getSubsOrderSegment(Long botRef) {
     Set<Long> subscriptionOrdersList = new HashSet<>();
     JSONObject requestBody = new JSONObject();
+    List<String> subscriptionTitlesList =
+        Arrays.asList(subscriptionTitles.split(","));
     try {
       String query = NativeQueries.SUBSCRIPTION_ORDER_QUERY;
       query = query.replace(Constants.BOT_REF, botRef.toString());
+      query = query.replace(QueryConstants.SUBSCRIPTION_TITLES,
+          subscriptionTitlesList.stream().collect(Collectors.joining("','", "'", "'")));
       requestBody.put(Constants.QUERY, query);
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
