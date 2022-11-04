@@ -14,6 +14,7 @@ import com.engati.data.analytics.engine.model.response.CustomerSegmentationCusto
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.engati.data.analytics.engine.model.response.KafkaPayloadForSegmentStatus;
 import com.engati.data.analytics.engine.repository.SegmentRepository;
+import com.engati.data.analytics.engine.repository.ShopifyCityRepository;
 import com.engati.data.analytics.engine.service.CustomerSegmentationConfigurationService;
 import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.engati.data.analytics.engine.service.SegmentService;
@@ -24,7 +25,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONNavi;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.function.Failable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +63,9 @@ public class SegmentServiceImpl implements SegmentService {
 
   @Autowired
   private SegmentRepository segmentRepository;
+
+  @Autowired
+  private ShopifyCityRepository shopifyCityRepository;
 
   @Autowired
   private CommonUtils commonUtils;
@@ -717,7 +723,15 @@ public class SegmentServiceImpl implements SegmentService {
 
       } else if(operand.contains("CITY")) {
         String inputCity = operand.split("IN", 2)[1];
-        Set<String> cityList = Arrays.stream(inputCity.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
+        List<String> cityList = Arrays.stream(inputCity.split(",")).map(str -> str.trim()).collect(Collectors.toList());
+        List<String> cityFromParquet = getCityListForSegment(botRef, startDate, endDate);
+
+        LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
+        Set<String> cityListForQuery = cityFromParquet.parallelStream()
+                .filter(city -> cityList.stream()
+                        .anyMatch(city1 -> levenshteinDistance.apply(city,city1)<=2))
+                .collect(Collectors.toSet());
+        query_for_operand = generateQueryForCityCustomSegment(botRef,operand,startDate,endDate,cityListForQuery);
 //        List<String> customerCity = getCity(botRef);
 //
 //        cityList = cityList.stream()
@@ -753,8 +767,6 @@ public class SegmentServiceImpl implements SegmentService {
 ////            }
 ////        }
 //
-
-        query_for_operand = generateQueryForCityCustomSegment(botRef,operand,startDate,endDate,cityList);
 
       }  else if(operand.contains("COUNTRY")) {
          String inputCountry = operand.split("IN",2)[1];
@@ -1113,27 +1125,92 @@ public class SegmentServiceImpl implements SegmentService {
 
   @Override
   public DataAnalyticsResponse<List<String>> getCity(Long botRef) {
-    Map<String,List<String>> cityList = new HashMap<>();
+    List<String> cityList = new ArrayList<>();
+
+    List<String> countryFromParquet = getCountry(botRef).getResponseObject();
+    List<String> cityFromDB = shopifyCityRepository.getAllCities(countryFromParquet);
+    List<String> cityFromParquet = getCityListFromParquet(botRef);
+
     DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
-    try {
-      String query = NativeQueries.CITY_QUERY;
+    LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
+
+    cityList = cityFromDB.parallelStream()
+                .filter(city -> cityFromParquet.stream()
+                        .anyMatch(city1 ->
+                                levenshteinDistance.apply(city1,city)<=2))
+                .collect(Collectors.toList());
+
+    response.setResponseObject(cityList);
+    response.setStatus(ResponseStatusCode.SUCCESS);
+    return response;
+  }
+
+  private List<String> getCityListForSegment(Long botRef, String startDate, String endDate) {
+    Map<String,List<String>> cityList = new HashMap<>();
+    try{
+      String query = NativeQueries.CITY_QUERY_FOR_SEGMENT;
       query = query.replace(Constants.BOT_REF,botRef.toString());
+      query = query.replace(QueryConstants.START_DATE, startDate);
+      query = query.replace(QueryConstants.END_DATE, endDate);
+
       JSONObject requestBody = new JSONObject();
       requestBody.put(Constants.QUERY, query);
-      log.debug("Request body for query to duckDB: {}", requestBody);
+      log.debug("Request body for query to duckDB:{}", requestBody);
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
-      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+      if(Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
         cityList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String, List<String>>>() {
         });
       }
     } catch (Exception e) {
-      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      log.info("Error while getting List of Cities for: botRef:{}", botRef, e);
+      prometheusManagementService.apiRequestFailureEvent("getCity", botRef, e.getMessage(), "");
+      log.error("Exception while getting cityList from parquet files for botRef: {}", botRef, e);
     }
-    response.setResponseObject(cityList.get(QueryConstants.CITIES));
-    response.setStatus(ResponseStatusCode.SUCCESS);
-    return response;
+    return cityList.get(QueryConstants.CITIES);
   }
+
+  private List<String> getCityListFromParquet(Long botRef) {
+    Map<String,List<String>> cityList = new HashMap<>();
+    try{
+      String query = NativeQueries.CITY_QUERY;
+      query = query.replace(Constants.BOT_REF,botRef.toString());
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      log.debug("Request body for query to duckDB:{}", requestBody);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if(Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        cityList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String, List<String>>>() {
+        });
+      }
+    } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getCity", botRef, e.getMessage(), "");
+      log.error("Exception while getting cityList from parquet files for botRef: {}", botRef, e);
+    }
+    return cityList.get(QueryConstants.CITIES);
+  }
+//  @Override
+//  public DataAnalyticsResponse<List<String>> getCity(Long botRef) {
+//    Map<String,List<String>> cityList = new HashMap<>();
+//    DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
+//    List<String> cityListDB = getCityFromDB();
+//    try {
+//      String query = NativeQueries.CITY_QUERY;
+//      query = query.replace(Constants.BOT_REF,botRef.toString());
+//      JSONObject requestBody = new JSONObject();
+//      requestBody.put(Constants.QUERY, query);
+//      log.debug("Request body for query to duckDB: {}", requestBody);
+//      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+//      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+//        cityList = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String, List<String>>>() {
+//        });
+//      }
+//    } catch (Exception e) {
+//      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+//      log.info("Error while getting List of Cities for: botRef:{}", botRef, e);
+//    }
+//    response.setResponseObject(cityList.get(QueryConstants.CITIES));
+//    response.setStatus(ResponseStatusCode.SUCCESS);
+//    return response;
+//  }
 
 }
 
