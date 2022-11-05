@@ -659,6 +659,8 @@ public class SegmentServiceImpl implements SegmentService {
       startDate = formatter.format(dateRange.get(0));
       endDate = formatter.format(dateRange.get(1));
 
+      String payLoadDateSelected = startDate + ',' + endDate;
+      kafkaPayload.setDateRange(payLoadDateSelected);
     } else {
       response.setResponseObject(null);
       response.setStatus(ResponseStatusCode.DATE_RANGE_IS_NOT_VALID);

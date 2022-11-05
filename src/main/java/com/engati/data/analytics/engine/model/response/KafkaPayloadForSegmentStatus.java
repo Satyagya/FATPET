@@ -2,7 +2,9 @@ package com.engati.data.analytics.engine.model.response;
 
 import lombok.Data;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 @Data
 public class KafkaPayloadForSegmentStatus {
@@ -14,4 +16,5 @@ public class KafkaPayloadForSegmentStatus {
   private String fileName;
   private int customerCount;
   private String segmentType;
+  private String dateRange;
 }
