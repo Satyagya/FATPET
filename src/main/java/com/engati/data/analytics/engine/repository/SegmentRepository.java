@@ -19,7 +19,7 @@ public interface SegmentRepository extends JpaRepository<ShopifyCustomer, Long> 
       "where customer_id in :customerIds ", nativeQuery = true)
   List<Map<Long, Object>> findByShopifyCustomerId(@Param("customerIds") Set<Long> customerIds);
 
-  @Query(value = "select shop_domain from shopify_customer where bot_ref = :botRef limit 1",
+  @Query(value = "select store_domain from shopify_product_discovery_config where bot_ref = :botRef limit 1",
          nativeQuery = true)
   String findShopDomainByBotRef(@Param("botRef") Long botRef);
 }

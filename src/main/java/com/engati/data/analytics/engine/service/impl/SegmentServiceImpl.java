@@ -340,15 +340,7 @@ public class SegmentServiceImpl implements SegmentService {
       monetarySegment = getMonetarySegment(configDetails);
     }
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
-    List<String> shopDomains_subscription =
-        Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
-    String shopDomainForBotRef = segmentRepository.findShopDomainByBotRef(botRef);
-    if (shopDomainForBotRef!=null && shopDomains_subscription.stream()
-        .anyMatch(shopDomainForBotRef::contains)
-        && resultSet != null) {
-      subscriptionOrdersSegment = getSubsOrderSegment(botRef);
-      resultSet.removeAll(subscriptionOrdersSegment);
-    }
+    resultSet = omitSubscriptionCustomersFromSegments(botRef, resultSet);
     try {
       String fileName = getOutputFileName(botRef, segmentName);
       kafkaPayload.setFileName(fileName);
@@ -382,7 +374,7 @@ public class SegmentServiceImpl implements SegmentService {
           e.getMessage(), segmentName);
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
-      kafkaPayload.setStatus("FAILURE - PROCESSING ERROR");
+      kafkaPayload.setStatus("F AILURE - PROCESSING ERROR");
       kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
     }
     try {
@@ -394,8 +386,8 @@ public class SegmentServiceImpl implements SegmentService {
     return response;
   }
 
-  private Set<Long> getSubsOrderSegment(Long botRef) {
-    Set<Long> subscriptionOrdersList = new HashSet<>();
+  private Set<Long> getSubscribedUsersSegment(Long botRef) {
+    Set<Long> customersWithSubscriptionOrder = new HashSet<>();
     JSONObject requestBody = new JSONObject();
     List<String> subscriptionTitlesList =
         Arrays.asList(subscriptionTitles.split(","));
@@ -408,7 +400,7 @@ public class SegmentServiceImpl implements SegmentService {
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
           etlResponse.body())) {
-        subscriptionOrdersList = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(
+        customersWithSubscriptionOrder = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(
                     etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)),
                 ArrayList.class).stream().map(x -> ((Number) x).longValue())
             .collect(Collectors.toSet());
@@ -418,7 +410,7 @@ public class SegmentServiceImpl implements SegmentService {
           e.getMessage(), requestBody.toString());
       log.error("Exception while getting Subscription orders for botRef: {}", botRef.toString(), e);
     }
-    return subscriptionOrdersList;
+    return customersWithSubscriptionOrder;
   }
 
   private String getOutputFileName(Long botRef, String segmentName) {
@@ -801,15 +793,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
 
     }
-    List<String> shopDomains_subscription =
-        Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
-    String shopDomainForBotRef = segmentRepository.findShopDomainByBotRef(botRef);
-    if (shopDomainForBotRef!=null && shopDomains_subscription.stream()
-        .anyMatch(shopDomainForBotRef::contains)
-        && resultSet != null) {
-      Set<Long> subscriptionOrdersSegment = getSubsOrderSegment(botRef);
-      resultSet.removeAll(subscriptionOrdersSegment);
-    }
+    resultSet = omitSubscriptionCustomersFromSegments(botRef, resultSet);
 
     try {
       String fileName = getOutputFileName(botRef, customSegmentRequest.getFileName());
@@ -851,6 +835,19 @@ public class SegmentServiceImpl implements SegmentService {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
     }
     return response;
+  }
+
+  private Set<Long> omitSubscriptionCustomersFromSegments(Long botRef, Set<Long> resultSet) {
+    List<String> shopDomains_subscription =
+        Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
+    String shopDomainForBotRef = segmentRepository.findShopDomainByBotRef(botRef);
+    if (shopDomainForBotRef!=null && shopDomains_subscription.stream()
+        .anyMatch(shopDomainForBotRef::contains)
+        && resultSet != null) {
+      Set<Long> subscriptionCustomersSegment = getSubscribedUsersSegment(botRef);
+      resultSet.removeAll(subscriptionCustomersSegment);
+    }
+    return resultSet;
   }
 
   public Map<String, Object> getCustomerListForParameter(String parameter_query_definition) {

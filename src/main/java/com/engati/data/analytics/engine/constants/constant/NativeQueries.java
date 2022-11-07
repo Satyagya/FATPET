@@ -31,7 +31,7 @@ public class NativeQueries {
        "group by customer_id)as b)as c\n" +
        "where metric operator value";
 
-   public static String SUBSCRIPTION_ORDER_QUERY = "select customer_id from parquet_scan('"
+   public static String SUBSCRIPTION_ORDER_QUERY = "select distinct(customer_id) from parquet_scan('"
        + Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet') "
        + "where variant_id in (select variant_id "
        + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_variants_*.parquet') "
