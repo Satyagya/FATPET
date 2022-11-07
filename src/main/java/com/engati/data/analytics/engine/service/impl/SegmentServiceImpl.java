@@ -13,7 +13,7 @@ import com.engati.data.analytics.engine.model.response.CustomerSegmentationConfi
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationCustomSegmentResponse;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.engati.data.analytics.engine.model.response.KafkaPayloadForSegmentStatus;
-import com.engati.data.analytics.engine.repository.SegmentRepository;
+import com.engati.data.analytics.engine.repository.ShopifyProductDiscoveryConfigRepository;
 import com.engati.data.analytics.engine.service.CustomerSegmentationConfigurationService;
 import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.engati.data.analytics.engine.service.SegmentService;
@@ -54,7 +54,7 @@ public class SegmentServiceImpl implements SegmentService {
   private KafkaTemplate<String, String> kafka;
 
   @Autowired
-  private SegmentRepository segmentRepository;
+  private ShopifyProductDiscoveryConfigRepository shopifyProductDiscoveryConfigRepository;
 
   @Autowired
   private CommonUtils commonUtils;
@@ -374,7 +374,7 @@ public class SegmentServiceImpl implements SegmentService {
           e.getMessage(), segmentName);
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Exception caught while getting customer details for botRef: {}, segment: {}", botRef, segmentName, e);
-      kafkaPayload.setStatus("F AILURE - PROCESSING ERROR");
+      kafkaPayload.setStatus("FAILURE - PROCESSING ERROR");
       kafkaPayload.setTimestamp(Timestamp.from(Instant.now()));
     }
     try {
@@ -840,7 +840,7 @@ public class SegmentServiceImpl implements SegmentService {
   private Set<Long> omitSubscriptionCustomersFromSegments(Long botRef, Set<Long> resultSet) {
     List<String> shopDomains_subscription =
         Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
-    String shopDomainForBotRef = segmentRepository.findShopDomainByBotRef(botRef);
+    String shopDomainForBotRef = shopifyProductDiscoveryConfigRepository.findShopDomainByBotRef(botRef);
     if (shopDomainForBotRef!=null && shopDomains_subscription.stream()
         .anyMatch(shopDomainForBotRef::contains)
         && resultSet != null) {
