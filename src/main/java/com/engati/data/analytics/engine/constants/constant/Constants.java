@@ -7,8 +7,12 @@ import java.util.Locale;
 public class Constants {
 
   public static final String RESPONSE_OBJECT = "response";
-  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
-  public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
+//  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
+//  public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
+  public static final String CSV_BASE_PATH_FORMAT = "/Users/jaymehta/Desktop/IdeaProjects/data-analytics-engine/src/main/resources/customer_segments/%s";
+  public static final String CSV_PATH_FORMAT = "/Users/jaymehta/Desktop/IdeaProjects/data-analytics-engine/src/main/resources/customer_segments/%s/%s.csv";
+
+  public static String PARQUET_FILE_PATH = "/Users/jaymehta/Desktop/PycharmProjects/shopify-etl-engine/parquet_store";
   public static final String PDE_PREFIX = "pde";
   public static final String RETROFIT_PDE_API = "retrofitPDEApi";
   public static final String PDE_CLIENT = "pdeHttpClient";
@@ -28,7 +32,7 @@ public class Constants {
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-  public static String PARQUET_FILE_PATH = "/opt/engati/local_parquet_store";
+//  public static String PARQUET_FILE_PATH = "/opt/engati/local_parquet_store";
 
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
