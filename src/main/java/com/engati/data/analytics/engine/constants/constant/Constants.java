@@ -53,7 +53,7 @@ public class Constants {
   public static String VARIANT_ID = "variant_id";
   public static String PRODUCT_ID = "product_id";
   public static String DATE_FORMAT = "yyyy-MM-dd";
-  public static String ISO_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+  public static String ISO_DATE_FORMAT = "E MMM dd yyyy HH:mm:ss 'GMT+5:30'";
   public static String CREATED_DATE = "created_date";
   public static String QUERIES_ASKED = "queries_asked";
   public static String QUERIES_UNANSWERED= "queries_unanswered";
