@@ -50,9 +50,9 @@ public class ShopifyProductDiscoveryConfig {
   private Timestamp updatedAt;
 
   @Column(name = "is_tag_generation_enabled")
-  private Timestamp isTagGenerationEnabled;
+  private Integer isTagGenerationEnabled;
 
   @Column(name = "is_similar_products_enabled")
-  private Timestamp isSimilarProductsEnabled;
+  private Integer isSimilarProductsEnabled;
 
 }
