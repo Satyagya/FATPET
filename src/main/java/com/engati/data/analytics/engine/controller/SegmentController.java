@@ -42,5 +42,4 @@ public class SegmentController {
     DataAnalyticsResponse<List<String>> response = segmentService.getProductType(botRef);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
-
 }
