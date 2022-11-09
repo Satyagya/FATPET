@@ -719,6 +719,7 @@ public class SegmentServiceImpl implements SegmentService {
         String productType = operand.split("IN", 2)[1];
         Set<String> productTypes = Arrays.stream(productType.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
         query_for_operand = generateQueryForProductTypeCustomSegment(botRef,operand,startDate,endDate,productTypes);
+        
       } else {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
