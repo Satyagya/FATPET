@@ -43,24 +43,4 @@ public class SegmentController {
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 
-  @GetMapping(value = ApiPathConstants.GET_COLLECTION)
-  public ResponseEntity<DataAnalyticsResponse> getCollection(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef) {
-    log.info("Got call to fetch collection for botRef:{}", botRef);
-    DataAnalyticsResponse<List<String>> response = segmentService.getCollection(botRef);
-    return new ResponseEntity<>(response, response.getStatusCode());
-  }
-
-  @GetMapping(value = ApiPathConstants.GET_COUNTRY)
-  public ResponseEntity<DataAnalyticsResponse> getCountry(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef) {
-    log.info("Got call to fetch country for botRef:{}", botRef);
-    DataAnalyticsResponse<List<String>> response = segmentService.getCountry(botRef);
-    return new ResponseEntity<>(response, response.getStatusCode());
-  }
-
-  @GetMapping(value = ApiPathConstants.GET_CITY)
-  public ResponseEntity<DataAnalyticsResponse> getCity(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef) {
-    log.info("Got call to fetch country for botRef:{}", botRef);
-    DataAnalyticsResponse<List<String>> response = segmentService.getCity(botRef);
-    return new ResponseEntity<>(response, response.getStatusCode());
-  }
 }
