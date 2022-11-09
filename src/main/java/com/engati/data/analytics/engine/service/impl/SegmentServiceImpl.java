@@ -32,7 +32,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import javax.swing.text.Document;
 import java.io.File;
