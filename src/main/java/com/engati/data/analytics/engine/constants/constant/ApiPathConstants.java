@@ -31,6 +31,6 @@ public class ApiPathConstants {
   public static final String AUTH_JSON = "authJson";
   public static final String PROPERTY_ID = "propertyId";
   public static final String GET_PRODUCT_TYPE = "/botRef/{botRef}/getProductType";
- 
+
 
 }

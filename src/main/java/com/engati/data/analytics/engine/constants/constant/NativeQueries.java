@@ -144,8 +144,8 @@ public class NativeQueries {
           "case " +
           "when customer_email<>'' then customer_email else '' end as customer_email, " +
           "case when customer_phone<>'' then customer_phone " +
-          "     when shipping_address_phone<>'' then shipping_address_phone " +
           "     when billing_address_phone<>'' then billing_address_phone " +
+          "     when shipping_address_phone<>'' then shipping_address_phone " +
           "     else '' end as customer_phone, " +
           "customer_name " +
           "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_customer_*.parquet')\n" +
