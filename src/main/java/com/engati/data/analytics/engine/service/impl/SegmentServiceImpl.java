@@ -691,6 +691,12 @@ public class SegmentServiceImpl implements SegmentService {
       startDate = formatter.format(dateRange.get(0));
       endDate = formatter.format(dateRange.get(1));
 
+      DateFormat payLoadDateFormat = new SimpleDateFormat(Constants.PAYLOAD_DATE_FORMAT);
+      String payLoadStartDate = payLoadDateFormat.format(dateRange.get(0));
+      String payLoadEndDate = payLoadDateFormat.format(dateRange.get(1));
+
+      String payLoadDateSelected = payLoadStartDate + ',' +payLoadEndDate;
+      kafkaPayload.setDateRange(payLoadDateSelected);
     } else {
       response.setResponseObject(null);
       response.setStatus(ResponseStatusCode.DATE_RANGE_IS_NOT_VALID);
@@ -744,7 +750,7 @@ public class SegmentServiceImpl implements SegmentService {
         String productType = operand.split("IN", 2)[1];
         Set<String> productTypes = Arrays.stream(productType.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
         query_for_operand = generateQueryForProductTypeCustomSegment(botRef,operand,startDate,endDate,productTypes);
-
+        
       } else {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
