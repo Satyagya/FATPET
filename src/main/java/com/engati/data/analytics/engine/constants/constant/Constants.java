@@ -7,12 +7,8 @@ import java.util.Locale;
 public class Constants {
 
   public static final String RESPONSE_OBJECT = "response";
-//  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
-//  public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
-  public static final String CSV_BASE_PATH_FORMAT = "/Users/jaymehta/Desktop/IdeaProjects/data-analytics-engine/src/main/resources/customer_segments/%s";
-  public static final String CSV_PATH_FORMAT = "/Users/jaymehta/Desktop/IdeaProjects/data-analytics-engine/src/main/resources/customer_segments/%s/%s.csv";
-
-  public static String PARQUET_FILE_PATH = "/Users/jaymehta/Desktop/PycharmProjects/shopify-etl-engine/parquet_store";
+  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
+  public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
   public static final String PDE_PREFIX = "pde";
   public static final String RETROFIT_PDE_API = "retrofitPDEApi";
   public static final String PDE_CLIENT = "pdeHttpClient";
@@ -32,7 +28,7 @@ public class Constants {
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-//  public static String PARQUET_FILE_PATH = "/opt/engati/local_parquet_store";
+  public static String PARQUET_FILE_PATH = "/opt/engati/local_parquet_store";
 
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
@@ -61,6 +57,10 @@ public class Constants {
   public static String QUERIES_ASKED = "queries_asked";
   public static String QUERIES_UNANSWERED= "queries_unanswered";
   public static Integer MAXIMUM_NUMBER_OF_OPERATORS = 4;
+  public static String PHONE_PROVIDED = "phone_provided";
+  public static String EMAIL_PROVIDED = "email_provided";
+  public static String CUSTOMER_PROVIDED = "customer_provided";
+  public static String LAST_ORDER_DATE = "last_order_date";
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";
@@ -91,5 +91,8 @@ public class Constants {
   public static final String[] INTENT_LIST = new String[]{"ORDER_ENQUIRY", "PURCHASE_ENQUIRY", "RETURN_AND_EXCHANGE",
                                                           "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};
   public static final String[] SENTIMENT_LIST = new String[]{"Positive", "Negative", "Neutral"};
+  public static final String CUSTOMER_EMAIL_COMPARATOR = "and customer_email like '%email_provided%' ";
+  public static final String CUSTOMER_PHONE_NUMBER_COMPARATOR = "and (customer_phone like '%phone_provided%' or billing_address_phone like '%phone_provided%')";
+
 
 }
