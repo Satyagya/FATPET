@@ -59,6 +59,8 @@ public class NativeQueries {
       "where collection_id in\n" +
       "(select distinct(collection_id) " +
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
+      "where cancelled_at like 'None'\n" +
+      "order by created_date desc limit 50" +
       ")"  ;
 
   public static final String COUNTRY_QUERY = "select distinct(shipping_address_country) as countries\n" +
@@ -66,16 +68,6 @@ public class NativeQueries {
       "where cancelled_at like 'None'\n" +
       "and shipping_address_country <> '' and shipping_address_country <> 'None'" ;
 
-  public static String CITY_QUERY = "select distinct(shipping_address_city) as cities\n" +
-      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
-      "where cancelled_at like 'None'\n" +
-      "and shipping_address_city <> '' and shipping_address_city <> 'None'" ;
-
-  public static String CITY_QUERY_FOR_SEGMENT = "select distinct(shipping_address_city) as cities\n" +
-      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
-      "where cancelled_at like 'None'\n" +
-      "and created_date between '_startdate_' and '_enddate_'" +
-      "and shipping_address_city <> '' and shipping_address_city <> 'None'" ;
    public static String ORDERS_FOR_X_MONTHS = "select customer_id, count(distinct order_id)as orders__last_gap_months \n" +
        "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet') " +
        "       where cancelled_at like 'None'\n" +
@@ -225,11 +217,17 @@ public class NativeQueries {
           "and cancelled_at like 'None'\n" +
           "and created_date between '_startdate_' and '_enddate_'";
 
-  public static final String GET_CUSTOMERS_FOR_CITIES = "select distinct(customer_id) from\n" +
-          "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
-          "where shipping_address_city in cities\n" +
-          "and cancelled_at like 'None'\n" +
-          "and created_date between '_startdate_' and '_enddate_'";
+ public static final String GET_CITIES = "select name, state_name, country_name from\n" +
+         "parquet_scan('" + Constants.SHOPIFY_CITY_PARQUET_PATH + "')";
+
+ public static final String GET_CUSTOMER_AND_CITY = "select customer_id, GROUP_CONCAT(distinct(shipping_address_city),',') as cities\n" +
+         "from parquet_scan('" + Constants.PARQUET_FILE_PATH + "/botRef/shipping_information_*.parquet')\n" +
+         "where cancelled_at like 'None' \n" +
+         "and shipping_address_province in states\n" +
+         "and shipping_address_country in countries\n" +
+         "and shipping_address_city <> ''\n" +
+         "and created_date between '_startdate_' and '_enddate_'" +
+         "group by customer_id";
 
   public static final String CUSTOMER_ORDERS = "select customer_id, count(distinct order_id)as total_orders from\n" +
             "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')" +
