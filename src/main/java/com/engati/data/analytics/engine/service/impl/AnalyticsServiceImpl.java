@@ -273,11 +273,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         customerDetailsRequest);
     CustomerSetResponseDTO customerSetResponseDTO = new CustomerSetResponseDTO();
     Long customerId = 0L;
-    if ((customerDetailsRequest.getCustomerEmail() == null || customerDetailsRequest.getCustomerEmail().equals("")) && (customerDetailsRequest.getCustomerPhone() != null || !customerDetailsRequest.getCustomerPhone()
-        .equals(""))) {
-      customerSetResponseDTO.setCustomerId(0L);
-      customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.INPUT_MISSING));
-    }
     try {
       String query = NativeQueries.GET_CUSTOMER_ID_FROM_EMAIL_PHONE;
       query = query.replace(Constants.BOT_REF, botRef.toString());
