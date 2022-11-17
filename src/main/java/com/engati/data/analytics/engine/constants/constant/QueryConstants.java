@@ -69,12 +69,6 @@ public class QueryConstants {
   public static String CITIES = "cities";
   public static String COUNTRIES = "countries";
   public static String STATES = "states";
-
-
-
-
-
-
-
+  public static String SUBSCRIPTION_TITLES = "subscriptionTitles";
 
 }
