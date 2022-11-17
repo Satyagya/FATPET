@@ -7,8 +7,8 @@ import java.util.Locale;
 public class Constants {
 
   public static final String RESPONSE_OBJECT = "response";
-  public static final String CSV_BASE_PATH_FORMAT = "/Users/aniketmodi/Documents/customer_segmentsV3/%s";
-  public static final String CSV_PATH_FORMAT = "/Users/aniketmodi/Documents/customer_segmentsV3/%s/%s.csv";
+  public static final String CSV_BASE_PATH_FORMAT = "/opt/engati/customer_segments/%s";
+  public static final String CSV_PATH_FORMAT = "/opt/engati/customer_segments/%s/%s.csv";
   public static final String PDE_PREFIX = "pde";
   public static final String RETROFIT_PDE_API = "retrofitPDEApi";
   public static final String PDE_CLIENT = "pdeHttpClient";
@@ -28,9 +28,9 @@ public class Constants {
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-  public static String PARQUET_FILE_PATH = "/Users/aniketmodi/Desktop/parquet_store";
+  public static String PARQUET_FILE_PATH = "/opt/engati/parquet_store";
 
-  public static String SHOPIFY_CITY_PARQUET_PATH = "/Users/aniketmodi/Desktop/parquet_store/shopify_city.parquet";
+  public static String SHOPIFY_CITY_PARQUET_PATH = "/opt/engati/parquet_store/shopify_city.parquet";
 //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
