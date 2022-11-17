@@ -211,60 +211,67 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     DataAnalyticsResponse<CustomerDetailsResponse> response = new DataAnalyticsResponse<>();
     try {
       CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
-      CustomerSetResponseDTO customerSetResponseDTO = getCustomerId(customerDetailsRequest, botRef);
-      if (Objects.equals(customerSetResponseDTO.getStatus(), String.valueOf(ResponseStatusCode.PROCESSING_ERROR))) {
+      if ((customerDetailsRequest.getCustomerEmail() == null || customerDetailsRequest.getCustomerEmail().equals("")) && (
+          customerDetailsRequest.getCustomerPhone() == null || customerDetailsRequest.getCustomerPhone().equals(""))) {
         response.setResponseObject(null);
-        response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      }
-      else if (customerSetResponseDTO.getCustomerId() == 0L) {
-        response.setResponseObject(null);
-        response.setStatus(ResponseStatusCode.SUCCESS);
-      }
-      else {
-        Set<Long> customerSet = new HashSet<>();
-        customerSet.add(customerSetResponseDTO.getCustomerId());
-        List<CustomerSegmentationResponse> customerSegmentationResponse =
-            segmentService.getDetailsforCustomerSegments(customerSet, botRef);
-        if (!customerSegmentationResponse.isEmpty()) {
-          BeanUtils.copyProperties(customerDetailsResponse, customerSegmentationResponse.get(0));
-          try {
-            String query = NativeQueries.GET_LAST_ORDER_DATE_FOR_CUSTOMER;
-            query = query.replace(Constants.CUSTOMER_PROVIDED,
-                customerSetResponseDTO.getCustomerId().toString());
-            query = query.replace(Constants.BOTREF, botRef.toString());
-            JSONObject requestBody = new JSONObject();
-            requestBody.put(Constants.QUERY, query);
-            Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
-            if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
-              String lastOrderDate = (MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class).get(
-                      Constants.RESPONSE_OBJECT).get(Constants.LAST_ORDER_DATE).get(0).textValue());
-              customerDetailsResponse.setLastOrderDate(lastOrderDate);
-            }
-            else {
-              customerDetailsResponse.setLastOrderDate(String.valueOf(Constants.DEFAULT_LAST_ORDER_DATE));
-            }
-            response.setResponseObject(customerDetailsResponse);
-            response.setStatus(ResponseStatusCode.SUCCESS);
-          } catch (Exception e) {
-            log.info("Error while executing last order date query for botRef:{}, having shopify_customer_id: {}", botRef,customerSetResponseDTO.getCustomerId().toString(), e);
-            response.setResponseObject(null);
-            response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-            return response;
-          }
-        }
-        else{
+        response.setStatus(ResponseStatusCode.INPUT_MISSING);
+      } else {
+        CustomerSetResponseDTO customerSetResponseDTO = getCustomerId(customerDetailsRequest, botRef);
+        if (Objects.equals(customerSetResponseDTO.getStatus(), String.valueOf(ResponseStatusCode.PROCESSING_ERROR))) {
+          response.setResponseObject(null);
+          response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+        } else if (customerSetResponseDTO.getCustomerId() == 0L) {
           response.setResponseObject(null);
           response.setStatus(ResponseStatusCode.SUCCESS);
+        } else {
+          Set<Long> customerSet = new HashSet<>();
+          customerSet.add(customerSetResponseDTO.getCustomerId());
+          List<CustomerSegmentationResponse> customerSegmentationResponse =
+              segmentService.getDetailsforCustomerSegments(customerSet, botRef);
+          if (!customerSegmentationResponse.isEmpty()) {
+            BeanUtils.copyProperties(customerDetailsResponse, customerSegmentationResponse.get(0));
+            try {
+              String query = NativeQueries.GET_LAST_ORDER_DATE_FOR_CUSTOMER;
+              query = query.replace(Constants.CUSTOMER_PROVIDED,
+                  customerSetResponseDTO.getCustomerId().toString());
+              query = query.replace(Constants.BOTREF, botRef.toString());
+              JSONObject requestBody = new JSONObject();
+              requestBody.put(Constants.QUERY, query);
+              Response<JsonNode> etlResponse =
+                  etlEngineRestUtility.executeQuery(requestBody).execute();
+              if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+                  etlResponse.body())) {
+                String lastOrderDate =
+                    (MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
+                        .get(Constants.RESPONSE_OBJECT).get(Constants.LAST_ORDER_DATE).get(0).textValue());
+                customerDetailsResponse.setLastOrderDate(lastOrderDate);
+              } else {
+                customerDetailsResponse.setLastOrderDate(String.valueOf(Constants.DEFAULT_LAST_ORDER_DATE));
+              }
+              response.setResponseObject(customerDetailsResponse);
+              response.setStatus(ResponseStatusCode.SUCCESS);
+            } catch (Exception e) {
+              log.info(
+                  "Error while executing last order date query for botRef:{}, having shopify_customer_id: {}",
+                  botRef, customerSetResponseDTO.getCustomerId().toString(), e);
+              response.setResponseObject(null);
+              response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+              return response;
+            }
+          } else {
+            response.setResponseObject(null);
+            response.setStatus(ResponseStatusCode.SUCCESS);
+            }
+          }
         }
+      } catch(Exception e){
+        log.info(
+            "Error while getting Customer Details for: botRef:{}, having customerDetailsRequest:{}",
+            botRef, customerDetailsRequest, e);
+        response.setResponseObject(null);
+        response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+        return response;
       }
-    } catch (Exception e) {
-      log.info(
-          "Error while getting Customer Details for: botRef:{}, having customerDetailsRequest:{}",
-          botRef, customerDetailsRequest, e);
-      response.setResponseObject(null);
-      response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      return response;
-    }
     return response;
   }
 
