@@ -59,7 +59,7 @@ public class SegmentController {
 
   @GetMapping(value = ApiPathConstants.GET_CITY)
   public ResponseEntity<DataAnalyticsResponse> getCity(@PathVariable(name = ApiPathConstants.BOTREF) Long botRef) {
-    log.info("Got call to fetch country for botRef:{}", botRef);
+    log.info("Got call to fetch city for botRef:{}", botRef);
     DataAnalyticsResponse<List<String>> response = segmentService.getCity();
     return new ResponseEntity<>(response, response.getStatusCode());
   }
