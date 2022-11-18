@@ -201,8 +201,10 @@ public class SegmentServiceImpl implements SegmentService {
         customerSegmentationCustomSegmentResponse.setCustomerProductTypes(Constants.DEFAULT_PRODUCT_TYPES);
       }
 
-      customerSegmentationResponseList.add(customerSegmentationCustomSegmentResponse);
-      customerSegmentationResponseList.sort(Collections.reverseOrder());
+      if (customerSegmentationCustomSegmentResponse.getCustomerOrders() > 0 ) {
+        customerSegmentationResponseList.add(customerSegmentationCustomSegmentResponse);
+        customerSegmentationResponseList.sort(Collections.reverseOrder());
+      }
     }
     return customerSegmentationResponseList;
   }
