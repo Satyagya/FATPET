@@ -741,28 +741,28 @@ public class SegmentServiceImpl implements SegmentService {
     for(int index=0;index<operands.length;index++) {
       String operand = operands[index];
 
-      if(operand.contains("ORDERS")) {
+      if(operand.contains(Constants.ORDERS_SEGMENT_CONDITION)) {
         query_for_operand = generateQueryForOrdersCustomSegment(botRef,operand,startDate,endDate);
 
-      } else if(operand.contains("AVERAGE_ORDER_VALUE")) {
+      } else if(operand.contains(Constants.AOV_SEGMENT_CONDITION)) {
         query_for_operand = generateQueryForCustomerAOVCustomSegment(botRef,operand,startDate,endDate);
 
-      } else if(operand.contains("LAST_ORDER")) {
+      } else if(operand.contains(Constants.LAST_ORDER_DATE_SEGMENT_CONDITION)) {
         query_for_operand = generateQueryForLastOrderDaysCustomSegment(botRef,operand,startDate,endDate);
 
-      } else if(operand.contains("AMOUNT_SPENT")) {
+      } else if(operand.contains(Constants.AMOUNT_SPENT_SEGMENT_CONDITION)) {
         query_for_operand = generateQueryForAmountSpentCustomSegment(botRef,operand,startDate,endDate);
 
-      } else if(operand.contains("PRODUCT_TYPE")) {
-        String productType = operand.split("IN", 2)[1];
+      } else if(operand.contains(Constants.PRODUCT_TYPE_SEGMENT_CONDITION)) {
+        String productType = operand.split(Constants.SEGMENT_IN_CONDITION, 2)[1];
         Set<String> productTypes = Arrays.stream(productType.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
         query_for_operand = generateQueryForProductTypeCustomSegment(botRef,operand,startDate,endDate,productTypes);
 
-      } else if(operand.contains("CITY")) {
-        String inputCityWithStateCountry = operand.split("IN",2)[1]
+      } else if(operand.contains(Constants.CITY_SEGMENT_CONDITION)) {
+        String inputCityWithStateCountry = operand.split(Constants.SEGMENT_IN_CONDITION,2)[1]
                 .replace("'","").trim();
 
-        List<String> inputList = Arrays.stream(inputCityWithStateCountry.split(","))
+        List<String> inputList = Arrays.stream(inputCityWithStateCountry.split(Constants.SPLIT_CITY_STRING))
                 .map(str -> '\'' + str + '\'')
                 .collect(Collectors.toList());
 
@@ -788,13 +788,13 @@ public class SegmentServiceImpl implements SegmentService {
 
 
 
-      }  else if(operand.contains("COUNTRY")) {
-         String inputCountry = operand.split("IN",2)[1];
+      }  else if(operand.contains(Constants.COUNTRY_SEGMENT_CONDITION)) {
+         String inputCountry = operand.split(Constants.SEGMENT_IN_CONDITION,2)[1];
          Set<String> countryList = Arrays.stream(inputCountry.split(",")).map(str->str.trim()).collect(Collectors.toSet());
          query_for_operand = generateQueryForCountryCustomSegment(botRef, operand, startDate, endDate, countryList);
 
-      }else if(operand.contains("COLLECTION")) {
-        String inputCollection = operand.split("IN",2)[1];
+      }else if(operand.contains(Constants.COLLECTION_SEGMENT_CONDITION)) {
+        String inputCollection = operand.split(Constants.SEGMENT_IN_CONDITION,2)[1];
         Set<String> collectionList = Arrays.stream(inputCollection.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
         query_for_operand = generateQueryForCollectionCustomSegment(botRef, operand, startDate, endDate, collectionList);
       } else {
@@ -904,7 +904,7 @@ public class SegmentServiceImpl implements SegmentService {
         });
       }
     } catch (Exception e) {
-      log.info("Error while getting List of cities of each customer from parquet",e);
+      log.error("Error while getting List of cities of each customer from parquet",e);
     }
 
     return customerIdAndCityList;
@@ -946,6 +946,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
     return customerIds;
   }
+
   private Set<Long> omitSubscriptionCustomersFromSegments(Long botRef, Set<Long> resultSet) {
     List<String> shopDomains_subscription =
         Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
@@ -1160,7 +1161,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     } catch (Exception e) {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      log.info("Error while getting List of ProductTypes for: botRef:{}", botRef, e);
+      log.error("Error while getting List of ProductTypes for: botRef:{}", botRef, e);
     }
     response.setResponseObject(productTypes.get("product_type"));
     response.setStatus(ResponseStatusCode.SUCCESS);
@@ -1184,7 +1185,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     } catch (Exception e) {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      log.info("Error while getting List of Collections for: botRef:{}", botRef, e);
+      log.error("Error while getting List of Collections for: botRef:{}", botRef, e);
     }
     response.setResponseObject(collections.get(QueryConstants.COLLECTIONS));
     response.setStatus(ResponseStatusCode.SUCCESS);
@@ -1208,7 +1209,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     } catch (Exception e) {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      log.info("Error while getting List of Countries for: botRef:{}", botRef, e);
+      log.error("Error while getting List of Countries for: botRef:{}", botRef, e);
     }
     response.setResponseObject(countries.get(QueryConstants.COUNTRIES));
     response.setStatus(ResponseStatusCode.SUCCESS);
@@ -1228,16 +1229,16 @@ public class SegmentServiceImpl implements SegmentService {
         });
       }
     } catch (Exception e) {
-      log.info("Error while getting List of cities from parquet",e);
+      log.error("Error while getting List of cities from parquet",e);
     }
 
     if (Objects.nonNull(correctCityNames)) {
-      Iterator<String> cityIterator = correctCityNames.get("name").iterator();
-      Iterator<String> stateIterator = correctCityNames.get("state_name").iterator();
-      Iterator<String> countryIterator = correctCityNames.get("country_name").iterator();
+      Iterator<String> cityIterator = correctCityNames.get(Constants.CITY_NAME).iterator();
+      Iterator<String> stateIterator = correctCityNames.get(Constants.STATE_NAME).iterator();
+      Iterator<String> countryIterator = correctCityNames.get(Constants.COUNTRY_NAME).iterator();
 
       while(cityIterator.hasNext() && stateIterator.hasNext() && countryIterator.hasNext()) {
-        cityWithStateAndCountry.add(String.valueOf(new StringJoiner(",").add(cityIterator.next()).add(stateIterator.next()).add(countryIterator.next())));
+        cityWithStateAndCountry.add(String.valueOf(new StringJoiner(Constants.SPLIT_CITY_STRING).add(cityIterator.next()).add(stateIterator.next()).add(countryIterator.next())));
       }
 
     }
