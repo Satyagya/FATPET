@@ -932,6 +932,7 @@ public class SegmentServiceImpl implements SegmentService {
       int matched = 0;
       for(String customerCity:customerCityList) {
             for(String inputCity:inputCityList) {
+              inputCity = inputCity.replace("'","");
               Integer distance = levenshteinDistance.apply(customerCity,inputCity);
               if(distance!=-1 && distance<=2) {
                 customerIds.add(key);
