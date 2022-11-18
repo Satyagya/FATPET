@@ -762,7 +762,6 @@ public class SegmentServiceImpl implements SegmentService {
         String inputCityWithStateCountry = operand.split("IN",2)[1]
                 .replace("'","").trim();
 
-        log.info("{}",inputCityWithStateCountry);
         List<String> inputList = Arrays.stream(inputCityWithStateCountry.split(","))
                 .map(str -> '\'' + str + '\'')
                 .collect(Collectors.toList());
@@ -784,8 +783,6 @@ public class SegmentServiceImpl implements SegmentService {
         String query = generateQueryForCityCustomSegment(botRef,operand,startDate,endDate,inputCity,inputState,inputCountry);
 
         Map<Long, Map<String,String>> customerIdWithCityList = getCustomerIdAndCityList(query);
-
-        log.info("CustomerId and City List:{}",customerIdWithCityList);
 
         customerId = getFuzzyMatchedCityCustomers(customerIdWithCityList, inputCity);
 
@@ -907,7 +904,7 @@ public class SegmentServiceImpl implements SegmentService {
         });
       }
     } catch (Exception e) {
-      log.info("Error while getting List of cities from parquet",e);
+      log.info("Error while getting List of cities of each customer from parquet",e);
     }
 
     return customerIdAndCityList;
@@ -1211,7 +1208,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
     } catch (Exception e) {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-      log.info("Error while getting List of Collections for: botRef:{}", botRef, e);
+      log.info("Error while getting List of Countries for: botRef:{}", botRef, e);
     }
     response.setResponseObject(countries.get(QueryConstants.COUNTRIES));
     response.setStatus(ResponseStatusCode.SUCCESS);
