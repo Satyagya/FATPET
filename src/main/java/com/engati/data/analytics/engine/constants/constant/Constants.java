@@ -90,7 +90,7 @@ public class Constants {
                                                           "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};
   public static final String[] SENTIMENT_LIST = new String[]{"Positive", "Negative", "Neutral"};
   public static final String SEGMENT_IN_CONDITION = "IN";
-  public static final String SPLIT_CITY_STRING = " - ";
+  public static final String JOIN_CITY_STATE_COUNTRY = " - ";
   public static final String CITY_NAME = "name";
   public static final String STATE_NAME = "state_name";
   public static final String COUNTRY_NAME = "country_name";

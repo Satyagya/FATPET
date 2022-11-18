@@ -762,7 +762,7 @@ public class SegmentServiceImpl implements SegmentService {
         String inputCityWithStateCountry = operand.split(Constants.SEGMENT_IN_CONDITION,2)[1]
                 .replace("'","").trim();
 
-        List<String> inputList = Arrays.stream(inputCityWithStateCountry.split(Constants.SPLIT_CITY_STRING))
+        List<String> inputList = Arrays.stream(inputCityWithStateCountry.split(Constants.JOIN_CITY_STATE_COUNTRY))
                 .map(str -> '\'' + str + '\'')
                 .collect(Collectors.toList());
 
@@ -1238,7 +1238,7 @@ public class SegmentServiceImpl implements SegmentService {
       Iterator<String> countryIterator = correctCityNames.get(Constants.COUNTRY_NAME).iterator();
 
       while(cityIterator.hasNext() && stateIterator.hasNext() && countryIterator.hasNext()) {
-        cityWithStateAndCountry.add(String.valueOf(new StringJoiner(Constants.SPLIT_CITY_STRING).add(cityIterator.next()).add(stateIterator.next()).add(countryIterator.next())));
+        cityWithStateAndCountry.add(String.valueOf(new StringJoiner(Constants.JOIN_CITY_STATE_COUNTRY).add(cityIterator.next()).add(stateIterator.next()).add(countryIterator.next())));
       }
 
     }
