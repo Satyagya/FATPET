@@ -1163,7 +1163,7 @@ public class SegmentServiceImpl implements SegmentService {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
       log.error("Error while getting List of ProductTypes for: botRef:{}", botRef, e);
     }
-    response.setResponseObject(productTypes.get("product_type"));
+    response.setResponseObject(productTypes.get(Constants.GET_PRODUCT_TYPES_ETL_RESPONSE));
     response.setStatus(ResponseStatusCode.SUCCESS);
     return response;
   }

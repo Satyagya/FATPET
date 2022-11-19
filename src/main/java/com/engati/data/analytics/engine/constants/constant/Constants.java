@@ -101,5 +101,6 @@ public class Constants {
   public static final String CITY_SEGMENT_CONDITION = "CITY";
   public static final String COUNTRY_SEGMENT_CONDITION = "COUNTRY";
   public static final String COLLECTION_SEGMENT_CONDITION = "COLLECTION";
+  public static final String GET_PRODUCT_TYPES_ETL_RESPONSE = "product_type";
 
 }
