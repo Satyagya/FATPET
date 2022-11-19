@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import retrofit2.Response;
 
 import java.util.ArrayList;
@@ -211,8 +212,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     DataAnalyticsResponse<CustomerDetailsResponse> response = new DataAnalyticsResponse<>();
     try {
       CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
-      if ((customerDetailsRequest.getCustomerEmail() == null || customerDetailsRequest.getCustomerEmail().equals("")) && (
-          customerDetailsRequest.getCustomerPhone() == null || customerDetailsRequest.getCustomerPhone().equals(""))) {
+      if ((Objects.nonNull(customerDetailsRequest.getCustomerEmail()) || !StringUtils.hasLength(customerDetailsRequest.getCustomerEmail())) && (
+          Objects.nonNull(customerDetailsRequest.getCustomerPhone()) || !StringUtils.hasLength(customerDetailsRequest.getCustomerPhone()))) {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INPUT_MISSING);
       } else {
