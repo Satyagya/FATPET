@@ -762,22 +762,21 @@ public class SegmentServiceImpl implements SegmentService {
         String inputCityWithStateCountry = operand.split(Constants.SEGMENT_IN_CONDITION,2)[1]
                 .replace("'","").trim();
 
-        List<String> inputList = Arrays.stream(inputCityWithStateCountry.split(Constants.JOIN_CITY_STATE_COUNTRY))
-                .map(str -> '\'' + str + '\'')
-                .collect(Collectors.toList());
+        List<String> inputCityWithStateCountryList = Arrays.stream(inputCityWithStateCountry.split(",")).collect(Collectors.toList());
 
         Set<String>inputCity = new HashSet<>();
         Set<String> inputCountry = new HashSet<>();
         Set<String> inputState = new HashSet<>();
 
-        for(int i=0 ;i<inputList.size();i++) {
-              if(i%3 ==0) {
-                inputCity.add(inputList.get(i));
-              } else if(i%3 ==1) {
-                inputState.add(inputList.get(i));
-              } else {
-                inputCountry.add(inputList.get(i));
-              }
+        for(String input:inputCityWithStateCountryList) {
+          List<String> cityStateCountry = Arrays.stream(input.split(Constants.JOIN_CITY_STATE_COUNTRY))
+                  .map(str -> '\'' + str + '\'')
+                  .collect(Collectors.toList());
+
+          inputCity.add(cityStateCountry.get(0));
+          inputState.add(cityStateCountry.get(1));
+          inputCountry.add(cityStateCountry.get(2));
+
         }
 
         String query = generateQueryForCityCustomSegment(botRef,operand,startDate,endDate,inputCity,inputState,inputCountry);
