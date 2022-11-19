@@ -271,7 +271,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             botRef, customerDetailsRequest, e);
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
-        return response;
       }
     return response;
   }
