@@ -30,8 +30,7 @@ public class Constants {
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
   public static String PARQUET_FILE_PATH = "/opt/engati/local_parquet_store";
 
-  public static String SHOPIFY_CITY_PARQUET_PATH = "/opt/engati/local_parquet_store/shopify_city.parquet";
-//  Defaults
+  //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;

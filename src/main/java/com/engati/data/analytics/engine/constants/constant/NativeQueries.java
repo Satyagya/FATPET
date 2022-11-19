@@ -224,7 +224,7 @@ public class NativeQueries {
           "and created_date between '_startdate_' and '_enddate_'";
 
  public static final String GET_CITIES = "select name, state_name, country_name from\n" +
-         "parquet_scan('" + Constants.SHOPIFY_CITY_PARQUET_PATH + "')";
+         "parquet_scan('" + Constants.PARQUET_FILE_PATH + "/shopify_city.parquet')";
 
  public static final String GET_CUSTOMER_AND_CITY = "select customer_id, GROUP_CONCAT(distinct(shipping_address_city),',') as cities\n" +
          "from parquet_scan('" + Constants.PARQUET_FILE_PATH + "/botRef/shipping_information_*.parquet')\n" +
