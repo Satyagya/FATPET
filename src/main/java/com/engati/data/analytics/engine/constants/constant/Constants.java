@@ -58,6 +58,10 @@ public class Constants {
   public static String QUERIES_ASKED = "queries_asked";
   public static String QUERIES_UNANSWERED= "queries_unanswered";
   public static Integer MAXIMUM_NUMBER_OF_OPERATORS = 4;
+  public static String PHONE_PROVIDED = "phone_provided";
+  public static String EMAIL_PROVIDED = "email_provided";
+  public static String CUSTOMER_PROVIDED = "customer_provided";
+  public static String LAST_ORDER_DATE = "last_order_date";
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";
@@ -88,5 +92,8 @@ public class Constants {
   public static final String[] INTENT_LIST = new String[]{"ORDER_ENQUIRY", "PURCHASE_ENQUIRY", "RETURN_AND_EXCHANGE",
                                                           "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};
   public static final String[] SENTIMENT_LIST = new String[]{"Positive", "Negative", "Neutral"};
+  public static final String CUSTOMER_EMAIL_COMPARATOR = "and customer_email like '%email_provided%' ";
+  public static final String CUSTOMER_PHONE_NUMBER_COMPARATOR = "and (customer_phone like '%phone_provided%' or billing_address_phone like '%phone_provided%')";
+
 
 }
