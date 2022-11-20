@@ -31,6 +31,12 @@ public class NativeQueries {
        "group by customer_id)as b)as c\n" +
        "where metric operator value";
 
+   public static String SUBSCRIPTION_ORDER_QUERY = "select distinct(customer_id) from parquet_scan('"
+       + Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet') "
+       + "where variant_id in (select variant_id "
+       + "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_variants_*.parquet') "
+       + "where title in (subscriptionTitles))";
+
    public static String STORE_AOV_QUERY = "select coalesce(round(sum_total*1.0/number_of_orders, 2), 0)as STORE_AOV from\n" +
        "(select sum(total_price)as sum_total, count(distinct order_id)as number_of_orders from\n" +
        "(select order_id, cast(total_price as float) total_price from\n" +
@@ -138,8 +144,8 @@ public class NativeQueries {
           "case " +
           "when customer_email<>'' then customer_email else '' end as customer_email, " +
           "case when customer_phone<>'' then customer_phone " +
-          "     when shipping_address_phone<>'' then shipping_address_phone " +
           "     when billing_address_phone<>'' then billing_address_phone " +
+          "     when shipping_address_phone<>'' then shipping_address_phone " +
           "     else '' end as customer_phone, " +
           "customer_name " +
           "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_customer_*.parquet')\n" +

@@ -13,16 +13,14 @@ import com.engati.data.analytics.engine.model.response.CustomerSegmentationConfi
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationCustomSegmentResponse;
 import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.engati.data.analytics.engine.model.response.KafkaPayloadForSegmentStatus;
-import com.engati.data.analytics.engine.repository.SegmentRepository;
+import com.engati.data.analytics.engine.repository.ShopifyProductDiscoveryConfigRepository;
 import com.engati.data.analytics.engine.service.CustomerSegmentationConfigurationService;
 import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.engati.data.analytics.engine.service.SegmentService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +32,6 @@ import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -57,13 +54,19 @@ public class SegmentServiceImpl implements SegmentService {
   private KafkaTemplate<String, String> kafka;
 
   @Autowired
-  private SegmentRepository segmentRepository;
+  private ShopifyProductDiscoveryConfigRepository shopifyProductDiscoveryConfigRepository;
 
   @Autowired
   private CommonUtils commonUtils;
 
   @Value("${topic.shopify.segments.response}")
   private String segmentResponseTopic;
+
+  @Value("${segment.remove.subscribedCust.shopDomains}")
+  private String shopDomainsForSubscribedCustomers;
+
+  @Value("${segment.subscription.titles}")
+  private String subscriptionTitles;
 
   @Autowired
   private EtlEngineRestUtility etlEngineRestUtility;
@@ -322,6 +325,7 @@ public class SegmentServiceImpl implements SegmentService {
     log.info("Checking for Config values for the segment values for {} for botRef: {}", segmentName, botRef);
     Set<Long> resultSet = null;
     Set<Long> recencySegment = null;
+    Set<Long> subscriptionOrdersSegment = null;
     if (configDetails.getResponseObject().getRecencyMetric() != null) {
       log.info("Recency configurations found for botRef: {}, segmentName {}", botRef, segmentName);
       recencySegment = getRecencySegment(configDetails);
@@ -337,6 +341,7 @@ public class SegmentServiceImpl implements SegmentService {
       monetarySegment = getMonetarySegment(configDetails);
     }
     resultSet = getIntersectionForSegments(recencySegment, frequencySegment, monetarySegment);
+    resultSet = omitSubscriptionCustomersFromSegments(botRef, resultSet);
     try {
       String fileName = getOutputFileName(botRef, segmentName);
       kafkaPayload.setFileName(fileName);
@@ -380,6 +385,33 @@ public class SegmentServiceImpl implements SegmentService {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
     }
     return response;
+  }
+
+  private Set<Long> getSubscribedUsersSegment(Long botRef) {
+    Set<Long> customersWithSubscriptionOrder = new HashSet<>();
+    JSONObject requestBody = new JSONObject();
+    List<String> subscriptionTitlesList =
+        Arrays.asList(subscriptionTitles.split(","));
+    try {
+      String query = NativeQueries.SUBSCRIPTION_ORDER_QUERY;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      query = query.replace(QueryConstants.SUBSCRIPTION_TITLES,
+          subscriptionTitlesList.stream().collect(Collectors.joining("','", "'", "'")));
+      requestBody.put(Constants.QUERY, query);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+          etlResponse.body())) {
+        customersWithSubscriptionOrder = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(
+                    etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.CUSTOMER_ID)),
+                ArrayList.class).stream().map(x -> ((Number) x).longValue())
+            .collect(Collectors.toSet());
+      }
+    } catch (Exception e) {
+      prometheusManagementService.apiRequestFailureEvent("getSubscriptionOrderSegment", botRef,
+          e.getMessage(), requestBody.toString());
+      log.error("Exception while getting Subscription orders for botRef: {}", botRef.toString(), e);
+    }
+    return customersWithSubscriptionOrder;
   }
 
   private String getOutputFileName(Long botRef, String segmentName) {
@@ -660,6 +692,12 @@ public class SegmentServiceImpl implements SegmentService {
       startDate = formatter.format(dateRange.get(0));
       endDate = formatter.format(dateRange.get(1));
 
+      DateFormat payLoadDateFormat = new SimpleDateFormat(Constants.PAYLOAD_DATE_FORMAT);
+      String payLoadStartDate = payLoadDateFormat.format(dateRange.get(0));
+      String payLoadEndDate = payLoadDateFormat.format(dateRange.get(1));
+
+      String payLoadDateSelected = payLoadStartDate + ',' +payLoadEndDate;
+      kafkaPayload.setDateRange(payLoadDateSelected);
     } else {
       response.setResponseObject(null);
       response.setStatus(ResponseStatusCode.DATE_RANGE_IS_NOT_VALID);
@@ -713,7 +751,7 @@ public class SegmentServiceImpl implements SegmentService {
         String productType = operand.split("IN", 2)[1];
         Set<String> productTypes = Arrays.stream(productType.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
         query_for_operand = generateQueryForProductTypeCustomSegment(botRef,operand,startDate,endDate,productTypes);
-
+        
       } else {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
@@ -762,6 +800,7 @@ public class SegmentServiceImpl implements SegmentService {
       }
 
     }
+    resultSet = omitSubscriptionCustomersFromSegments(botRef, resultSet);
 
     try {
       String fileName = getOutputFileName(botRef, customSegmentRequest.getFileName());
@@ -803,6 +842,19 @@ public class SegmentServiceImpl implements SegmentService {
       log.error("Error publishing message to kafka for kafkaPayload: {}", kafkaPayload, e);
     }
     return response;
+  }
+
+  private Set<Long> omitSubscriptionCustomersFromSegments(Long botRef, Set<Long> resultSet) {
+    List<String> shopDomains_subscription =
+        Arrays.asList(shopDomainsForSubscribedCustomers.split(","));
+    String shopDomainForBotRef = shopifyProductDiscoveryConfigRepository.findShopDomainByBotRef(botRef);
+    if (shopDomainForBotRef!=null && shopDomains_subscription.stream()
+        .anyMatch(shopDomainForBotRef::contains)
+        && resultSet != null) {
+      Set<Long> subscriptionCustomersSegment = getSubscribedUsersSegment(botRef);
+      resultSet.removeAll(subscriptionCustomersSegment);
+    }
+    return resultSet;
   }
 
   public Map<String, Object> getCustomerListForParameter(String parameter_query_definition) {
