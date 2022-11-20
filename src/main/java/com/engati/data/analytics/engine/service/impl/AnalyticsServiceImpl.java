@@ -266,7 +266,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
           }
         }
       } catch(Exception e){
-        log.info(
+        log.error(
             "Error while getting Customer Details for: botRef:{}, having customerDetailsRequest:{}",
             botRef, customerDetailsRequest, e);
         response.setResponseObject(null);
@@ -317,7 +317,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.SUCCESS));
       }
     } catch (Exception e) {
-      log.info("Error while getting CustomerId for: botRef:{} and customDetailRequest: {}", botRef, customerDetailsRequest, e);
+      log.error("Error while getting CustomerId for: botRef:{} and customDetailRequest: {}", botRef, customerDetailsRequest, e);
       customerSetResponseDTO.setCustomerId(customerId);
       customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.PROCESSING_ERROR));
       return customerSetResponseDTO;
