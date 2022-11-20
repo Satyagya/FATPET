@@ -14,5 +14,8 @@ public interface SegmentService {
     DataAnalyticsResponse<List<CustomerSegmentationCustomSegmentResponse>> getCustomersForCustomSegment(Long botRef, CustomSegmentRequest customSegmentRequest);
 
     DataAnalyticsResponse<List<String>> getProductType(Long botRef);
+    DataAnalyticsResponse<List<String>> getCollection(Long botRef);
+    DataAnalyticsResponse<List<String>> getCountry(Long botRef);
+    DataAnalyticsResponse<List<String>> getCity();
 
 }

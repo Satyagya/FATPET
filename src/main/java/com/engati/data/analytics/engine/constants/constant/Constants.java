@@ -30,7 +30,7 @@ public class Constants {
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
   public static String PARQUET_FILE_PATH = "/opt/engati/local_parquet_store";
 
-//  Defaults
+  //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
   public static Integer DEFAULT_ORDER_VALUE = 0;
   public static Long DEFAULT_AOV_VALUE = 0L;
@@ -92,8 +92,21 @@ public class Constants {
   public static final String[] INTENT_LIST = new String[]{"ORDER_ENQUIRY", "PURCHASE_ENQUIRY", "RETURN_AND_EXCHANGE",
                                                           "PRICE_ENQUIRY", "OUT_OF_STOCK_ENQUIRY"};
   public static final String[] SENTIMENT_LIST = new String[]{"Positive", "Negative", "Neutral"};
+  public static final String SEGMENT_IN_CONDITION = "IN";
+  public static final String JOIN_CITY_STATE_COUNTRY = " - ";
+  public static final String CITY_NAME = "name";
+  public static final String STATE_NAME = "state_name";
+  public static final String COUNTRY_NAME = "country_name";
+  public static final String ORDERS_SEGMENT_CONDITION = "ORDERS";
+  public static final String AOV_SEGMENT_CONDITION = "AVERAGE_ORDER_VALUE";
+  public static final String LAST_ORDER_DATE_SEGMENT_CONDITION = "LAST_ORDER";
+  public static final String AMOUNT_SPENT_SEGMENT_CONDITION = "AMOUNT_SPENT";
+  public static final String PRODUCT_TYPE_SEGMENT_CONDITION = "PRODUCT_TYPE";
+  public static final String CITY_SEGMENT_CONDITION = "CITY";
+  public static final String COUNTRY_SEGMENT_CONDITION = "COUNTRY";
+  public static final String COLLECTION_SEGMENT_CONDITION = "COLLECTION";
+  public static final String GET_PRODUCT_TYPES_ETL_RESPONSE = "product_type";
   public static final String CUSTOMER_EMAIL_COMPARATOR = "and customer_email like '%email_provided%' ";
   public static final String CUSTOMER_PHONE_NUMBER_COMPARATOR = "and (customer_phone like '%phone_provided%' or billing_address_phone like '%phone_provided%')";
-
 
 }
