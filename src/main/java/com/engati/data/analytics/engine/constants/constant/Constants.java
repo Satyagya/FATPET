@@ -58,6 +58,10 @@ public class Constants {
   public static String QUERIES_ASKED = "queries_asked";
   public static String QUERIES_UNANSWERED= "queries_unanswered";
   public static Integer MAXIMUM_NUMBER_OF_OPERATORS = 4;
+  public static String PHONE_PROVIDED = "phone_provided";
+  public static String EMAIL_PROVIDED = "email_provided";
+  public static String CUSTOMER_PROVIDED = "customer_provided";
+  public static String LAST_ORDER_DATE = "last_order_date";
 
   // Retrofit
   public static final String DUCKDB_ENGINE_PREFIX = "duckdb.engine";
@@ -102,5 +106,7 @@ public class Constants {
   public static final String COUNTRY_SEGMENT_CONDITION = "COUNTRY";
   public static final String COLLECTION_SEGMENT_CONDITION = "COLLECTION";
   public static final String GET_PRODUCT_TYPES_ETL_RESPONSE = "product_type";
+  public static final String CUSTOMER_EMAIL_COMPARATOR = "and customer_email like '%email_provided%' ";
+  public static final String CUSTOMER_PHONE_NUMBER_COMPARATOR = "and (customer_phone like '%phone_provided%' or billing_address_phone like '%phone_provided%')";
 
 }

@@ -7,16 +7,23 @@ import com.engati.data.analytics.engine.constants.constant.Constants;
 import com.engati.data.analytics.engine.constants.constant.NativeQueries;
 import com.engati.data.analytics.engine.constants.constant.QueryConstants;
 import com.engati.data.analytics.engine.constants.enums.ResponseStatusCode;
+import com.engati.data.analytics.engine.model.dto.CustomerSetResponseDTO;
+import com.engati.data.analytics.engine.model.request.CustomerDetailsRequest;
 import com.engati.data.analytics.engine.model.request.ProductDiscoveryRequest;
 import com.engati.data.analytics.engine.model.request.PurchaseHistoryRequest;
+import com.engati.data.analytics.engine.model.response.CustomerDetailsResponse;
+import com.engati.data.analytics.engine.model.response.CustomerSegmentationResponse;
 import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
 import com.engati.data.analytics.engine.service.PrometheusManagementService;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,9 +31,11 @@ import org.springframework.util.CollectionUtils;
 import retrofit2.Response;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,6 +49,9 @@ public class AnalyticsServiceImpl implements AnalyticsService {
   private EtlEngineRestUtility etlEngineRestUtility;
 
   public static final ObjectMapper MAPPER = new ObjectMapper();
+
+  @Autowired
+  private SegmentServiceImpl segmentService;
 
   @Autowired
   @Qualifier("com.engati.data.analytics.engine.service.impl.PrometheusManagementServiceImpl")
@@ -192,6 +204,127 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
     }
     return response;
+  }
+
+  @Override
+  public DataAnalyticsResponse<CustomerDetailsResponse> getCustomerDetails(Long botRef,
+      CustomerDetailsRequest customerDetailsRequest) {
+    DataAnalyticsResponse<CustomerDetailsResponse> response = new DataAnalyticsResponse<>();
+    try {
+      CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
+      if ((Objects.nonNull(customerDetailsRequest.getCustomerEmail()) || StringUtils.isBlank(customerDetailsRequest.getCustomerEmail())) && (
+          Objects.nonNull(customerDetailsRequest.getCustomerPhone()) || StringUtils.isBlank(customerDetailsRequest.getCustomerPhone()))) {
+        response.setResponseObject(null);
+        response.setStatus(ResponseStatusCode.INPUT_MISSING);
+      } else {
+        CustomerSetResponseDTO customerSetResponseDTO = getCustomerId(customerDetailsRequest, botRef);
+        if (Objects.equals(customerSetResponseDTO.getStatus(), String.valueOf(ResponseStatusCode.PROCESSING_ERROR))) {
+          response.setResponseObject(null);
+          response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+        } else if (customerSetResponseDTO.getCustomerId() == 0L) {
+          response.setResponseObject(null);
+          response.setStatus(ResponseStatusCode.SUCCESS);
+        } else {
+          Set<Long> customerSet = new HashSet<>();
+          customerSet.add(customerSetResponseDTO.getCustomerId());
+          List<CustomerSegmentationResponse> customerSegmentationResponse =
+              segmentService.getDetailsforCustomerSegments(customerSet, botRef);
+          if (!customerSegmentationResponse.isEmpty()) {
+            BeanUtils.copyProperties(customerDetailsResponse, customerSegmentationResponse.get(0));
+            try {
+              String query = NativeQueries.GET_LAST_ORDER_DATE_FOR_CUSTOMER;
+              query = query.replace(Constants.CUSTOMER_PROVIDED,
+                  customerSetResponseDTO.getCustomerId().toString());
+              query = query.replace(Constants.BOTREF, botRef.toString());
+              JSONObject requestBody = new JSONObject();
+              requestBody.put(Constants.QUERY, query);
+              Response<JsonNode> etlResponse =
+                  etlEngineRestUtility.executeQuery(requestBody).execute();
+              if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(
+                  etlResponse.body())) {
+                String lastOrderDate =
+                    (MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class)
+                        .get(Constants.RESPONSE_OBJECT).get(Constants.LAST_ORDER_DATE).get(0).textValue());
+                customerDetailsResponse.setLastOrderDate(lastOrderDate);
+              } else {
+                customerDetailsResponse.setLastOrderDate(String.valueOf(Constants.DEFAULT_LAST_ORDER_DATE));
+              }
+              response.setResponseObject(customerDetailsResponse);
+              response.setStatus(ResponseStatusCode.SUCCESS);
+            } catch (Exception e) {
+              log.info(
+                  "Error while executing last order date query for botRef:{}, having shopify_customer_id: {}",
+                  botRef, customerSetResponseDTO.getCustomerId().toString(), e);
+              response.setResponseObject(null);
+              response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+              return response;
+            }
+          } else {
+            response.setResponseObject(null);
+            response.setStatus(ResponseStatusCode.SUCCESS);
+            }
+          }
+        }
+      } catch(Exception e){
+        log.error(
+            "Error while getting Customer Details for: botRef:{}, having customerDetailsRequest:{}",
+            botRef, customerDetailsRequest, e);
+        response.setResponseObject(null);
+        response.setStatus(ResponseStatusCode.PROCESSING_ERROR);
+      }
+    return response;
+  }
+
+  private CustomerSetResponseDTO getCustomerId(CustomerDetailsRequest customerDetailsRequest, Long botRef) {
+    log.info("Got call to get customerId for botRef: {} having requestBody: {}", botRef,
+        customerDetailsRequest);
+    CustomerSetResponseDTO customerSetResponseDTO = new CustomerSetResponseDTO();
+    Long customerId = 0L;
+    try {
+      String query = NativeQueries.GET_CUSTOMER_ID_FROM_EMAIL_PHONE;
+      query = query.replace(Constants.BOT_REF, botRef.toString());
+      if (customerDetailsRequest.getCustomerEmail() != null || !customerDetailsRequest.getCustomerEmail()
+          .equals("")) {
+        query = query.replace(Constants.EMAIL_PROVIDED, customerDetailsRequest.getCustomerEmail());
+      } else {
+        query = query.replace(Constants.CUSTOMER_EMAIL_COMPARATOR, "");
+      }
+      if (customerDetailsRequest.getCustomerPhone() != null || !customerDetailsRequest.getCustomerPhone()
+          .equals("")) {
+        query = query.replace(Constants.PHONE_PROVIDED, customerDetailsRequest.getCustomerPhone());
+      } else {
+        query = query.replace(Constants.CUSTOMER_PHONE_NUMBER_COMPARATOR, "");
+      }
+      JSONObject requestBody = new JSONObject();
+      requestBody.put(Constants.QUERY, query);
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        if ((MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class).get(
+            Constants.RESPONSE_OBJECT).get(QueryConstants.CUSTOMER_ID).size()) > 0) {
+          customerId = Long.valueOf(
+              (MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body()), JsonNode.class).get(Constants.RESPONSE_OBJECT).get(QueryConstants.CUSTOMER_ID)).get(0)
+                  .toString());
+          customerSetResponseDTO.setCustomerId(customerId);
+          customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.SUCCESS));
+        }else{
+          log.info("No matching CustomerId for: botRef:{} and customDetailRequest: {}", botRef, customerDetailsRequest);
+          customerSetResponseDTO.setCustomerId(0L);
+          customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.SUCCESS));
+        }
+      }else{
+        log.info("Empty response for: botRef:{} and customDetailRequest: {}", botRef, customerDetailsRequest);
+        customerSetResponseDTO.setCustomerId(0L);
+        customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.SUCCESS));
+      }
+    } catch (Exception e) {
+      log.error("Error while getting CustomerId for: botRef:{} and customDetailRequest: {}", botRef, customerDetailsRequest, e);
+      customerSetResponseDTO.setCustomerId(customerId);
+      customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.PROCESSING_ERROR));
+      return customerSetResponseDTO;
+    }
+    customerSetResponseDTO.setCustomerId(customerId);
+    customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.SUCCESS));
+    return customerSetResponseDTO;
   }
 }
 

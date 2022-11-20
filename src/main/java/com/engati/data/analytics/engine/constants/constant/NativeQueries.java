@@ -355,4 +355,15 @@ public class NativeQueries {
   public static final String ABANDONED_CHECKOUTS_BY_TIME_RANGE =
       "SELECT COUNT(checkout_id) as abandoned_checkouts FROM PARQUET_SCAN('%s') WHERE created_date BETWEEN DATE '%s' - "
           + "INTERVAL %d DAY AND '%s'";
+
+  public static final String GET_CUSTOMER_ID_FROM_EMAIL_PHONE =
+      "select distinct customer_id as customer_id from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_customer*.parquet') "
+          + "where 1=1 "
+          + "and customer_email like '%email_provided%' "
+          + "and (customer_phone like '%phone_provided%' or billing_address_phone like '%phone_provided%')";
+
+  public static final String GET_LAST_ORDER_DATE_FOR_CUSTOMER =
+      "select max(created_date)as last_order_date from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_customer*.parquet') "
+          + " where customer_id = customer_provided";
+
 }
