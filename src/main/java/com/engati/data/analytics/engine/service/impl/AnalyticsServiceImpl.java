@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -212,8 +211,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     DataAnalyticsResponse<CustomerDetailsResponse> response = new DataAnalyticsResponse<>();
     try {
       CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
-      if ((Objects.nonNull(customerDetailsRequest.getCustomerEmail()) || StringUtils.isBlank(customerDetailsRequest.getCustomerEmail())) && (
-          Objects.nonNull(customerDetailsRequest.getCustomerPhone()) || StringUtils.isBlank(customerDetailsRequest.getCustomerPhone()))) {
+      if ((Objects.nonNull(customerDetailsRequest.getCustomerEmail()) || customerDetailsRequest.getCustomerEmail().equals("")) && (
+          Objects.nonNull(customerDetailsRequest.getCustomerPhone()) || customerDetailsRequest.getCustomerPhone().equals(""))) {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INPUT_MISSING);
       } else {
@@ -260,6 +259,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
               return response;
             }
           } else {
+            log.info("Empty customer Object found while requesting customer details for botRef: {}, customerDetailsRequest: {}", botRef, customerDetailsRequest);
             response.setResponseObject(null);
             response.setStatus(ResponseStatusCode.SUCCESS);
             }
