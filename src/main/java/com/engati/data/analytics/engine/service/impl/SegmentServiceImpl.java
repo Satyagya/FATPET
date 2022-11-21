@@ -58,7 +58,7 @@ public class SegmentServiceImpl implements SegmentService {
   @Autowired
   private ShopifyProductDiscoveryConfigRepository shopifyProductDiscoveryConfigRepository;
 
-  public Map<String,List<String>> correctCityNames;
+  public Map<String,List<String>> cityNamesFromParquet;
   public List<String> cityWithStateAndCountry = new ArrayList<>();
 
   @Autowired
@@ -795,7 +795,8 @@ public class SegmentServiceImpl implements SegmentService {
       }else if(operand.contains(Constants.COLLECTION_SEGMENT_CONDITION)) {
         String inputCollection = operand.split(Constants.SEGMENT_IN_CONDITION,2)[1];
         Set<String> collectionList = Arrays.stream(inputCollection.split(",")).map(str -> str.trim()).collect(Collectors.toSet());
-        query_for_operand = generateQueryForCollectionCustomSegment(botRef, operand, startDate, endDate, collectionList);
+        Set<Long> collectionIds = getCollectionIds(botRef,collectionList);
+        query_for_operand = generateQueryForCollectionCustomSegment(botRef, operand, startDate, endDate, collectionIds);
       } else {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INVALID_ATTRIBUTES_PROVIDED);
@@ -921,25 +922,22 @@ public class SegmentServiceImpl implements SegmentService {
       Set<String> customerCityList = Arrays.stream(customerIdWithCityList.get(key).get("cities").split(","))
               .collect(Collectors.toSet());
 
-      if(CollectionUtils.isEmpty(customerCityList)) {
-        continue;
-      }
-
-      int matched = 0;
-      for(String customerCity:customerCityList) {
-            for(String inputCity:inputCityList) {
-              inputCity = inputCity.replace("'","");
-              Integer distance = levenshteinDistance.apply(customerCity,inputCity);
-              if(distance!=-1 && distance<=2) {
-                customerIds.add(key);
-                matched = 1;
-                break;
-              }
-            }
-            if (matched==1)
-            {
+      if(!CollectionUtils.isEmpty(customerCityList)) {
+        int matched = 0;
+        for (String customerCity : customerCityList) {
+          for (String inputCity : inputCityList) {
+            inputCity = inputCity.replace("'", "");
+            Integer distance = levenshteinDistance.apply(customerCity, inputCity);
+            if (distance != -1 && distance <= 2) {
+              customerIds.add(key);
+              matched = 1;
               break;
             }
+          }
+          if (matched == 1) {
+            break;
+          }
+        }
       }
 
     }
@@ -1099,10 +1097,10 @@ public class SegmentServiceImpl implements SegmentService {
     return query;
   }
 
-  public String generateQueryForCollectionCustomSegment(Long botRef, String operand,String startDate,String endDate, Set<String>collections) {
+  public String generateQueryForCollectionCustomSegment(Long botRef, String operand,String startDate,String endDate, Set<Long>collectionIds) {
     String query = NativeQueries.GET_CUSTOMERS_FOR_COLLECTION;
     query = query.replace(Constants.BOT_REF,botRef.toString());
-    query = query.replace(QueryConstants.COLLECTIONS,collections.toString());
+    query = query.replace(QueryConstants.COLLECTIONS,collectionIds.toString());
 
     query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET,QueryConstants.OPENING_ROUND_BRACKET);
     query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET,QueryConstants.CLOSING_ROUND_BRACKET);
@@ -1145,6 +1143,7 @@ public class SegmentServiceImpl implements SegmentService {
 
   @Override
   public DataAnalyticsResponse<List<String>> getProductType(Long botRef) {
+    log.info("Entered to get List of ProductTypes for botRef:{}",botRef);
     Map<String, List<String>> productTypes = new HashMap<>();
     DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
     try {
@@ -1169,6 +1168,7 @@ public class SegmentServiceImpl implements SegmentService {
 
   @Override
   public DataAnalyticsResponse<List<String>> getCollection(Long botRef) {
+    log.info("Entered to get List of Collections for botRef:{}",botRef);
     Map<String, List<String>> collections = new HashMap<>();
     DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
     try {
@@ -1193,6 +1193,7 @@ public class SegmentServiceImpl implements SegmentService {
 
   @Override
   public DataAnalyticsResponse<List<String>> getCountry(Long botRef) {
+    log.info("Entered to get List of Countries for botRef:{}",botRef);
     Map<String, List<String>> countries = new HashMap<>();
     DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
     try {
@@ -1217,6 +1218,7 @@ public class SegmentServiceImpl implements SegmentService {
 
   @PostConstruct
   public void getCorrectCities() {
+    log.info("Entered get List of Cities from shopify_city parquet File");
     try {
       String query = NativeQueries.GET_CITIES;
       JSONObject requestBody = new JSONObject();
@@ -1224,27 +1226,21 @@ public class SegmentServiceImpl implements SegmentService {
       log.debug("Request body for query to duckDB: {}", requestBody);
       Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
       if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
-        correctCityNames = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String,List<String>>>() {
+        cityNamesFromParquet = MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT)), new TypeReference<Map<String,List<String>>>() {
         });
       }
     } catch (Exception e) {
       log.error("Error while getting List of cities from parquet",e);
     }
 
-    if (Objects.nonNull(correctCityNames)) {
-      Iterator<String> cityIterator = correctCityNames.get(Constants.CITY_NAME).iterator();
-      Iterator<String> stateIterator = correctCityNames.get(Constants.STATE_NAME).iterator();
-      Iterator<String> countryIterator = correctCityNames.get(Constants.COUNTRY_NAME).iterator();
-
-      while(cityIterator.hasNext() && stateIterator.hasNext() && countryIterator.hasNext()) {
-        cityWithStateAndCountry.add(String.valueOf(new StringJoiner(Constants.JOIN_CITY_STATE_COUNTRY).add(cityIterator.next()).add(stateIterator.next()).add(countryIterator.next())));
+    if (Objects.nonNull(cityNamesFromParquet)) {
+        cityWithStateAndCountry = cityNamesFromParquet.get(Constants.CITY_STATE_COUNTRY);
       }
-
-    }
   }
 
   @Override
-  public DataAnalyticsResponse<List<String>> getCity(){
+  public DataAnalyticsResponse<List<String>> getCity(Long botRef){
+    log.info("Entered to get List of Cities for botRef:{}",botRef);
 
     DataAnalyticsResponse<List<String>> response = new DataAnalyticsResponse<>();
 
@@ -1253,5 +1249,30 @@ public class SegmentServiceImpl implements SegmentService {
     return response;
   }
 
+  public Set<Long> getCollectionIds(Long botRef, Set<String>collectionList) {
+    log.info("Entered to get List of collectionIds for botRef:{}",botRef);
+
+    String query = NativeQueries.GET_COLLECTION_IDS_FROM_COLLECTIONS;
+    query = query.replace(Constants.BOT_REF,botRef.toString());
+    query = query.replace(Constants.COLLECTIONS, collectionList.toString());
+
+    query = query.replace(QueryConstants.OPENING_SQUARE_BRACKET,QueryConstants.OPENING_ROUND_BRACKET);
+    query = query.replace(QueryConstants.CLOSING_SQUARE_BRACKET,QueryConstants.CLOSING_ROUND_BRACKET);
+
+    JSONObject requestBody = new JSONObject();
+    requestBody.put(Constants.QUERY, query);
+    Set<Long> collectionIds = new HashSet<>();
+
+    try {
+      Response<JsonNode> etlResponse = etlEngineRestUtility.executeQuery(requestBody).execute();
+      if (Objects.nonNull(etlResponse) && etlResponse.isSuccessful() && Objects.nonNull(etlResponse.body())) {
+        collectionIds = (Set<Long>) MAPPER.readValue(MAPPER.writeValueAsString(etlResponse.body().get(Constants.RESPONSE_OBJECT).get(Constants.COLLECION_IDS)), ArrayList.class).stream().map(x -> ((Number) x).longValue()).collect(Collectors.toSet());
+      }
+    }catch (Exception e) {
+      log.error("Error while getting CollectionIds for: botRef:{}", botRef, e);
+    }
+
+    return collectionIds;
+  }
 }
 

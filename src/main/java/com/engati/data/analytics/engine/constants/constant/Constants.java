@@ -28,7 +28,7 @@ public class Constants {
 
   //  DuckDB Connection URL
   public static String DUCKDB_CONNECTION_URI = "jdbc:duckdb:";
-  public static String PARQUET_FILE_PATH = "/opt/engati/local_parquet_store";
+  public static String PARQUET_FILE_PATH = "/Users/aniketmodi/Desktop/parquet_store";
 
   //  Defaults
   public static Long DEFAULT_BOTREF = -1L;
@@ -90,7 +90,7 @@ public class Constants {
   public static final String[] SENTIMENT_LIST = new String[]{"Positive", "Negative", "Neutral"};
   public static final String SEGMENT_IN_CONDITION = "IN";
   public static final String JOIN_CITY_STATE_COUNTRY = " - ";
-  public static final String CITY_NAME = "name";
+  public static final String CITY_NAME = "city_name";
   public static final String STATE_NAME = "state_name";
   public static final String COUNTRY_NAME = "country_name";
   public static final String ORDERS_SEGMENT_CONDITION = "ORDERS";
@@ -102,5 +102,8 @@ public class Constants {
   public static final String COUNTRY_SEGMENT_CONDITION = "COUNTRY";
   public static final String COLLECTION_SEGMENT_CONDITION = "COLLECTION";
   public static final String GET_PRODUCT_TYPES_ETL_RESPONSE = "product_type";
+  public static final String COLLECTIONS = "collections";
+  public static final String COLLECION_IDS = "collectionIds";
+  public static final String CITY_STATE_COUNTRY = "city_state_country";
 
 }
