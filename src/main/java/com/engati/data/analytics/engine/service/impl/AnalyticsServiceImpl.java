@@ -211,8 +211,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     DataAnalyticsResponse<CustomerDetailsResponse> response = new DataAnalyticsResponse<>();
     try {
       CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
-      if ((Objects.nonNull(customerDetailsRequest.getCustomerEmail()) || customerDetailsRequest.getCustomerEmail().equals("")) && (
-          Objects.nonNull(customerDetailsRequest.getCustomerPhone()) || customerDetailsRequest.getCustomerPhone().equals(""))) {
+      if ((customerDetailsRequest.getCustomerEmail() == null || customerDetailsRequest.getCustomerEmail().equals("")) && (
+          (customerDetailsRequest.getCustomerEmail() == null || customerDetailsRequest.getCustomerPhone().equals("")))) {
         response.setResponseObject(null);
         response.setStatus(ResponseStatusCode.INPUT_MISSING);
       } else {
