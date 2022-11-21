@@ -211,6 +211,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     DataAnalyticsResponse<CustomerDetailsResponse> response = new DataAnalyticsResponse<>();
     try {
       CustomerDetailsResponse customerDetailsResponse = new CustomerDetailsResponse();
+      log.info(" CustomerDetails Request {} ", customerDetailsRequest);
       if ((customerDetailsRequest.getCustomerEmail() == null || customerDetailsRequest.getCustomerEmail().equals("")) && (
           (customerDetailsRequest.getCustomerEmail() == null || customerDetailsRequest.getCustomerPhone().equals("")))) {
         response.setResponseObject(null);
@@ -322,8 +323,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
       customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.PROCESSING_ERROR));
       return customerSetResponseDTO;
     }
-    customerSetResponseDTO.setCustomerId(customerId);
-    customerSetResponseDTO.setStatus(String.valueOf(ResponseStatusCode.SUCCESS));
     return customerSetResponseDTO;
   }
 }
