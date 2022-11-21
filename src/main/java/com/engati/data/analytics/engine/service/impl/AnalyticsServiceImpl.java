@@ -260,6 +260,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
               return response;
             }
           } else {
+            log.info("Empty customer Object found while requesting customer details for botRef: {}, customerDetailsRequest: {}", botRef, customerDetailsRequest);
             response.setResponseObject(null);
             response.setStatus(ResponseStatusCode.SUCCESS);
             }
