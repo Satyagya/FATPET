@@ -27,7 +27,7 @@ public class KafkaConsumerConfiguration {
   @Value("${kafka.session.timeout.ms:15000}")
   private String consumerSessionTimeout = "15000";
 
-  @Value("${kafka.auto.offset.reset:earliest}")
+  @Value("${kafka.auto.offset.reset:latest}")
   private String offsetResetConfig = "earliest";
 
   @Value("${kafka.auto.commit.interval.ms:1000}")
