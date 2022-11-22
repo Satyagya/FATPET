@@ -227,10 +227,10 @@ public class NativeQueries {
 
  public static final String GET_CUSTOMER_AND_CITY = "select customer_id, GROUP_CONCAT(distinct(shipping_address_city),',') as cities\n" +
          "from parquet_scan('" + Constants.PARQUET_FILE_PATH + "/botRef/shipping_information_*.parquet')\n" +
-         "where shipping_address_province in states\n" +
+         "where created_date between '_startdate_' and '_enddate_'" +
+         "and shipping_address_province in states\n" +
          "and shipping_address_country in countries\n" +
          "and shipping_address_city <> ''\n" +
-         "and created_date between '_startdate_' and '_enddate_'" +
          "group by customer_id";
 
   public static final String CUSTOMER_ORDERS = "select customer_id, count(distinct order_id)as total_orders from\n" +

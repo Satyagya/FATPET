@@ -43,6 +43,7 @@ public class Constants {
   public static String CUSTOM_SEGMENT = "custom";
   public static String SYSTEM_SEGMENT = "system";
   public static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  public static Integer EDIT_DISTANCE_THRESHOLD = 2;
 
   //  Generic Constants
   public static String BOT_REF = "botRef";

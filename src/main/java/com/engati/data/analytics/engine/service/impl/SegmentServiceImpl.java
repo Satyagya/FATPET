@@ -925,7 +925,7 @@ public class SegmentServiceImpl implements SegmentService {
   public Set<Long> getFuzzyMatchedCityCustomers(Map<Long, Map<String,String>> customerIdWithCityList, Set<String> inputCityList ) {
 
     Set<Long> customerIds = new HashSet<>();
-    LevenshteinDistance levenshteinDistance = new LevenshteinDistance(2);
+    LevenshteinDistance levenshteinDistance = new LevenshteinDistance(Constants.EDIT_DISTANCE_THRESHOLD);
 
     if(Objects.isNull(inputCityList) || CollectionUtils.isEmpty(inputCityList)) return customerIds;
 
