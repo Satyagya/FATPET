@@ -848,17 +848,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     }
 
-    Long segmentSize = 0L;
-    if(Objects.nonNull(resultSet)) {
-      segmentSize = (long) resultSet.size();
-    }
-
-    log.info("Before omitting subscription customers Segment Size:{}",segmentSize);
     resultSet = omitSubscriptionCustomersFromSegments(botRef, resultSet);
-
-    if(Objects.nonNull(resultSet)) {
-      log.info("Omitted Subscription customer count:{}", segmentSize - (long) resultSet.size());
-    }
 
     try {
       String fileName = getOutputFileName(botRef, customSegmentRequest.getFileName());
