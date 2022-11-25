@@ -848,7 +848,6 @@ public class SegmentServiceImpl implements SegmentService {
       }
 
     }
-
     resultSet = omitSubscriptionCustomersFromSegments(botRef, resultSet);
 
     try {
