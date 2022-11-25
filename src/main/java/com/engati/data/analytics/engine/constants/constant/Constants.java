@@ -112,5 +112,6 @@ public class Constants {
   public static final String CITY_STATE_COUNTRY = "city_state_country";
   public static final String CUSTOMER_EMAIL_COMPARATOR = "and customer_email like '%email_provided%' ";
   public static final String CUSTOMER_PHONE_NUMBER_COMPARATOR = "and (customer_phone like '%phone_provided%' or billing_address_phone like '%phone_provided%')";
+  public static final String CITIES = "cities";
 
 }

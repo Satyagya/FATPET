@@ -920,7 +920,7 @@ public class SegmentServiceImpl implements SegmentService {
     if(Objects.isNull(inputCityList) || CollectionUtils.isEmpty(inputCityList)) return customerIds;
 
     for(Long key: customerIdWithCityList.keySet()) {
-      Set<String> customerCityList = Arrays.stream(customerIdWithCityList.get(key).get("cities").split(","))
+      Set<String> customerCityList = Arrays.stream(customerIdWithCityList.get(key).get(Constants.CITIES).split(","))
               .collect(Collectors.toSet());
 
       if(!CollectionUtils.isEmpty(customerCityList)) {
