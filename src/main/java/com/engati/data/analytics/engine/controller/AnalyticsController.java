@@ -2,8 +2,10 @@ package com.engati.data.analytics.engine.controller;
 
 import com.engati.data.analytics.engine.common.model.DataAnalyticsResponse;
 import com.engati.data.analytics.engine.constants.constant.ApiPathConstants;
+import com.engati.data.analytics.engine.model.request.CustomerDetailsRequest;
 import com.engati.data.analytics.engine.model.request.ProductDiscoveryRequest;
 import com.engati.data.analytics.engine.model.request.PurchaseHistoryRequest;
+import com.engati.data.analytics.engine.model.response.CustomerDetailsResponse;
 import com.engati.data.analytics.engine.model.response.OrderDetailsResponse;
 import com.engati.data.analytics.engine.model.response.ProductVariantResponse;
 import com.engati.data.analytics.engine.service.AnalyticsService;
@@ -50,6 +52,14 @@ public class AnalyticsController {
   ){
     log.info("Got call for fetching purchase History for botRef: {}, requestbody: {}", purchaseHistoryRequest.getBotRef(), purchaseHistoryRequest);
     DataAnalyticsResponse<List<OrderDetailsResponse>> response = analyticsService.getPurchaseHistory(purchaseHistoryRequest);
+    return new ResponseEntity<>(response, response.getStatusCode());
+  }
+
+  @PostMapping(value = ApiPathConstants.API_BASE_PATH_FOR_FETCHING_CUSTOMER_DETAILS)
+  public ResponseEntity<DataAnalyticsResponse<CustomerDetailsResponse>> getCustomerDetails( @RequestBody
+      CustomerDetailsRequest customerDetailsRequest, @PathVariable(name = ApiPathConstants.BOTREF) Long botRef){
+    log.info("Got call for fetching customer details for botRef: {}, requestBody: {}", botRef, customerDetailsRequest);
+    DataAnalyticsResponse<CustomerDetailsResponse> response = analyticsService.getCustomerDetails(botRef, customerDetailsRequest);
     return new ResponseEntity<>(response, response.getStatusCode());
   }
 

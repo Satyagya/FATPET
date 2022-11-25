@@ -82,7 +82,8 @@ public class SegmentServiceImpl implements SegmentService {
 
   public static final ObjectMapper MAPPER = new ObjectMapper();
 
-  private List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList, Long botRef) {
+  public List<CustomerSegmentationResponse> getDetailsforCustomerSegments(Set<Long> customerList,
+      Long botRef) {
     log.info("Getting details for Customer segment with botRef : {}", botRef);
     List<CustomerSegmentationResponse> customerSegmentationResponseList = new ArrayList<>();
 
