@@ -209,27 +209,28 @@ public class NativeQueries {
 
   public static final String GET_CUSTOMERS_FOR_COLLECTION = "select distinct(customer_id) from\n" +
           "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/orders_*.parquet')\n" +
-          "where collection_id in\n" +
-          "(select distinct(collection_id) from\n" +
-          "parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/shopify_collection_*.parquet')\n" +
-          "where title in collections)\n" +
+          "where collection_id in collections\n"+
           "and cancelled_at like 'None'\n" +
           "and created_date between '_startdate_' and '_enddate_'";
+
+  public static final String GET_COLLECTION_IDS_FROM_COLLECTIONS = "select distinct(collection_id) as collectionIds from\n" +
+          "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_collection_*.parquet')\n" +
+          "where title in collections";
 
  public static final String GET_CUSTOMERS_FOR_COUNTRY = "select distinct(customer_id) from\n" +
           "parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
           "where shipping_address_country in countries\n" +
           "and created_date between '_startdate_' and '_enddate_'";
 
- public static final String GET_CITIES = "select name, state_name, country_name from\n" +
+ public static final String GET_CITIES = "select city_state_country from\n" +
          "parquet_scan('" + Constants.PARQUET_FILE_PATH + "/shopify_city.parquet')";
 
  public static final String GET_CUSTOMER_AND_CITY = "select customer_id, GROUP_CONCAT(distinct(shipping_address_city),',') as cities\n" +
          "from parquet_scan('" + Constants.PARQUET_FILE_PATH + "/botRef/shipping_information_*.parquet')\n" +
-         "where shipping_address_province in states\n" +
+         "where created_date between '_startdate_' and '_enddate_'" +
+         "and shipping_address_province in states\n" +
          "and shipping_address_country in countries\n" +
          "and shipping_address_city <> ''\n" +
-         "and created_date between '_startdate_' and '_enddate_'" +
          "group by customer_id";
 
   public static final String CUSTOMER_ORDERS = "select customer_id, count(distinct order_id)as total_orders from\n" +

@@ -43,6 +43,7 @@ public class Constants {
   public static String CUSTOM_SEGMENT = "custom";
   public static String SYSTEM_SEGMENT = "system";
   public static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  public static Integer EDIT_DISTANCE_THRESHOLD = 2;
 
   //  Generic Constants
   public static String BOT_REF = "botRef";
@@ -94,7 +95,7 @@ public class Constants {
   public static final String[] SENTIMENT_LIST = new String[]{"Positive", "Negative", "Neutral"};
   public static final String SEGMENT_IN_CONDITION = "IN";
   public static final String JOIN_CITY_STATE_COUNTRY = " - ";
-  public static final String CITY_NAME = "name";
+  public static final String CITY_NAME = "city_name";
   public static final String STATE_NAME = "state_name";
   public static final String COUNTRY_NAME = "country_name";
   public static final String ORDERS_SEGMENT_CONDITION = "ORDERS";
@@ -106,7 +107,11 @@ public class Constants {
   public static final String COUNTRY_SEGMENT_CONDITION = "COUNTRY";
   public static final String COLLECTION_SEGMENT_CONDITION = "COLLECTION";
   public static final String GET_PRODUCT_TYPES_ETL_RESPONSE = "product_type";
+  public static final String COLLECTIONS = "collections";
+  public static final String COLLECION_IDS = "collectionIds";
+  public static final String CITY_STATE_COUNTRY = "city_state_country";
   public static final String CUSTOMER_EMAIL_COMPARATOR = "and customer_email like '%email_provided%' ";
   public static final String CUSTOMER_PHONE_NUMBER_COMPARATOR = "and (customer_phone like '%phone_provided%' or billing_address_phone like '%phone_provided%')";
+  public static final String CITIES = "cities";
 
 }
