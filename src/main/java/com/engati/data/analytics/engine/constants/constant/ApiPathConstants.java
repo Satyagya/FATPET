@@ -31,6 +31,8 @@ public class ApiPathConstants {
   public static final String AUTH_JSON = "authJson";
   public static final String PROPERTY_ID = "propertyId";
   public static final String GET_PRODUCT_TYPE = "/botRef/{botRef}/getProductType";
-
-
+  public static final String GET_COLLECTION = "/botRef/{botRef}/getCollection";
+  public static final String GET_CITY = "/botRef/{botRef}/getCity";
+  public static final String GET_COUNTRY = "/botRef/{botRef}/getCountry";
+  public static final String API_BASE_PATH_FOR_FETCHING_CUSTOMER_DETAILS = "/{botRef}/getCustomerDetails";
 }
