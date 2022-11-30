@@ -1,0 +1,36 @@
+job1:
+  tags:
+  - engati
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /.*integrated-feature.*/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /.*release.*/'
+
+  before_script:
+    - apk add --no-cache curl jq
+
+  script:
+    - echo Running pipeline to get sonar analysis results for the branch $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME in the project $CI_PROJECT_NAME
+    - 'VERSION_DATE="$(curl -s --request GET --header "Authorization: Basic $SONAR_TOKEN" "http://sonarqube.engati.ops:9000/api/project_analyses/search?project=$CI_PROJECT_NAME&category=VERSION" | jq -r ".analyses[] | select(.events[].name ==\"$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME\") | .date")"'
+    - if [ -z $VERSION_DATE ]; then
+      echo "No sonar analysis available for this branch, Exiting" && exit 1;
+      else
+      VERSION_DATE="${VERSION_DATE//+/%2B}";
+      echo VERSION_DATE is $VERSION_DATE;
+      fi;
+    - 'COVERAGE_VALUE="$(curl -s --request GET --header "Authorization: Basic $SONAR_TOKEN" "http://sonarqube.engati.ops:9000/api/measures/search_history?component=$CI_PROJECT_NAME&metrics=quality_gate_details&from=$VERSION_DATE&to=$VERSION_DATE" | jq -r ".measures[] | select(.metric == \"quality_gate_details\") | .history[].value" | jq -r ".conditions[] | select(.metric == \"new_coverage\") | .actual | tonumber | floor")"'
+    - if [ ! -z $COVERAGE_VALUE ]; then
+      echo COVERAGE_VALUE is $COVERAGE_VALUE;
+      if [ $COVERAGE_VALUE -le $COVERAGE_THRESHOLD ]; then
+      echo "Coverage value less than $COVERAGE_THRESHOLD%, Failed" && exit 1;
+      else
+      echo "Coverage value more than or equal to $COVERAGE_THRESHOLD%, Successful";
+      fi;
+      else
+      echo "No coverage value available for this branch as no new code is present, Successful";
+      fi;
