@@ -76,7 +76,7 @@ pipeline {
       }
       steps {
           withSonarQubeEnv('Engati-Sonar') {
-            sh "${scannerHome}/bin/sonar-scanner"
+            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectVersion=$BRANCH_NAME"
            }
       }
     }
