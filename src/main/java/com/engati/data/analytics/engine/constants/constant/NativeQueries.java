@@ -61,13 +61,7 @@ public class NativeQueries {
       "where product_type <> ''"    ;
 
   public static String COLLECTION_QUERY = "select distinct(title) as collections\n" +
-      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_collection_*.parquet')\n" +
-      "where collection_id in\n" +
-      "(select distinct(collection_id) " +
-      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH + "/botRef/orders_*.parquet')\n" +
-      "where cancelled_at like 'None'\n" +
-      "order by created_date desc limit 50" +
-      ")"  ;
+      "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shopify_collection_*.parquet') limit 100";
 
   public static final String COUNTRY_QUERY = "select distinct(shipping_address_country) as countries\n" +
       "from parquet_scan('"+ Constants.PARQUET_FILE_PATH +"/botRef/shipping_information_*.parquet')\n" +
