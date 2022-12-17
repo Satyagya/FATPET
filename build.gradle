@@ -53,6 +53,8 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.3'
     compile(group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: "3.9.1")
     implementation "com.googlecode.json-simple:json-simple:1.1.1"
+    implementation 'javax.validation:validation-api:2.0.0.Final'
+
 
 
     implementation "org.springframework.boot:spring-boot-starter-data-rest:${spring_boot_version}"

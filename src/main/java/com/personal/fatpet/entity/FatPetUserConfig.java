@@ -15,6 +15,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.File;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Data
@@ -35,16 +37,16 @@ public class FatPetUserConfig {
   private String userId;
 
   @Column(name = "TIME")
-  private String time;
+  private LocalTime time;
 
   @Column(name = "QUANTITY_OF_FOOD")
-  private String quantityOfFood;
+  private int quantityOfFood;
 
   @Column(name = "AUDIO_FILE_FOR_PET")
-  private String audioFileForPet;
+  private File audioFileForPet;
 
   @Column(name = "AUDIO_FILE_FOR_OWNER")
-  private String audioFileForOwner;
+  private File audioFileForOwner;
 
   @Column(name = "UPDATED_ON")
   @UpdateTimestamp

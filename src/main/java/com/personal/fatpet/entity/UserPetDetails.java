@@ -24,6 +24,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = FatPetConstants.USER_PET_DETAILS)
 public class UserPetDetails {
+
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
@@ -41,11 +42,17 @@ public class UserPetDetails {
   private String breed;
 
   @Column(name = "AGE")
-  private String age;
+  private int age;
 
   @Column(name = "ACTIVITY_LEVEL")
-  private String activityLevel;
+  private int activityLevel;
 
-  @Column(name = "APPROX_SIZE")
-  private String approxSize;
+  @Column(name = "WEIGHT")
+  private int weight;
+
+  @Column(name = "HEIGHT")
+  private int height;
+
+  @Column(name = "FOOD_NAME")
+  private String foodName;
 }

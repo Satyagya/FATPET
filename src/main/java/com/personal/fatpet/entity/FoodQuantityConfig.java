@@ -34,9 +34,12 @@ public class FoodQuantityConfig {
   @Column(name = "ANIMAL_SPECIES")
   private String animalSpecies;
 
-  @Column(name = "TIME_PER_TWENTY_FIVE_GRAM")
-  private String timePerTwentyFiveGrame;
+  @Column(name = "TIME_PER_FIFTY_GRAM")
+  private String timePerFiftyGrame;
 
   @Column(name = "MOTOR_ROTAION_ANGLE")
   private String motorRotationAngle;
+
+  @Column(name = "CALORIES_PER_FIFTY_GRAM")
+  private int caloriesPerFiftyGram;
 }

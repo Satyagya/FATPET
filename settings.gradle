@@ -12,4 +12,4 @@ pluginManagement {
         }
     }
 }
-rootProject.name = 'data-analytics-engine'
+rootProject.name = 'fatPet'

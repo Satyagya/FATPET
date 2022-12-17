@@ -33,4 +33,7 @@ public class UserDetailsConfig {
 
   @Column(name = "IP_ADDRESS")
   private String ipAddress;
+
+  @Column(name = "SSID")
+  private String ssid;
 }

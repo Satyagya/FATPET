@@ -8,5 +8,6 @@ public interface FatPetConstants {
   String USER_DETAILS = "USER_DETAILS";
   String API_BASE_PATH_V1 = "/v1.0";
   String USER_ID = "user_id";
-
+  String API_VALIDATION_STRING = " gDSLIUFGniu347to87e";
+  String WAV_FILE_PATH = "/Users/satyagtaparasharkumar/Documents/fatPet/wavFiles/";
 }
