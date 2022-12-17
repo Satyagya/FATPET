@@ -1,5 +1,6 @@
 package com.personal.fatpet.service.impl;
 
+import com.personal.fatpet.entity.DefaultSettingsConfig;
 import com.personal.fatpet.entity.FatPetUserConfig;
 import com.personal.fatpet.entity.FoodQuantityConfig;
 import com.personal.fatpet.entity.UserDetailsConfig;
@@ -7,6 +8,7 @@ import com.personal.fatpet.entity.UserPetDetails;
 import com.personal.fatpet.model.FatPetResponse;
 import com.personal.fatpet.model.FatPetStatusCode;
 import com.personal.fatpet.model.UserPetDetailsModel;
+import com.personal.fatpet.repository.DefaultSettingsRepository;
 import com.personal.fatpet.repository.FoodQuantityRepository;
 import com.personal.fatpet.repository.PetDetailsRepository;
 import com.personal.fatpet.repository.UserDetailsRepository;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -36,6 +39,9 @@ public class NodeMcuServiceImpl implements NodeMcuService {
 
   @Autowired
   private FoodQuantityRepository foodQuantityRepository;
+
+  @Autowired
+  private DefaultSettingsRepository defaultSettingsRepository;
 
   @Override
   public FatPetResponse<UserDetailsConfig> saveInitialDetailsAndGetUserId(String userName,
@@ -85,7 +91,10 @@ public class NodeMcuServiceImpl implements NodeMcuService {
       UserPetDetails userPetDetails = petDetailsRepository.findByUserId(userId);
       FoodQuantityConfig foodQuantityConfig =
           foodQuantityRepository.findByFoodName(userPetDetails.getFoodName());
+      Option<DefaultSettingsConfig> defaultSettingsConfig =
+          defaultSettingsRepository.getDefaultSettingsConfigByUserId(userId);
       List<LocalTime> timestampsForDispensingFood = getRecommendedTimestampsForFood(userPetDetails);
+
       int totalQuantityOfFood = getRecommendedQuantityForPet(userPetDetails, foodQuantityConfig);
       int singleQuantityFood = totalQuantityOfFood/(timestampsForDispensingFood.size());
       File defaultAudioForPet = getDefaultAudioForPet(userPetDetails.getSpecie());

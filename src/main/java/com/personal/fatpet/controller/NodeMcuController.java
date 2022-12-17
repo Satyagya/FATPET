@@ -20,7 +20,7 @@ public class NodeMcuController {
   @Autowired
   private NodeMcuService nodeMcuService;
 
-  @GetMapping(value = "/fatPetUser/initalConnection/")
+  @GetMapping(value = "/fatPetUser/{userName}/{ssid}/initalConnection/{ipAddress}")
   public ResponseEntity<FatPetResponse> createConnectionForUser(
       @RequestParam String userName, @RequestParam String ipAddress, @RequestParam String ssid) {
     log.info("Received new connection with Name: {}, ip: {}, ssid: {}", userName, ipAddress, ssid);
